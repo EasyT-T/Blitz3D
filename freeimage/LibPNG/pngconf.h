@@ -96,7 +96,7 @@
  *   ALL_STATIC (since we can't #undef something outside our namespace)
  *   PNG_BUILD_DLL
  *   PNG_STATIC
- *   (nothing) == PNG_USE_DLL 
+ *   (nothing) == PNG_USE_DLL
  */
 #if defined(__CYGWIN__)
 #  if defined(ALL_STATIC)
@@ -138,8 +138,8 @@
 #        if !defined(PNG_DLL)
 #          define PNG_DLL
 #        endif
-#      endif  
-#    endif  
+#      endif
+#    endif
 #  endif
 #endif
 
@@ -158,7 +158,7 @@
 
 #if defined(_WIN32_WCE)
 #  include <windows.h>
-   /* Console I/O functions are not supported on WindowsCE */
+/* Console I/O functions are not supported on WindowsCE */
 #  define PNG_NO_CONSOLE_IO
 #  ifdef PNG_DEBUG
 #    undef PNG_DEBUG
@@ -186,6 +186,7 @@
 #    if !defined(_WIN32_WCE)
 /* "stdio.h" functions are not supported on WindowsCE */
 #      include <stdio.h>
+
 #    endif
 #  endif
 
@@ -225,7 +226,9 @@
 
 /* enough people need this for various reasons to include it here */
 #if !defined(MACOS) && !defined(RISCOS) && !defined(_WIN32_WCE)
+
 #  include <sys/types.h>
+
 #endif
 
 #ifndef PNG_SETJMP_NOT_SUPPORTED
@@ -243,12 +246,12 @@
 #      undef _BSD_SOURCE
 #    endif
 #    ifdef _SETJMP_H
-      __png.h__ already includes setjmp.h;
-      __dont__ include it again.;
+__png.h__ already includes setjmp.h;
+__dont__ include it again.;
 #    endif
 #  endif /* __linux__ */
 
-   /* include setjmp.h for error handling */
+/* include setjmp.h for error handling */
 #  include <setjmp.h>
 
 #  ifdef __linux__
@@ -262,7 +265,9 @@
 #ifdef BSD
 #  include <strings.h>
 #else
+
 #  include <string.h>
+
 #endif
 
 /* Other defines for things like memory and the like can go here.  */
@@ -516,7 +521,7 @@
  !defined(PNG_PROGRESSIVE_READ_NOT_SUPPORTED)  /* if you don't do progressive */
 #  define PNG_PROGRESSIVE_READ_SUPPORTED     /* reading.  This is not talking */
 #endif                               /* about interlacing capability!  You'll */
-              /* still have interlacing unless you change the following line: */
+/* still have interlacing unless you change the following line: */
 
 #define PNG_READ_INTERLACING_SUPPORTED /* required for PNG-compliant decoders */
 
@@ -632,7 +637,7 @@
 #  define PNG_EASY_ACCESS_SUPPORTED
 #endif
 
-/* PNG_ASSEMBLER_CODE was enabled by default in version 1.2.0 
+/* PNG_ASSEMBLER_CODE was enabled by default in version 1.2.0
    even when PNG_USE_PNGVCRD or PNG_USE_PNGGCCRD is not defined */
 /*
 #if defined(PNG_READ_SUPPORTED) && !defined(PNG_NO_ASSEMBLER_CODE)
@@ -959,8 +964,9 @@
 /* need the time information for reading tIME chunks */
 #if defined(PNG_tIME_SUPPORTED)
 #  if !defined(_WIN32_WCE)
-     /* "time.h" functions are not supported on WindowsCE */
+/* "time.h" functions are not supported on WindowsCE */
 #    include <time.h>
+
 #  endif
 #endif
 
@@ -1000,7 +1006,7 @@ typedef size_t png_size_t;
 #  else
 #    define LDATA 0
 #  endif
-   /* GRR:  why is Cygwin in here?  Cygwin is not Borland C... */
+/* GRR:  why is Cygwin in here?  Cygwin is not Borland C... */
 #  if !defined(__WIN32__) && !defined(__FLAT__) && !defined(__CYGWIN__)
 #    define PNG_MAX_MALLOC_64K
 #    if (LDATA != 1)
@@ -1009,11 +1015,11 @@ typedef size_t png_size_t;
 #      endif
 #      define USE_FAR_KEYWORD
 #    endif   /* LDATA != 1 */
-     /* Possibly useful for moving data out of default segment.
-      * Uncomment it if you want. Could also define FARDATA as
-      * const if your compiler supports it. (SJT)
+  /* Possibly useful for moving data out of default segment.
+   * Uncomment it if you want. Could also define FARDATA as
+   * const if your compiler supports it. (SJT)
 #    define FARDATA FAR
-      */
+   */
 #  endif  /* __WIN32__, __FLAT__, __CYGWIN__ */
 #endif   /* __BORLANDC__ */
 
@@ -1047,51 +1053,51 @@ typedef size_t png_size_t;
 typedef png_int_32 png_fixed_point;
 
 /* Add typedefs for pointers */
-typedef void            FAR * png_voidp;
-typedef png_byte        FAR * png_bytep;
-typedef png_uint_32     FAR * png_uint_32p;
-typedef png_int_32      FAR * png_int_32p;
-typedef png_uint_16     FAR * png_uint_16p;
-typedef png_int_16      FAR * png_int_16p;
-typedef PNG_CONST char  FAR * png_const_charp;
-typedef char            FAR * png_charp;
-typedef png_fixed_point FAR * png_fixed_point_p;
+typedef void            FAR *png_voidp;
+typedef png_byte        FAR *png_bytep;
+typedef png_uint_32     FAR *png_uint_32p;
+typedef png_int_32      FAR *png_int_32p;
+typedef png_uint_16     FAR *png_uint_16p;
+typedef png_int_16      FAR *png_int_16p;
+typedef PNG_CONST char  FAR *png_const_charp;
+typedef char            FAR *png_charp;
+typedef png_fixed_point FAR *png_fixed_point_p;
 
 #ifndef PNG_NO_STDIO
 #if defined(_WIN32_WCE)
 typedef HANDLE                png_FILE_p;
 #else
-typedef FILE                * png_FILE_p;
+typedef FILE *png_FILE_p;
 #endif
 #endif
 
 #ifdef PNG_FLOATING_POINT_SUPPORTED
-typedef double          FAR * png_doublep;
+typedef double          FAR *png_doublep;
 #endif
 
 /* Pointers to pointers; i.e. arrays */
-typedef png_byte        FAR * FAR * png_bytepp;
-typedef png_uint_32     FAR * FAR * png_uint_32pp;
-typedef png_int_32      FAR * FAR * png_int_32pp;
-typedef png_uint_16     FAR * FAR * png_uint_16pp;
-typedef png_int_16      FAR * FAR * png_int_16pp;
-typedef PNG_CONST char  FAR * FAR * png_const_charpp;
-typedef char            FAR * FAR * png_charpp;
-typedef png_fixed_point FAR * FAR * png_fixed_point_pp;
+typedef png_byte        FAR *FAR *png_bytepp;
+typedef png_uint_32     FAR *FAR *png_uint_32pp;
+typedef png_int_32      FAR *FAR *png_int_32pp;
+typedef png_uint_16     FAR *FAR *png_uint_16pp;
+typedef png_int_16      FAR *FAR *png_int_16pp;
+typedef PNG_CONST char  FAR *FAR *png_const_charpp;
+typedef char            FAR *FAR *png_charpp;
+typedef png_fixed_point FAR *FAR *png_fixed_point_pp;
 #ifdef PNG_FLOATING_POINT_SUPPORTED
-typedef double          FAR * FAR * png_doublepp;
+typedef double          FAR *FAR *png_doublepp;
 #endif
 
 /* Pointers to pointers to pointers; i.e., pointer to array */
-typedef char            FAR * FAR * FAR * png_charppp;
+typedef char            FAR *FAR *FAR *png_charppp;
 
 /* libpng typedefs for types in zlib. If zlib changes
  * or another compression library is used, then change these.
  * Eliminates need to change all the source files.
  */
-typedef charf *         png_zcharp;
-typedef charf * FAR *   png_zcharpp;
-typedef z_stream FAR *  png_zstreamp;
+typedef charf *png_zcharp;
+typedef charf *FAR *png_zcharpp;
+typedef z_stream FAR *png_zstreamp;
 
 /*
  * Define PNG_BUILD_DLL if the module being built is a Windows
@@ -1164,9 +1170,9 @@ typedef z_stream FAR *  png_zstreamp;
 #endif
 
 #if defined(PNG_DLL) || defined(_DLL) || defined(__DLL__ ) || \
-    (( defined(_Windows) || defined(_WINDOWS) || \
+    ((defined(_Windows) || defined(_WINDOWS) || \
        defined(WIN32) || defined(_WIN32) || defined(__WIN32__) \
-	  ) && !defined(__CYGWIN__))
+) && !defined(__CYGWIN__))
 
 #  if defined(__GNUC__) || (defined (_MSC_VER) && (_MSC_VER >= 800))
 #    define PNGAPI __cdecl
@@ -1184,7 +1190,7 @@ typedef z_stream FAR *  png_zstreamp;
 #     define PNG_EXPORT_TYPE1(type,symbol)  PNG_IMPEXP type PNGAPI symbol
 #     define PNG_EXPORT_TYPE2(type,symbol)  type PNG_IMPEXP PNGAPI symbol
 
-      /* Borland/Microsoft */
+/* Borland/Microsoft */
 #     if defined(_MSC_VER) || defined(__BORLANDC__)
 #        if (_MSC_VER >= 800) || (__BORLANDC__ >= 0x500)
 #           define PNG_EXPORT PNG_EXPORT_TYPE1
@@ -1194,9 +1200,9 @@ typedef z_stream FAR *  png_zstreamp;
 #              define PNG_IMPEXP __export
 #           else
 #              define PNG_IMPEXP /*__import*/ /* doesn't exist AFAIK in
-                                                 VC++*/
+                                           VC++*/
 #           endif                             /* Exists in Borland C++ for
-                                                 C++ classes (== huge) */
+                                           C++ classes (== huge) */
 #        endif
 #     endif
 
@@ -1237,7 +1243,7 @@ typedef z_stream FAR *  png_zstreamp;
 #endif
 
 #ifndef PNG_EXPORT
-#  define PNG_EXPORT(type,symbol) PNG_IMPEXP type PNGAPI symbol
+#  define PNG_EXPORT(type, symbol) PNG_IMPEXP type PNGAPI symbol
 #endif
 
 #ifdef PNG_USE_GLOBAL_ARRAYS
@@ -1305,7 +1311,7 @@ typedef z_stream FAR *  png_zstreamp;
 #  define PNG_MMX_ROWBYTES_THRESHOLD_DEFAULT  128  /*  >=  */
 #endif
 #ifndef PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT
-#  define PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT  9    /*  >=  */   
+#  define PNG_MMX_BITDEPTH_THRESHOLD_DEFAULT  9    /*  >=  */
 #endif
 
 /* Set this in the makefile for VC++ on Pentium, not here. */

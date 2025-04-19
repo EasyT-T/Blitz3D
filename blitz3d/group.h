@@ -2,15 +2,16 @@
 #ifndef GROUP_H
 #define GROUP_H
 
-class Group{
+class Group {
 
-	vector<Object*> _objs;
+    vector<Object *> _objs;
 
 public:
-	Group( Object *obj );
-	~Group();
+    Group(Object *obj);
 
-	const vector<Object*> objs()const{ return _objs; }
+    ~Group();
+
+    const vector<Object *> objs() const { return _objs; }
 };
 
 #endif

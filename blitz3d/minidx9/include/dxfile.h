@@ -33,12 +33,12 @@ typedef struct _DXFILELOADRESOURCE {
     HMODULE hModule;
     LPCTSTR lpName;
     LPCTSTR lpType;
-}DXFILELOADRESOURCE, *LPDXFILELOADRESOURCE;
+} DXFILELOADRESOURCE, *LPDXFILELOADRESOURCE;
 
 typedef struct _DXFILELOADMEMORY {
     LPVOID lpMemory;
     DWORD dSize;
-}DXFILELOADMEMORY, *LPDXFILELOADMEMORY;
+} DXFILELOADMEMORY, *LPDXFILELOADMEMORY;
 
 /*
  * DirectX File object types.
@@ -48,13 +48,13 @@ typedef struct _DXFILELOADMEMORY {
 #define WIN_TYPES(itype, ptype) typedef interface itype *LP##ptype, **LPLP##ptype
 #endif
 
-WIN_TYPES(IDirectXFile,                 DIRECTXFILE);
-WIN_TYPES(IDirectXFileEnumObject,       DIRECTXFILEENUMOBJECT);
-WIN_TYPES(IDirectXFileSaveObject,       DIRECTXFILESAVEOBJECT);
-WIN_TYPES(IDirectXFileObject,           DIRECTXFILEOBJECT);
-WIN_TYPES(IDirectXFileData,             DIRECTXFILEDATA);
-WIN_TYPES(IDirectXFileDataReference,    DIRECTXFILEDATAREFERENCE);
-WIN_TYPES(IDirectXFileBinary,           DIRECTXFILEBINARY);
+WIN_TYPES(IDirectXFile, DIRECTXFILE);
+WIN_TYPES(IDirectXFileEnumObject, DIRECTXFILEENUMOBJECT);
+WIN_TYPES(IDirectXFileSaveObject, DIRECTXFILESAVEOBJECT);
+WIN_TYPES(IDirectXFileObject, DIRECTXFILEOBJECT);
+WIN_TYPES(IDirectXFileData, DIRECTXFILEDATA);
+WIN_TYPES(IDirectXFileDataReference, DIRECTXFILEDATAREFERENCE);
+WIN_TYPES(IDirectXFileBinary, DIRECTXFILEBINARY);
 
 /*
  * API for creating IDirectXFile interface.
@@ -86,87 +86,100 @@ STDAPI DirectXFileCreate(LPDIRECTXFILE *lplpDirectXFile);
 #undef INTERFACE
 #define INTERFACE IDirectXFile
 
-DECLARE_INTERFACE_(IDirectXFile, IUnknown)
-{
+DECLARE_INTERFACE_(IDirectXFile, IUnknown) {
     IUNKNOWN_METHODS(PURE);
-    STDMETHOD(CreateEnumObject) (THIS_ LPVOID, DXFILELOADOPTIONS,
-                                 LPDIRECTXFILEENUMOBJECT *) PURE;
-    STDMETHOD(CreateSaveObject) (THIS_ LPCSTR, DXFILEFORMAT,
-                                 LPDIRECTXFILESAVEOBJECT *) PURE;
-    STDMETHOD(RegisterTemplates) (THIS_ LPVOID, DWORD) PURE;
+
+    STDMETHOD(CreateEnumObject)(THIS_ LPVOID, DXFILELOADOPTIONS,
+                                LPDIRECTXFILEENUMOBJECT *) PURE;
+
+    STDMETHOD(CreateSaveObject)(THIS_ LPCSTR, DXFILEFORMAT,
+                                LPDIRECTXFILESAVEOBJECT *) PURE;
+
+    STDMETHOD(RegisterTemplates)(THIS_ LPVOID, DWORD) PURE;
 };
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileEnumObject
 
-DECLARE_INTERFACE_(IDirectXFileEnumObject, IUnknown)
-{
+DECLARE_INTERFACE_(IDirectXFileEnumObject, IUnknown) {
     IUNKNOWN_METHODS(PURE);
-    STDMETHOD(GetNextDataObject)    (THIS_ LPDIRECTXFILEDATA *) PURE;
-    STDMETHOD(GetDataObjectById)    (THIS_ REFGUID, LPDIRECTXFILEDATA *) PURE;
-    STDMETHOD(GetDataObjectByName)  (THIS_ LPCSTR, LPDIRECTXFILEDATA *) PURE;
+
+    STDMETHOD(GetNextDataObject)(THIS_ LPDIRECTXFILEDATA *) PURE;
+
+    STDMETHOD(GetDataObjectById)(THIS_ REFGUID, LPDIRECTXFILEDATA *) PURE;
+
+    STDMETHOD(GetDataObjectByName)(THIS_ LPCSTR, LPDIRECTXFILEDATA *) PURE;
 };
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileSaveObject
 
-DECLARE_INTERFACE_(IDirectXFileSaveObject, IUnknown)
-{
+DECLARE_INTERFACE_(IDirectXFileSaveObject, IUnknown) {
     IUNKNOWN_METHODS(PURE);
-    STDMETHOD(SaveTemplates) (THIS_ DWORD, const GUID **) PURE;
-    STDMETHOD(CreateDataObject) (THIS_ REFGUID, LPCSTR, const GUID *,
-                                 DWORD, LPVOID, LPDIRECTXFILEDATA *) PURE;
-    STDMETHOD(SaveData) (THIS_ LPDIRECTXFILEDATA) PURE;
+
+    STDMETHOD(SaveTemplates)(THIS_ DWORD, const GUID **) PURE;
+
+    STDMETHOD(CreateDataObject)(THIS_ REFGUID, LPCSTR, const GUID *,
+                                DWORD, LPVOID, LPDIRECTXFILEDATA *) PURE;
+
+    STDMETHOD(SaveData)(THIS_ LPDIRECTXFILEDATA) PURE;
 };
 
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileObject
 
-DECLARE_INTERFACE_(IDirectXFileObject, IUnknown)
-{
+DECLARE_INTERFACE_(IDirectXFileObject, IUnknown) {
     IUNKNOWN_METHODS(PURE);
+
     IDIRECTXFILEOBJECT_METHODS(PURE);
 };
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileData
 
-DECLARE_INTERFACE_(IDirectXFileData, IDirectXFileObject)
-{
+DECLARE_INTERFACE_(IDirectXFileData, IDirectXFileObject) {
     IUNKNOWN_METHODS(PURE);
+
     IDIRECTXFILEOBJECT_METHODS(PURE);
 
-    STDMETHOD(GetData)          (THIS_ LPCSTR, DWORD *, void **) PURE;
-    STDMETHOD(GetType)          (THIS_ const GUID **) PURE;
-    STDMETHOD(GetNextObject)    (THIS_ LPDIRECTXFILEOBJECT *) PURE;
-    STDMETHOD(AddDataObject)    (THIS_ LPDIRECTXFILEDATA) PURE;
-    STDMETHOD(AddDataReference) (THIS_ LPCSTR, const GUID *) PURE;
-    STDMETHOD(AddBinaryObject)  (THIS_ LPCSTR, const GUID *, LPCSTR, LPVOID, DWORD) PURE;
+    STDMETHOD(GetData)(THIS_ LPCSTR, DWORD *, void **) PURE;
+
+    STDMETHOD(GetType)(THIS_ const GUID **) PURE;
+
+    STDMETHOD(GetNextObject)(THIS_ LPDIRECTXFILEOBJECT *) PURE;
+
+    STDMETHOD(AddDataObject)(THIS_ LPDIRECTXFILEDATA) PURE;
+
+    STDMETHOD(AddDataReference)(THIS_ LPCSTR, const GUID *) PURE;
+
+    STDMETHOD(AddBinaryObject)(THIS_ LPCSTR, const GUID *, LPCSTR, LPVOID, DWORD) PURE;
 };
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileDataReference
 
-DECLARE_INTERFACE_(IDirectXFileDataReference, IDirectXFileObject)
-{
+DECLARE_INTERFACE_(IDirectXFileDataReference, IDirectXFileObject) {
     IUNKNOWN_METHODS(PURE);
+
     IDIRECTXFILEOBJECT_METHODS(PURE);
 
-    STDMETHOD(Resolve) (THIS_ LPDIRECTXFILEDATA *) PURE;
+    STDMETHOD(Resolve)(THIS_ LPDIRECTXFILEDATA *) PURE;
 };
 
 #undef INTERFACE
 #define INTERFACE IDirectXFileBinary
 
-DECLARE_INTERFACE_(IDirectXFileBinary, IDirectXFileObject)
-{
+DECLARE_INTERFACE_(IDirectXFileBinary, IDirectXFileObject) {
     IUNKNOWN_METHODS(PURE);
+
     IDIRECTXFILEOBJECT_METHODS(PURE);
 
-    STDMETHOD(GetSize)      (THIS_ DWORD *) PURE;
-    STDMETHOD(GetMimeType)  (THIS_ LPCSTR *) PURE;
-    STDMETHOD(Read)         (THIS_ LPVOID, DWORD, LPDWORD) PURE;
+    STDMETHOD(GetSize)(THIS_ DWORD *) PURE;
+
+    STDMETHOD(GetMimeType)(THIS_ LPCSTR *) PURE;
+
+    STDMETHOD(Read)(THIS_ LPVOID, DWORD, LPDWORD) PURE;
 };
 
 /*
@@ -179,19 +192,19 @@ DEFINE_GUID(CLSID_CDirectXFile, 0x4516ec43, 0x8f20, 0x11d0, 0x9b, 0x6d, 0x00, 0x
  * DirectX File Interface GUIDs.
  */
 
-DEFINE_GUID(IID_IDirectXFile,               0x3d82ab40, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileEnumObject,     0x3d82ab41, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileSaveObject,     0x3d82ab42, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileObject,         0x3d82ab43, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileData,           0x3d82ab44, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileDataReference,  0x3d82ab45, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
-DEFINE_GUID(IID_IDirectXFileBinary,         0x3d82ab46, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFile, 0x3d82ab40, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileEnumObject, 0x3d82ab41, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileSaveObject, 0x3d82ab42, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileObject, 0x3d82ab43, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileData, 0x3d82ab44, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileDataReference, 0x3d82ab45, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(IID_IDirectXFileBinary, 0x3d82ab46, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
 
 /*
  * DirectX File Header template's GUID.
  */
 
-DEFINE_GUID(TID_DXFILEHeader,   0x3d82ab43, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
+DEFINE_GUID(TID_DXFILEHeader, 0x3d82ab43, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x20, 0xaf, 0x71, 0xe4, 0x33);
 
 
 /*
@@ -199,7 +212,7 @@ DEFINE_GUID(TID_DXFILEHeader,   0x3d82ab43, 0x62da, 0x11cf, 0xab, 0x39, 0x0, 0x2
  */
 
 #define _FACDD  0x876
-#define MAKE_DDHRESULT( code )  MAKE_HRESULT( 1, _FACDD, code )
+#define MAKE_DDHRESULT(code)  MAKE_HRESULT( 1, _FACDD, code )
 
 #define DXFILE_OK   0
 

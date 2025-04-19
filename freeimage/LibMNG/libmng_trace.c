@@ -106,6 +106,7 @@
 #include "libmng_data.h"
 #include "libmng_error.h"
 #include "libmng_trace.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif

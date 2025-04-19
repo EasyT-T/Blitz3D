@@ -236,6 +236,7 @@
 */
 
 #define PNG_INTERNAL
+
 #include "png.h"
 
 #if defined(PNG_USE_PNGGCCRD)
@@ -5198,7 +5199,7 @@ png_mmx_support(void)
 //      , "memory"   // if write to a variable gcc thought was in a reg
 //      , "cc"       // "condition codes" (flag bits)
     );
-#else     
+#else
     _mmx_supported = 0;
 #endif /* PNG_MMX_CODE_SUPPORTED */
 

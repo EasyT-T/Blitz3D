@@ -16,6 +16,7 @@
  */
 
 #define PNG_INTERNAL
+
 #include "png.h"
 
 /* Read the data from whatever input you are using.  The default routine
@@ -24,13 +25,12 @@
    buffering if you are using unbuffered reads.  This should never be asked
    to read more then 64K on a 16 bit machine. */
 void /* PRIVATE */
-png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
-{
-   png_debug1(4,"reading %d bytes\n", (int)length);
-   if (png_ptr->read_data_fn != NULL)
-      (*(png_ptr->read_data_fn))(png_ptr, data, length);
-   else
-      png_error(png_ptr, "Call to NULL read function");
+png_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
+    png_debug1(4, "reading %d bytes\n", (int) length);
+    if (png_ptr->read_data_fn != NULL)
+        (*(png_ptr->read_data_fn))(png_ptr, data, length);
+    else
+        png_error(png_ptr, "Call to NULL read function");
 }
 
 #if !defined(PNG_NO_STDIO)
@@ -39,25 +39,26 @@ png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
    read_data function and use it at run time with png_set_read_fn(), rather
    than changing the library. */
 #ifndef USE_FAR_KEYWORD
-static void /* PRIVATE */
-png_default_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
-{
-   png_size_t check;
 
-   /* fread() returns 0 on error, so it is OK to store this in a png_size_t
-    * instead of an int, which is what fread() actually returns.
-    */
+static void /* PRIVATE */
+png_default_read_data(png_structp png_ptr, png_bytep data, png_size_t length) {
+    png_size_t check;
+
+    /* fread() returns 0 on error, so it is OK to store this in a png_size_t
+     * instead of an int, which is what fread() actually returns.
+     */
 #if defined(_WIN32_WCE)
-   if ( !ReadFile((HANDLE)(png_ptr->io_ptr), data, length, &check, NULL) )
-      check = 0;
+    if ( !ReadFile((HANDLE)(png_ptr->io_ptr), data, length, &check, NULL) )
+       check = 0;
 #else
-   check = (png_size_t)fread(data, (png_size_t)1, length,
-      (png_FILE_p)png_ptr->io_ptr);
+    check = (png_size_t) fread(data, (png_size_t) 1, length,
+                               (png_FILE_p) png_ptr->io_ptr);
 #endif
 
-   if (check != length)
-      png_error(png_ptr, "Read Error");
+    if (check != length)
+        png_error(png_ptr, "Read Error");
 }
+
 #else
 /* this is the model-independent version. Since the standard I/O library
    can't handle far buffers in the medium and small models, we have to copy
@@ -132,31 +133,29 @@ png_default_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
                   function should call png_error(png_ptr, "Error msg"). */
 void PNGAPI
 png_set_read_fn(png_structp png_ptr, png_voidp io_ptr,
-   png_rw_ptr read_data_fn)
-{
-   png_ptr->io_ptr = io_ptr;
+                png_rw_ptr read_data_fn) {
+    png_ptr->io_ptr = io_ptr;
 
 #if !defined(PNG_NO_STDIO)
-   if (read_data_fn != NULL)
-      png_ptr->read_data_fn = read_data_fn;
-   else
-      png_ptr->read_data_fn = png_default_read_data;
+    if (read_data_fn != NULL)
+        png_ptr->read_data_fn = read_data_fn;
+    else
+        png_ptr->read_data_fn = png_default_read_data;
 #else
-   png_ptr->read_data_fn = read_data_fn;
+    png_ptr->read_data_fn = read_data_fn;
 #endif
 
-   /* It is an error to write to a read device */
-   if (png_ptr->write_data_fn != NULL)
-   {
-      png_ptr->write_data_fn = NULL;
-      png_warning(png_ptr,
-         "It's an error to set both read_data_fn and write_data_fn in the ");
-      png_warning(png_ptr,
-         "same structure.  Resetting write_data_fn to NULL.");
-   }
+    /* It is an error to write to a read device */
+    if (png_ptr->write_data_fn != NULL) {
+        png_ptr->write_data_fn = NULL;
+        png_warning(png_ptr,
+                    "It's an error to set both read_data_fn and write_data_fn in the ");
+        png_warning(png_ptr,
+                    "same structure.  Resetting write_data_fn to NULL.");
+    }
 
 #if defined(PNG_WRITE_FLUSH_SUPPORTED)
-   png_ptr->output_flush_fn = NULL;
+    png_ptr->output_flush_fn = NULL;
 #endif
 }
 

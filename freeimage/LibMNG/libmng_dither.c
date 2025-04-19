@@ -27,9 +27,11 @@
 #include "libmng_data.h"
 #include "libmng_error.h"
 #include "libmng_trace.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
+
 #include "libmng_dither.h"
 
 #if defined(__BORLANDC__) && defined(MNG_STRICT_ANSI)
@@ -38,12 +40,11 @@
 
 /* ************************************************************************** */
 
-mng_retcode dither_a_row (mng_datap  pData,
-                          mng_uint8p pRow)
-{
+mng_retcode dither_a_row(mng_datap pData,
+                         mng_uint8p pRow) {
 
 
-  return MNG_NOERROR;
+    return MNG_NOERROR;
 }
 
 /* ************************************************************************** */

@@ -48,14 +48,14 @@
 #define MNG_FREE(H,P,L)   { if (P) { free (P); P = 0; } }
 #define MNG_FREEX(H,P,L)  { if (P) free (P); }
 #else
-#define MNG_ALLOC(H,P,L)  { P = H->fMemalloc ((mng_size_t)(L)); \
+#define MNG_ALLOC(H, P, L)  { P = H->fMemalloc ((mng_size_t)(L)); \
                             if (P == 0) { MNG_ERROR (H, MNG_OUTOFMEMORY) } }
-#define MNG_ALLOCX(H,P,L) { P = H->fMemalloc ((mng_size_t)(L)); }
-#define MNG_FREE(H,P,L)   { if (P) { H->fMemfree (P, (mng_size_t)(L)); P = 0; } }
-#define MNG_FREEX(H,P,L)  { if (P) { H->fMemfree (P, (mng_size_t)(L)); } }
+#define MNG_ALLOCX(H, P, L) { P = H->fMemalloc ((mng_size_t)(L)); }
+#define MNG_FREE(H, P, L)   { if (P) { H->fMemfree (P, (mng_size_t)(L)); P = 0; } }
+#define MNG_FREEX(H, P, L)  { if (P) { H->fMemfree (P, (mng_size_t)(L)); } }
 #endif /* mng_internal_memmngmt */
 
-#define MNG_COPY(D,S,L)   { memcpy (D, S, (mng_size_t)(L)); }
+#define MNG_COPY(D, S, L)   { memcpy (D, S, (mng_size_t)(L)); }
 
 /* ************************************************************************** */
 

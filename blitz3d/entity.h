@@ -7,95 +7,131 @@
 #include "geom.h"
 
 class Entity;
+
 class Object;
+
 class Camera;
+
 class Light;
+
 class Model;
+
 class Mirror;
+
 class Listener;
+
 class MeshModel;
+
 class MD2Model;
 
-class Entity{
+class Entity {
 public:
 
-	Entity();
-	Entity( const Entity &e );
-	virtual ~Entity();
+    Entity();
 
-	virtual Entity *clone()=0;
+    Entity(const Entity &e);
 
-	//ugly casts!
-	virtual Object *getObject(){ return 0; }
-	virtual Camera *getCamera(){ return 0; }
-	virtual Light *getLight(){ return 0; }
-	virtual Model *getModel(){ return 0; }
-	virtual Mirror *getMirror(){ return 0; }
-	virtual Listener *getListener(){ return 0; }
+    virtual ~Entity();
 
-	void setName( const std::string &t );
-	void setParent( Entity *parent );
+    virtual Entity *clone() = 0;
 
-	void setVisible( bool vis );
-	void setEnabled( bool ena );
+    //ugly casts!
+    virtual Object *getObject() { return 0; }
 
-	bool visible()const{ return _visible; }
-	bool enabled()const{ return _enabled; }
+    virtual Camera *getCamera() { return 0; }
 
-	void enumVisible( vector<Object*> &out );
-	void enumEnabled( vector<Object*> &out );
+    virtual Light *getLight() { return 0; }
 
-	Entity *children()const{ return _children; }
-	Entity *successor()const{ return _succ; }
+    virtual Model *getModel() { return 0; }
 
-	std::string getName()const{ return _name; }
-	Entity *getParent()const{ return _parent; }
+    virtual Mirror *getMirror() { return 0; }
 
-	void setLocalPosition( const Vector &v );
-	void setLocalScale( const Vector & v );
-	void setLocalRotation( const Quat &q );
-	void setLocalTform( const Transform &t );
+    virtual Listener *getListener() { return 0; }
 
-	void setWorldPosition( const Vector &v );
-	void setWorldScale( const Vector &v );
-	void setWorldRotation( const Quat &q );
-	void setWorldTform( const Transform &t );
+    void setName(const std::string &t);
 
-	const Vector &getLocalPosition()const;
-	const Vector &getLocalScale()const;
-	const Quat &getLocalRotation()const;
-	const Transform &getLocalTform()const;
+    void setParent(Entity *parent);
 
-	const Vector &getWorldPosition()const;
-	const Vector &getWorldScale()const;
-	const Quat &getWorldRotation()const;
-	const Transform &getWorldTform()const;
+    void setVisible(bool vis);
 
-	static Entity *orphans(){ return _orphans; }
+    void setEnabled(bool ena);
+
+    bool visible() const { return _visible; }
+
+    bool enabled() const { return _enabled; }
+
+    void enumVisible(vector<Object *> &out);
+
+    void enumEnabled(vector<Object *> &out);
+
+    Entity *children() const { return _children; }
+
+    Entity *successor() const { return _succ; }
+
+    std::string getName() const { return _name; }
+
+    Entity *getParent() const { return _parent; }
+
+    void setLocalPosition(const Vector &v);
+
+    void setLocalScale(const Vector &v);
+
+    void setLocalRotation(const Quat &q);
+
+    void setLocalTform(const Transform &t);
+
+    void setWorldPosition(const Vector &v);
+
+    void setWorldScale(const Vector &v);
+
+    void setWorldRotation(const Quat &q);
+
+    void setWorldTform(const Transform &t);
+
+    const Vector &getLocalPosition() const;
+
+    const Vector &getLocalScale() const;
+
+    const Quat &getLocalRotation() const;
+
+    const Transform &getLocalTform() const;
+
+    const Vector &getWorldPosition() const;
+
+    const Vector &getWorldScale() const;
+
+    const Quat &getWorldRotation() const;
+
+    const Transform &getWorldTform() const;
+
+    static Entity *orphans() { return _orphans; }
 
 private:
-	Entity *_succ,*_pred,*_parent,*_children,*_last_child;
+    Entity *_succ, *_pred, *_parent, *_children, *_last_child;
 
-	static Entity *_orphans,*_last_orphan;
+    static Entity *_orphans, *_last_orphan;
 
-	bool _visible,_enabled;
+    bool _visible, _enabled;
 
-	std::string _name;
+    std::string _name;
 
-	mutable int invalid;
+    mutable int invalid;
 
-	Quat local_rot;
-	Vector local_pos,local_scl;
-	mutable Transform local_tform;
+    Quat local_rot;
+    Vector local_pos, local_scl;
+    mutable Transform local_tform;
 
-	mutable Quat world_rot;
-	mutable Vector world_pos,world_scl;
-	mutable Transform world_tform;
+    mutable Quat world_rot;
+    mutable Vector world_pos, world_scl;
+    mutable Transform world_tform;
 
-	void insert();
-	void remove();
-	void invalidateLocal();
-	void invalidateWorld();
+    void insert();
+
+    void remove();
+
+    void invalidateLocal();
+
+    void invalidateWorld();
 };
 
 #endif

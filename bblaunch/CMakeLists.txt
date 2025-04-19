@@ -6,7 +6,7 @@ add_executable(bblaunch WIN32
         bblaunch.cpp
         bblaunch.ico
         bblaunch.rc
-        )
+)
 
 target_compile_options(bblaunch PRIVATE /Gz)
 

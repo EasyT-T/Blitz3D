@@ -11,63 +11,74 @@
 #include "toker.h"
 #include "nodes.h"
 
-class Parser{
+class Parser {
 public:
 
-	Parser( Toker &t );
+    Parser(Toker &t);
 
-	ProgNode *parse( const string &main );
+    ProgNode *parse(const string &main);
 
 private:
-	enum Dialect {
-		DIALECT_CLASSIC,
-		DIALECT_SECURE,
-		DIALECT_MODERN,
+    enum Dialect {
+        DIALECT_CLASSIC,
+        DIALECT_SECURE,
+        DIALECT_MODERN,
 
-	};
-	Dialect dialect = DIALECT_CLASSIC;
+    };
+    Dialect dialect = DIALECT_CLASSIC;
 
-	string incfile;
-	set<string> included;
-	Toker *toker,*main_toker;
-	map<string,DimNode*> arrayDecls;
+    string incfile;
+    set<string> included;
+    Toker *toker, *main_toker;
+    map<string, DimNode *> arrayDecls;
 
-	DeclSeqNode *consts;
-	DeclSeqNode *structs;
-	DeclSeqNode *funcs;
-	DeclSeqNode *datas;
+    DeclSeqNode *consts;
+    DeclSeqNode *structs;
+    DeclSeqNode *funcs;
+    DeclSeqNode *datas;
 
-	StmtSeqNode *parseStmtSeq( int scope );
-	void parseStmtSeq( StmtSeqNode *stmts,int scope );
+    StmtSeqNode *parseStmtSeq(int scope);
 
-	void ex( const string &s );
-	void exp( const string &s );
+    void parseStmtSeq(StmtSeqNode *stmts, int scope);
 
-	string parseIdent();
-	void parseChar( int c );
-	string parseTypeTag();
+    void ex(const string &s);
 
-	VarNode *parseVar(bool mustExist=false);
-	VarNode *parseVar( const string &ident,const string &tag,bool mustExist=false );
-	CallNode *parseCall( const string &ident,const string &tag );
-	IfNode *parseIf();
+    void exp(const string &s);
 
-	DeclNode *parseVarDecl( int kind,bool constant );
-	DimNode  *parseArrayDecl();
-	DeclNode *parseFuncDecl();
-	DeclNode *parseStructDecl();
+    string parseIdent();
 
-	ExprSeqNode *parseExprSeq();
+    void parseChar(int c);
 
-	ExprNode *parseExpr( bool opt );
-	ExprNode *parseExpr1( bool opt );	//And, Or, Eor
-	ExprNode *parseExpr2( bool opt );	//<,=,>,<=,<>,>=
-	ExprNode *parseExpr3( bool opt );	//+,-
-	ExprNode *parseExpr4( bool opt );	//Lsr,Lsr,Asr
-	ExprNode *parseExpr5( bool opt );	//*,/,Mod
-	ExprNode *parseExpr6( bool opt );	//^
-	ExprNode *parseUniExpr( bool opt );	//+,-,Not,~
-	ExprNode *parsePrimary( bool opt );
+    string parseTypeTag();
+
+    VarNode *parseVar(bool mustExist = false);
+
+    VarNode *parseVar(const string &ident, const string &tag, bool mustExist = false);
+
+    CallNode *parseCall(const string &ident, const string &tag);
+
+    IfNode *parseIf();
+
+    DeclNode *parseVarDecl(int kind, bool constant);
+
+    DimNode *parseArrayDecl();
+
+    DeclNode *parseFuncDecl();
+
+    DeclNode *parseStructDecl();
+
+    ExprSeqNode *parseExprSeq();
+
+    ExprNode *parseExpr(bool opt);
+
+    ExprNode *parseExpr1(bool opt);    //And, Or, Eor
+    ExprNode *parseExpr2(bool opt);    //<,=,>,<=,<>,>=
+    ExprNode *parseExpr3(bool opt);    //+,-
+    ExprNode *parseExpr4(bool opt);    //Lsr,Lsr,Asr
+    ExprNode *parseExpr5(bool opt);    //*,/,Mod
+    ExprNode *parseExpr6(bool opt);    //^
+    ExprNode *parseUniExpr(bool opt);    //+,-,Not,~
+    ExprNode *parsePrimary(bool opt);
 };
 
 #endif

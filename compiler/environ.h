@@ -12,31 +12,36 @@
 #include "decl.h"
 #include "label.h"
 
-class Environ{
+class Environ {
 public:
-	int level;
-	DeclSeq *decls;
-	DeclSeq *funcDecls;
-	DeclSeq *typeDecls;
+    int level;
+    DeclSeq *decls;
+    DeclSeq *funcDecls;
+    DeclSeq *typeDecls;
 
-	vector<Type*> types;
+    vector<Type *> types;
 
-	vector<Label*> labels;
-	Environ *globals;
-	Type *returnType;
-	string funcLabel,breakLabel;
-	list<Environ*> children;		//for delete!
+    vector<Label *> labels;
+    Environ *globals;
+    Type *returnType;
+    string funcLabel, breakLabel;
+    list<Environ *> children;        //for delete!
 
-	Environ( const string &f,Type *r,int l,Environ *gs );
-	~Environ();
+    Environ(const string &f, Type *r, int l, Environ *gs);
 
-	Decl *findDecl( const string &s );
-	Decl *findFunc( const string &s );
-	Type *findType( const string &s );
-	Label *findLabel( const string &s );
-	Label *insertLabel( const string &s,int def,int src,int sz );
+    ~Environ();
 
-	string setBreak( const string &s );
+    Decl *findDecl(const string &s);
+
+    Decl *findFunc(const string &s);
+
+    Type *findType(const string &s);
+
+    Label *findLabel(const string &s);
+
+    Label *insertLabel(const string &s, int def, int src, int sz);
+
+    string setBreak(const string &s);
 };
 
 #endif

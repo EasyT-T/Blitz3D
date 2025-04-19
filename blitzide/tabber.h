@@ -4,53 +4,66 @@
 
 class Tabber;
 
-class TabberListener{
+class TabberListener {
 public:
-	virtual void currentSet( Tabber *tabber,int index )=0;
+    virtual void currentSet(Tabber *tabber, int index) = 0;
 };
 
-class Tabber : public CTabCtrl{
+class Tabber : public CTabCtrl {
 public:
-	Tabber();
-	~Tabber();
+    Tabber();
 
-	void setListener( TabberListener *l );
+    ~Tabber();
 
-	void insert( int index,CWnd *wnd,const string &text );
-	void remove( int index );
-	void setCurrent( int index );
-	void setTabText( int index,const string &t );
+    void setListener(TabberListener *l);
 
-	int size()const;
-	int getCurrent()const;
-	CWnd *getTabWnd( int index )const;
-	string getTabText( int index )const;
+    void insert(int index, CWnd *wnd, const string &text);
 
-	DECLARE_DYNAMIC( Tabber )
-	DECLARE_MESSAGE_MAP()
+    void remove(int index);
 
-	afx_msg void OnSize( UINT type,int w,int h );
-	afx_msg BOOL OnEraseBkgnd( CDC *dc );
-	afx_msg void tcn_selChange( NMHDR *p,LRESULT *result );
+    void setCurrent(int index);
+
+    void setTabText(int index, const string &t);
+
+    int size() const;
+
+    int getCurrent() const;
+
+    CWnd *getTabWnd(int index) const;
+
+    string getTabText(int index) const;
+
+DECLARE_DYNAMIC(Tabber)
+
+DECLARE_MESSAGE_MAP()
+
+    afx_msg void OnSize(UINT type, int w, int h);
+
+    afx_msg BOOL OnEraseBkgnd(CDC *dc);
+
+    afx_msg void tcn_selChange(NMHDR *p, LRESULT *result);
 
 private:
-	TabberListener *listener;
+    TabberListener *listener;
 
-	struct Tab{
-		CWnd *wnd;
-		string text;
-		Tab( CWnd *w,const string &t ):wnd(w),text(t){
-		}
-	};
+    struct Tab {
+        CWnd *wnd;
+        string text;
 
-	typedef list<Tab*> Tabs;
+        Tab(CWnd *w, const string &t) : wnd(w), text(t) {
+        }
+    };
 
-	Tabs tabs;
-	int curr;
+    typedef list<Tab *> Tabs;
 
-	void refresh();
-	CRect getInnerRect();
-	Tab *getTab( int index )const;
+    Tabs tabs;
+    int curr;
+
+    void refresh();
+
+    CRect getInnerRect();
+
+    Tab *getTab(int index) const;
 };
 
 #endif

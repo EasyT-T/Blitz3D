@@ -8,24 +8,28 @@
 
 class World;
 
-class Light : public Object{
+class Light : public Object {
 public:
-	Light( int type );
-	~Light();
+    Light(int type);
 
-	Light *getLight(){ return this; }
+    ~Light();
 
-	void setRange( float r );
-	void setColor( const Vector &v );
-	void setConeAngles( float inner,float outer );
+    Light *getLight() { return this; }
 
-	bool beginRender( float tween );
+    void setRange(float r);
 
-	gxLight *getGxLight()const{ return light; }
+    void setColor(const Vector &v);
+
+    void setConeAngles(float inner, float outer);
+
+    bool beginRender(float tween);
+
+    gxLight *getGxLight() const { return light; }
 
 private:
-	friend class World;
-	gxLight *light;
+    friend class World;
+
+    gxLight *light;
 };
 
 #endif

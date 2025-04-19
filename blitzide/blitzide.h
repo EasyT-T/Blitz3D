@@ -5,12 +5,13 @@
 #include "prefs.h"
 #include "mainframe.h"
 
-class BlitzIDE : public CWinApp{
+class BlitzIDE : public CWinApp {
 public:
-	MainFrame *mainFrame;
+    MainFrame *mainFrame;
 
-	virtual BOOL InitInstance();
-	virtual int ExitInstance();
+    virtual BOOL InitInstance();
+
+    virtual int ExitInstance();
 };
 
 extern BlitzIDE blitzIDE;

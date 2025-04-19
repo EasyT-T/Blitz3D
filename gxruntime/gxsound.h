@@ -1,4 +1,3 @@
-
 #ifndef GXSOUND_H
 #define GXSOUND_H
 
@@ -7,32 +6,33 @@
 class gxAudio;
 struct FSOUND_SAMPLE;
 
-class gxSound{
+class gxSound
+{
 public:
-	gxAudio *audio;
+    gxAudio* audio;
 
-	gxSound( gxAudio *audio,FSOUND_SAMPLE *sample );
-	~gxSound();
+    gxSound(gxAudio* audio, FSOUND_SAMPLE* sample);
+    ~gxSound();
 
 private:
-	bool defs_valid;
-	int def_freq,def_vol,def_pan,def_pri;
-	FSOUND_SAMPLE *sample;
-	float pos[3],vel[3];
+    bool defs_valid;
+    int def_freq, def_vol, def_pan, def_pri;
+    FSOUND_SAMPLE* sample;
+    float pos[3], vel[3];
 
-	void setDefaults();
+    void setDefaults();
 
-	/***** GX INTERFACE *****/
+    /***** GX INTERFACE *****/
 public:
-	//actions
-	gxChannel *play();
-	gxChannel *play3d( const float pos[3],const float vel[3] );
+    //actions
+    gxChannel* play();
+    gxChannel* play3d(const float pos[3], const float vel[3]);
 
-	//modifiers
-	void setLoop( bool loop );
-	void setPitch( int hertz );
-	void setVolume( float volume );
-	void setPan( float pan );
+    //modifiers
+    void setLoop(bool loop);
+    void setPitch(int hertz);
+    void setVolume(float volume);
+    void setPan(float pan);
 };
 
 #endif

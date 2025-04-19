@@ -61,9 +61,11 @@
 #include "libmng_data.h"
 #include "libmng_error.h"
 #include "libmng_trace.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
+
 #include "libmng_objects.h"
 #include "libmng_cms.h"
 
@@ -197,7 +199,7 @@ mng_retcode init_full_cms (mng_datap pData)
   if (!pImage)                         /* no current object? then use object 0 */
     pImage = (mng_imagep)pData->pObjzero;
 
-  pBuf = pImage->pImgbuf;              /* address the buffer */ 
+  pBuf = pImage->pImgbuf;              /* address the buffer */
 
   if ((pBuf->bHasICCP) || (pData->bHasglobalICCP))
   {
@@ -571,159 +573,156 @@ mng_retcode correct_full_cms (mng_datap pData)
 /* ************************************************************************** */
 
 #if defined(MNG_GAMMA_ONLY) || defined(MNG_FULL_CMS)
-mng_retcode init_gamma_only (mng_datap pData)
-{
-  mng_float      dGamma;
-  mng_imagep     pImage = (mng_imagep)pData->pCurrentobj;
-  mng_imagedatap pBuf;
+
+mng_retcode init_gamma_only(mng_datap pData) {
+    mng_float dGamma;
+    mng_imagep pImage = (mng_imagep) pData->pCurrentobj;
+    mng_imagedatap pBuf;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY, MNG_LC_START)
 #endif
 
-  if (!pImage)                         /* no current object? then use object 0 */
-    pImage = (mng_imagep)pData->pObjzero;
+    if (!pImage)                         /* no current object? then use object 0 */
+        pImage = (mng_imagep) pData->pObjzero;
 
-  pBuf = pImage->pImgbuf;              /* address the buffer */
+    pBuf = pImage->pImgbuf;              /* address the buffer */
 
-  if (pBuf->bHasSRGB)                  /* get the gamma value */
-    dGamma = 0.45455;
-  else
-  if (pBuf->bHasGAMA)
-    dGamma = (mng_float)pBuf->iGamma / 100000;
-  else
-  if (pData->bHasglobalSRGB)
-    dGamma = 0.45455;
-  else
-  if (pData->bHasglobalGAMA)
-    dGamma = (mng_float)pData->iGlobalGamma / 100000;
-  else
-    dGamma = pData->dDfltimggamma;
+    if (pBuf->bHasSRGB)                  /* get the gamma value */
+        dGamma = 0.45455;
+    else if (pBuf->bHasGAMA)
+        dGamma = (mng_float) pBuf->iGamma / 100000;
+    else if (pData->bHasglobalSRGB)
+        dGamma = 0.45455;
+    else if (pData->bHasglobalGAMA)
+        dGamma = (mng_float) pData->iGlobalGamma / 100000;
+    else
+        dGamma = pData->dDfltimggamma;
 
-  if (dGamma > 0)                      /* ignore gamma=0 */
-  {
-    dGamma = pData->dViewgamma / (dGamma * pData->dDisplaygamma);
-
-    if (dGamma != pData->dLastgamma)   /* lookup table needs to be computed ? */
+    if (dGamma > 0)                      /* ignore gamma=0 */
     {
-      mng_int32 iX;
+        dGamma = pData->dViewgamma / (dGamma * pData->dDisplaygamma);
 
-      pData->aGammatab [0] = 0;
+        if (dGamma != pData->dLastgamma)   /* lookup table needs to be computed ? */
+        {
+            mng_int32 iX;
 
-      for (iX = 1; iX <= 255; iX++)
-        pData->aGammatab [iX] = (mng_uint8)(pow (iX / 255.0, dGamma) * 255 + 0.5);
+            pData->aGammatab[0] = 0;
 
-      pData->dLastgamma = dGamma;      /* keep for next time */
+            for (iX = 1; iX <= 255; iX++)
+                pData->aGammatab[iX] = (mng_uint8) (pow(iX / 255.0, dGamma) * 255 + 0.5);
+
+            pData->dLastgamma = dGamma;      /* keep for next time */
+        }
+        /* load color-correction routine */
+        pData->fCorrectrow = (mng_fptr) correct_gamma_only;
     }
-                                       /* load color-correction routine */
-    pData->fCorrectrow = (mng_fptr)correct_gamma_only;
-  }
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;
+    return MNG_NOERROR;
 }
+
 #endif /* MNG_GAMMA_ONLY || MNG_FULL_CMS */
 
 /* ************************************************************************** */
 
 #if defined(MNG_GAMMA_ONLY) || defined(MNG_FULL_CMS)
-mng_retcode init_gamma_only_object (mng_datap pData)
-{
-  mng_float      dGamma;
-  mng_imagedatap pBuf;
+
+mng_retcode init_gamma_only_object(mng_datap pData) {
+    mng_float dGamma;
+    mng_imagedatap pBuf;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY_OBJ, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY_OBJ, MNG_LC_START)
 #endif
-                                       /* address the object-buffer */
-  pBuf = ((mng_imagep)pData->pRetrieveobj)->pImgbuf;
+    /* address the object-buffer */
+    pBuf = ((mng_imagep) pData->pRetrieveobj)->pImgbuf;
 
-  if (pBuf->bHasSRGB)                  /* get the gamma value */
-    dGamma = 0.45455;
-  else
-  if (pBuf->bHasGAMA)
-    dGamma = (mng_float)pBuf->iGamma / 100000;
-  else
-    dGamma = pData->dDfltimggamma;
+    if (pBuf->bHasSRGB)                  /* get the gamma value */
+        dGamma = 0.45455;
+    else if (pBuf->bHasGAMA)
+        dGamma = (mng_float) pBuf->iGamma / 100000;
+    else
+        dGamma = pData->dDfltimggamma;
 
-  if (dGamma)                          /* lets not divide by zero, shall we... */
-    dGamma = pData->dViewgamma / (dGamma * pData->dDisplaygamma);
+    if (dGamma)                          /* lets not divide by zero, shall we... */
+        dGamma = pData->dViewgamma / (dGamma * pData->dDisplaygamma);
 
-  if (dGamma != pData->dLastgamma)     /* lookup table needs to be computed ? */
-  {
+    if (dGamma != pData->dLastgamma)     /* lookup table needs to be computed ? */
+    {
+        mng_int32 iX;
+
+        pData->aGammatab[0] = 0;
+
+        for (iX = 1; iX <= 255; iX++)
+            pData->aGammatab[iX] = (mng_uint8) (pow(iX / 255.0, dGamma) * 255 + 0.5);
+
+        pData->dLastgamma = dGamma;        /* keep for next time */
+    }
+    /* load color-correction routine */
+    pData->fCorrectrow = (mng_fptr) correct_gamma_only;
+
+#ifdef MNG_SUPPORT_TRACE
+    MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY_OBJ, MNG_LC_END)
+#endif
+
+    return MNG_NOERROR;
+}
+
+#endif /* MNG_GAMMA_ONLY || MNG_FULL_CMS */
+
+/* ************************************************************************** */
+
+#if defined(MNG_GAMMA_ONLY) || defined(MNG_FULL_CMS)
+
+mng_retcode correct_gamma_only(mng_datap pData) {
+    mng_uint8p pWork;
     mng_int32 iX;
 
-    pData->aGammatab [0] = 0;
-
-    for (iX = 1; iX <= 255; iX++)
-      pData->aGammatab [iX] = (mng_uint8)(pow (iX / 255.0, dGamma) * 255 + 0.5);
-
-    pData->dLastgamma = dGamma;        /* keep for next time */
-  }
-                                       /* load color-correction routine */
-  pData->fCorrectrow = (mng_fptr)correct_gamma_only;
-
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INIT_GAMMA_ONLY_OBJ, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_CORRECT_GAMMA_ONLY, MNG_LC_START)
 #endif
 
-  return MNG_NOERROR;
+    pWork = pData->pRGBArow;             /* address intermediate row */
+
+    if (pData->bIsRGBA16)                /* 16-bit intermediate row ? */
+    {
+
+
+        /* TODO: 16-bit precision gamma processing */
+        /* we'll just do the high-order byte for now */
+
+
+        /* convert all samples in the row */
+        for (iX = 0; iX <
+                     pData->iRowsamples; iX++) {                                 /* using the precalculated gamma lookup table */
+            *pWork = pData->aGammatab[*pWork];
+            *(pWork + 2) = pData->aGammatab[*(pWork + 2)];
+            *(pWork + 4) = pData->aGammatab[*(pWork + 4)];
+
+            pWork += 8;
+        }
+    } else {                                    /* convert all samples in the row */
+        for (iX = 0; iX <
+                     pData->iRowsamples; iX++) {                                 /* using the precalculated gamma lookup table */
+            *pWork = pData->aGammatab[*pWork];
+            *(pWork + 1) = pData->aGammatab[*(pWork + 1)];
+            *(pWork + 2) = pData->aGammatab[*(pWork + 2)];
+
+            pWork += 4;
+        }
+    }
+
+#ifdef MNG_SUPPORT_TRACE
+    MNG_TRACE (pData, MNG_FN_CORRECT_GAMMA_ONLY, MNG_LC_END)
+#endif
+
+    return MNG_NOERROR;
 }
-#endif /* MNG_GAMMA_ONLY || MNG_FULL_CMS */
 
-/* ************************************************************************** */
-
-#if defined(MNG_GAMMA_ONLY) || defined(MNG_FULL_CMS)
-mng_retcode correct_gamma_only (mng_datap pData)
-{
-  mng_uint8p pWork;
-  mng_int32  iX;
-
-#ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_CORRECT_GAMMA_ONLY, MNG_LC_START)
-#endif
-
-  pWork = pData->pRGBArow;             /* address intermediate row */
-
-  if (pData->bIsRGBA16)                /* 16-bit intermediate row ? */
-  {
-
-  
-     /* TODO: 16-bit precision gamma processing */
-     /* we'll just do the high-order byte for now */
-
-     
-                                       /* convert all samples in the row */
-     for (iX = 0; iX < pData->iRowsamples; iX++)
-     {                                 /* using the precalculated gamma lookup table */
-       *pWork     = pData->aGammatab [*pWork];
-       *(pWork+2) = pData->aGammatab [*(pWork+2)];
-       *(pWork+4) = pData->aGammatab [*(pWork+4)];
-
-       pWork += 8;
-     }
-  }
-  else
-  {                                    /* convert all samples in the row */
-     for (iX = 0; iX < pData->iRowsamples; iX++)
-     {                                 /* using the precalculated gamma lookup table */
-       *pWork     = pData->aGammatab [*pWork];
-       *(pWork+1) = pData->aGammatab [*(pWork+1)];
-       *(pWork+2) = pData->aGammatab [*(pWork+2)];
-
-       pWork += 4;
-     }
-  }
-
-#ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_CORRECT_GAMMA_ONLY, MNG_LC_END)
-#endif
-
-  return MNG_NOERROR;
-}
 #endif /* MNG_GAMMA_ONLY || MNG_FULL_CMS */
 
 /* ************************************************************************** */
@@ -793,7 +792,7 @@ mng_retcode init_app_cms (mng_datap pData)
       iPrimarygreenx = pBuf->iPrimarygreenx;
       iPrimarygreeny = pBuf->iPrimarygreeny;
       iPrimarybluex  = pBuf->iPrimarybluex;
-      iPrimarybluey  = pBuf->iPrimarybluey;  
+      iPrimarybluey  = pBuf->iPrimarybluey;
     }
     else
     {

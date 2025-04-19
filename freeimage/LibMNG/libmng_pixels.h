@@ -69,7 +69,7 @@
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode display_progressive_check (mng_datap pData);
+mng_retcode display_progressive_check(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -78,14 +78,21 @@ mng_retcode display_progressive_check (mng_datap pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode display_rgb8           (mng_datap  pData);
-mng_retcode display_rgba8          (mng_datap  pData);
-mng_retcode display_argb8          (mng_datap  pData);
-mng_retcode display_rgb8_a8        (mng_datap  pData);
-mng_retcode display_bgr8           (mng_datap  pData);
-mng_retcode display_bgra8          (mng_datap  pData);
-mng_retcode display_bgra8_pm       (mng_datap  pData);
-mng_retcode display_abgr8          (mng_datap  pData);
+mng_retcode display_rgb8(mng_datap pData);
+
+mng_retcode display_rgba8(mng_datap pData);
+
+mng_retcode display_argb8(mng_datap pData);
+
+mng_retcode display_rgb8_a8(mng_datap pData);
+
+mng_retcode display_bgr8(mng_datap pData);
+
+mng_retcode display_bgra8(mng_datap pData);
+
+mng_retcode display_bgra8_pm(mng_datap pData);
+
+mng_retcode display_abgr8(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -94,12 +101,17 @@ mng_retcode display_abgr8          (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode restore_bkgd_backimage (mng_datap  pData);
-mng_retcode restore_bkgd_backcolor (mng_datap  pData);
-mng_retcode restore_bkgd_bkgd      (mng_datap  pData);
-mng_retcode restore_bkgd_bgcolor   (mng_datap  pData);
-mng_retcode restore_bkgd_rgb8      (mng_datap  pData);
-mng_retcode restore_bkgd_bgr8      (mng_datap  pData);
+mng_retcode restore_bkgd_backimage(mng_datap pData);
+
+mng_retcode restore_bkgd_backcolor(mng_datap pData);
+
+mng_retcode restore_bkgd_bkgd(mng_datap pData);
+
+mng_retcode restore_bkgd_bgcolor(mng_datap pData);
+
+mng_retcode restore_bkgd_rgb8(mng_datap pData);
+
+mng_retcode restore_bkgd_bgr8(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -108,15 +120,23 @@ mng_retcode restore_bkgd_bgr8      (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode retrieve_g8            (mng_datap  pData);
-mng_retcode retrieve_g16           (mng_datap  pData);
-mng_retcode retrieve_rgb8          (mng_datap  pData);
-mng_retcode retrieve_rgb16         (mng_datap  pData);
-mng_retcode retrieve_idx8          (mng_datap  pData);
-mng_retcode retrieve_ga8           (mng_datap  pData);
-mng_retcode retrieve_ga16          (mng_datap  pData);
-mng_retcode retrieve_rgba8         (mng_datap  pData);
-mng_retcode retrieve_rgba16        (mng_datap  pData);
+mng_retcode retrieve_g8(mng_datap pData);
+
+mng_retcode retrieve_g16(mng_datap pData);
+
+mng_retcode retrieve_rgb8(mng_datap pData);
+
+mng_retcode retrieve_rgb16(mng_datap pData);
+
+mng_retcode retrieve_idx8(mng_datap pData);
+
+mng_retcode retrieve_ga8(mng_datap pData);
+
+mng_retcode retrieve_ga16(mng_datap pData);
+
+mng_retcode retrieve_rgba8(mng_datap pData);
+
+mng_retcode retrieve_rgba16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -125,21 +145,35 @@ mng_retcode retrieve_rgba16        (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode store_g1               (mng_datap  pData);
-mng_retcode store_g2               (mng_datap  pData);
-mng_retcode store_g4               (mng_datap  pData);
-mng_retcode store_g8               (mng_datap  pData);
-mng_retcode store_g16              (mng_datap  pData);
-mng_retcode store_rgb8             (mng_datap  pData);
-mng_retcode store_rgb16            (mng_datap  pData);
-mng_retcode store_idx1             (mng_datap  pData);
-mng_retcode store_idx2             (mng_datap  pData);
-mng_retcode store_idx4             (mng_datap  pData);
-mng_retcode store_idx8             (mng_datap  pData);
-mng_retcode store_ga8              (mng_datap  pData);
-mng_retcode store_ga16             (mng_datap  pData);
-mng_retcode store_rgba8            (mng_datap  pData);
-mng_retcode store_rgba16           (mng_datap  pData);
+mng_retcode store_g1(mng_datap pData);
+
+mng_retcode store_g2(mng_datap pData);
+
+mng_retcode store_g4(mng_datap pData);
+
+mng_retcode store_g8(mng_datap pData);
+
+mng_retcode store_g16(mng_datap pData);
+
+mng_retcode store_rgb8(mng_datap pData);
+
+mng_retcode store_rgb16(mng_datap pData);
+
+mng_retcode store_idx1(mng_datap pData);
+
+mng_retcode store_idx2(mng_datap pData);
+
+mng_retcode store_idx4(mng_datap pData);
+
+mng_retcode store_idx8(mng_datap pData);
+
+mng_retcode store_ga8(mng_datap pData);
+
+mng_retcode store_ga16(mng_datap pData);
+
+mng_retcode store_rgba8(mng_datap pData);
+
+mng_retcode store_rgba16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -148,42 +182,65 @@ mng_retcode store_rgba16           (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode store_jpeg_g8          (mng_datap  pData);
-mng_retcode store_jpeg_rgb8        (mng_datap  pData);
-mng_retcode store_jpeg_ga8         (mng_datap  pData);
-mng_retcode store_jpeg_rgba8       (mng_datap  pData);
+mng_retcode store_jpeg_g8(mng_datap pData);
 
-mng_retcode store_jpeg_g12         (mng_datap  pData);
-mng_retcode store_jpeg_rgb12       (mng_datap  pData);
-mng_retcode store_jpeg_ga12        (mng_datap  pData);
-mng_retcode store_jpeg_rgba12      (mng_datap  pData);
+mng_retcode store_jpeg_rgb8(mng_datap pData);
 
-mng_retcode store_jpeg_g8_alpha    (mng_datap  pData);
-mng_retcode store_jpeg_rgb8_alpha  (mng_datap  pData);
+mng_retcode store_jpeg_ga8(mng_datap pData);
 
-mng_retcode store_jpeg_g8_a1       (mng_datap  pData);
-mng_retcode store_jpeg_g8_a2       (mng_datap  pData);
-mng_retcode store_jpeg_g8_a4       (mng_datap  pData);
-mng_retcode store_jpeg_g8_a8       (mng_datap  pData);
-mng_retcode store_jpeg_g8_a16      (mng_datap  pData);
+mng_retcode store_jpeg_rgba8(mng_datap pData);
 
-mng_retcode store_jpeg_rgb8_a1     (mng_datap  pData);
-mng_retcode store_jpeg_rgb8_a2     (mng_datap  pData);
-mng_retcode store_jpeg_rgb8_a4     (mng_datap  pData);
-mng_retcode store_jpeg_rgb8_a8     (mng_datap  pData);
-mng_retcode store_jpeg_rgb8_a16    (mng_datap  pData);
+mng_retcode store_jpeg_g12(mng_datap pData);
 
-mng_retcode store_jpeg_g12_a1      (mng_datap  pData);
-mng_retcode store_jpeg_g12_a2      (mng_datap  pData);
-mng_retcode store_jpeg_g12_a4      (mng_datap  pData);
-mng_retcode store_jpeg_g12_a8      (mng_datap  pData);
-mng_retcode store_jpeg_g12_a16     (mng_datap  pData);
+mng_retcode store_jpeg_rgb12(mng_datap pData);
 
-mng_retcode store_jpeg_rgb12_a1    (mng_datap  pData);
-mng_retcode store_jpeg_rgb12_a2    (mng_datap  pData);
-mng_retcode store_jpeg_rgb12_a4    (mng_datap  pData);
-mng_retcode store_jpeg_rgb12_a8    (mng_datap  pData);
-mng_retcode store_jpeg_rgb12_a16   (mng_datap  pData);
+mng_retcode store_jpeg_ga12(mng_datap pData);
+
+mng_retcode store_jpeg_rgba12(mng_datap pData);
+
+mng_retcode store_jpeg_g8_alpha(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_alpha(mng_datap pData);
+
+mng_retcode store_jpeg_g8_a1(mng_datap pData);
+
+mng_retcode store_jpeg_g8_a2(mng_datap pData);
+
+mng_retcode store_jpeg_g8_a4(mng_datap pData);
+
+mng_retcode store_jpeg_g8_a8(mng_datap pData);
+
+mng_retcode store_jpeg_g8_a16(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_a1(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_a2(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_a4(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_a8(mng_datap pData);
+
+mng_retcode store_jpeg_rgb8_a16(mng_datap pData);
+
+mng_retcode store_jpeg_g12_a1(mng_datap pData);
+
+mng_retcode store_jpeg_g12_a2(mng_datap pData);
+
+mng_retcode store_jpeg_g12_a4(mng_datap pData);
+
+mng_retcode store_jpeg_g12_a8(mng_datap pData);
+
+mng_retcode store_jpeg_g12_a16(mng_datap pData);
+
+mng_retcode store_jpeg_rgb12_a1(mng_datap pData);
+
+mng_retcode store_jpeg_rgb12_a2(mng_datap pData);
+
+mng_retcode store_jpeg_rgb12_a4(mng_datap pData);
+
+mng_retcode store_jpeg_rgb12_a8(mng_datap pData);
+
+mng_retcode store_jpeg_rgb12_a16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -192,21 +249,35 @@ mng_retcode store_jpeg_rgb12_a16   (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode delta_g1               (mng_datap  pData);
-mng_retcode delta_g2               (mng_datap  pData);
-mng_retcode delta_g4               (mng_datap  pData);
-mng_retcode delta_g8               (mng_datap  pData);
-mng_retcode delta_g16              (mng_datap  pData);
-mng_retcode delta_rgb8             (mng_datap  pData);
-mng_retcode delta_rgb16            (mng_datap  pData);
-mng_retcode delta_idx1             (mng_datap  pData);
-mng_retcode delta_idx2             (mng_datap  pData);
-mng_retcode delta_idx4             (mng_datap  pData);
-mng_retcode delta_idx8             (mng_datap  pData);
-mng_retcode delta_ga8              (mng_datap  pData);
-mng_retcode delta_ga16             (mng_datap  pData);
-mng_retcode delta_rgba8            (mng_datap  pData);
-mng_retcode delta_rgba16           (mng_datap  pData);
+mng_retcode delta_g1(mng_datap pData);
+
+mng_retcode delta_g2(mng_datap pData);
+
+mng_retcode delta_g4(mng_datap pData);
+
+mng_retcode delta_g8(mng_datap pData);
+
+mng_retcode delta_g16(mng_datap pData);
+
+mng_retcode delta_rgb8(mng_datap pData);
+
+mng_retcode delta_rgb16(mng_datap pData);
+
+mng_retcode delta_idx1(mng_datap pData);
+
+mng_retcode delta_idx2(mng_datap pData);
+
+mng_retcode delta_idx4(mng_datap pData);
+
+mng_retcode delta_idx8(mng_datap pData);
+
+mng_retcode delta_ga8(mng_datap pData);
+
+mng_retcode delta_ga16(mng_datap pData);
+
+mng_retcode delta_rgba8(mng_datap pData);
+
+mng_retcode delta_rgba16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -214,25 +285,43 @@ mng_retcode delta_rgba16           (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode delta_g1_g1            (mng_datap  pData);
-mng_retcode delta_g2_g2            (mng_datap  pData);
-mng_retcode delta_g4_g4            (mng_datap  pData);
-mng_retcode delta_g8_g8            (mng_datap  pData);
-mng_retcode delta_g16_g16          (mng_datap  pData);
-mng_retcode delta_rgb8_rgb8        (mng_datap  pData);
-mng_retcode delta_rgb16_rgb16      (mng_datap  pData);
-mng_retcode delta_ga8_ga8          (mng_datap  pData);
-mng_retcode delta_ga8_g8           (mng_datap  pData);
-mng_retcode delta_ga8_a8           (mng_datap  pData);
-mng_retcode delta_ga16_ga16        (mng_datap  pData);
-mng_retcode delta_ga16_g16         (mng_datap  pData);
-mng_retcode delta_ga16_a16         (mng_datap  pData);
-mng_retcode delta_rgba8_rgba8      (mng_datap  pData);
-mng_retcode delta_rgba8_rgb8       (mng_datap  pData);
-mng_retcode delta_rgba8_a8         (mng_datap  pData);
-mng_retcode delta_rgba16_rgba16    (mng_datap  pData);
-mng_retcode delta_rgba16_rgb16     (mng_datap  pData);
-mng_retcode delta_rgba16_a16       (mng_datap  pData);
+mng_retcode delta_g1_g1(mng_datap pData);
+
+mng_retcode delta_g2_g2(mng_datap pData);
+
+mng_retcode delta_g4_g4(mng_datap pData);
+
+mng_retcode delta_g8_g8(mng_datap pData);
+
+mng_retcode delta_g16_g16(mng_datap pData);
+
+mng_retcode delta_rgb8_rgb8(mng_datap pData);
+
+mng_retcode delta_rgb16_rgb16(mng_datap pData);
+
+mng_retcode delta_ga8_ga8(mng_datap pData);
+
+mng_retcode delta_ga8_g8(mng_datap pData);
+
+mng_retcode delta_ga8_a8(mng_datap pData);
+
+mng_retcode delta_ga16_ga16(mng_datap pData);
+
+mng_retcode delta_ga16_g16(mng_datap pData);
+
+mng_retcode delta_ga16_a16(mng_datap pData);
+
+mng_retcode delta_rgba8_rgba8(mng_datap pData);
+
+mng_retcode delta_rgba8_rgb8(mng_datap pData);
+
+mng_retcode delta_rgba8_a8(mng_datap pData);
+
+mng_retcode delta_rgba16_rgba16(mng_datap pData);
+
+mng_retcode delta_rgba16_rgb16(mng_datap pData);
+
+mng_retcode delta_rgba16_a16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -250,21 +339,35 @@ mng_retcode delta_rgba16_a16       (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode process_g1             (mng_datap  pData);
-mng_retcode process_g2             (mng_datap  pData);
-mng_retcode process_g4             (mng_datap  pData);
-mng_retcode process_g8             (mng_datap  pData);
-mng_retcode process_g16            (mng_datap  pData);
-mng_retcode process_rgb8           (mng_datap  pData);
-mng_retcode process_rgb16          (mng_datap  pData);
-mng_retcode process_idx1           (mng_datap  pData);
-mng_retcode process_idx2           (mng_datap  pData);
-mng_retcode process_idx4           (mng_datap  pData);
-mng_retcode process_idx8           (mng_datap  pData);
-mng_retcode process_ga8            (mng_datap  pData);
-mng_retcode process_ga16           (mng_datap  pData);
-mng_retcode process_rgba8          (mng_datap  pData);
-mng_retcode process_rgba16         (mng_datap  pData);
+mng_retcode process_g1(mng_datap pData);
+
+mng_retcode process_g2(mng_datap pData);
+
+mng_retcode process_g4(mng_datap pData);
+
+mng_retcode process_g8(mng_datap pData);
+
+mng_retcode process_g16(mng_datap pData);
+
+mng_retcode process_rgb8(mng_datap pData);
+
+mng_retcode process_rgb16(mng_datap pData);
+
+mng_retcode process_idx1(mng_datap pData);
+
+mng_retcode process_idx2(mng_datap pData);
+
+mng_retcode process_idx4(mng_datap pData);
+
+mng_retcode process_idx8(mng_datap pData);
+
+mng_retcode process_ga8(mng_datap pData);
+
+mng_retcode process_ga16(mng_datap pData);
+
+mng_retcode process_rgba8(mng_datap pData);
+
+mng_retcode process_rgba16(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -273,36 +376,65 @@ mng_retcode process_rgba16         (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode init_g1_ni             (mng_datap  pData);
-mng_retcode init_g1_i              (mng_datap  pData);
-mng_retcode init_g2_ni             (mng_datap  pData);
-mng_retcode init_g2_i              (mng_datap  pData);
-mng_retcode init_g4_ni             (mng_datap  pData);
-mng_retcode init_g4_i              (mng_datap  pData);
-mng_retcode init_g8_ni             (mng_datap  pData);
-mng_retcode init_g8_i              (mng_datap  pData);
-mng_retcode init_g16_ni            (mng_datap  pData);
-mng_retcode init_g16_i             (mng_datap  pData);
-mng_retcode init_rgb8_ni           (mng_datap  pData);
-mng_retcode init_rgb8_i            (mng_datap  pData);
-mng_retcode init_rgb16_ni          (mng_datap  pData);
-mng_retcode init_rgb16_i           (mng_datap  pData);
-mng_retcode init_idx1_ni           (mng_datap  pData);
-mng_retcode init_idx1_i            (mng_datap  pData);
-mng_retcode init_idx2_ni           (mng_datap  pData);
-mng_retcode init_idx2_i            (mng_datap  pData);
-mng_retcode init_idx4_ni           (mng_datap  pData);
-mng_retcode init_idx4_i            (mng_datap  pData);
-mng_retcode init_idx8_ni           (mng_datap  pData);
-mng_retcode init_idx8_i            (mng_datap  pData);
-mng_retcode init_ga8_ni            (mng_datap  pData);
-mng_retcode init_ga8_i             (mng_datap  pData);
-mng_retcode init_ga16_ni           (mng_datap  pData);
-mng_retcode init_ga16_i            (mng_datap  pData);
-mng_retcode init_rgba8_ni          (mng_datap  pData);
-mng_retcode init_rgba8_i           (mng_datap  pData);
-mng_retcode init_rgba16_ni         (mng_datap  pData);
-mng_retcode init_rgba16_i          (mng_datap  pData);
+mng_retcode init_g1_ni(mng_datap pData);
+
+mng_retcode init_g1_i(mng_datap pData);
+
+mng_retcode init_g2_ni(mng_datap pData);
+
+mng_retcode init_g2_i(mng_datap pData);
+
+mng_retcode init_g4_ni(mng_datap pData);
+
+mng_retcode init_g4_i(mng_datap pData);
+
+mng_retcode init_g8_ni(mng_datap pData);
+
+mng_retcode init_g8_i(mng_datap pData);
+
+mng_retcode init_g16_ni(mng_datap pData);
+
+mng_retcode init_g16_i(mng_datap pData);
+
+mng_retcode init_rgb8_ni(mng_datap pData);
+
+mng_retcode init_rgb8_i(mng_datap pData);
+
+mng_retcode init_rgb16_ni(mng_datap pData);
+
+mng_retcode init_rgb16_i(mng_datap pData);
+
+mng_retcode init_idx1_ni(mng_datap pData);
+
+mng_retcode init_idx1_i(mng_datap pData);
+
+mng_retcode init_idx2_ni(mng_datap pData);
+
+mng_retcode init_idx2_i(mng_datap pData);
+
+mng_retcode init_idx4_ni(mng_datap pData);
+
+mng_retcode init_idx4_i(mng_datap pData);
+
+mng_retcode init_idx8_ni(mng_datap pData);
+
+mng_retcode init_idx8_i(mng_datap pData);
+
+mng_retcode init_ga8_ni(mng_datap pData);
+
+mng_retcode init_ga8_i(mng_datap pData);
+
+mng_retcode init_ga16_ni(mng_datap pData);
+
+mng_retcode init_ga16_i(mng_datap pData);
+
+mng_retcode init_rgba8_ni(mng_datap pData);
+
+mng_retcode init_rgba8_i(mng_datap pData);
+
+mng_retcode init_rgba16_ni(mng_datap pData);
+
+mng_retcode init_rgba16_i(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -311,11 +443,15 @@ mng_retcode init_rgba16_i          (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode init_jpeg_a1_ni        (mng_datap  pData);
-mng_retcode init_jpeg_a2_ni        (mng_datap  pData);
-mng_retcode init_jpeg_a4_ni        (mng_datap  pData);
-mng_retcode init_jpeg_a8_ni        (mng_datap  pData);
-mng_retcode init_jpeg_a16_ni       (mng_datap  pData);
+mng_retcode init_jpeg_a1_ni(mng_datap pData);
+
+mng_retcode init_jpeg_a2_ni(mng_datap pData);
+
+mng_retcode init_jpeg_a4_ni(mng_datap pData);
+
+mng_retcode init_jpeg_a8_ni(mng_datap pData);
+
+mng_retcode init_jpeg_a16_ni(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -323,11 +459,15 @@ mng_retcode init_jpeg_a16_ni       (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode init_rowproc           (mng_datap  pData);
-mng_retcode next_row               (mng_datap  pData);
-mng_retcode next_jpeg_alpharow     (mng_datap  pData);
-mng_retcode next_jpeg_row          (mng_datap  pData);
-mng_retcode cleanup_rowproc        (mng_datap  pData);
+mng_retcode init_rowproc(mng_datap pData);
+
+mng_retcode next_row(mng_datap pData);
+
+mng_retcode next_jpeg_alpharow(mng_datap pData);
+
+mng_retcode next_jpeg_row(mng_datap pData);
+
+mng_retcode cleanup_rowproc(mng_datap pData);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -335,231 +475,261 @@ mng_retcode cleanup_rowproc        (mng_datap  pData);
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_retcode magnify_g8_x1          (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_g8_x2          (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_g8_x3          (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_x1        (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_x2        (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_x3        (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_x1         (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_x2         (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_x3         (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_x4         (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_x5         (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_x1       (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_x2       (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_x3       (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_x4       (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_x5       (mng_datap  pData,
-                                    mng_uint16 iMX,
-                                    mng_uint16 iML,
-                                    mng_uint16 iMR,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline,
-                                    mng_uint8p pDstline);
+mng_retcode magnify_g8_x1(mng_datap pData,
+                          mng_uint16 iMX,
+                          mng_uint16 iML,
+                          mng_uint16 iMR,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline,
+                          mng_uint8p pDstline);
 
-mng_retcode magnify_g8_y1          (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_g8_y2          (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_g8_y3          (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_y1        (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_y2        (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgb8_y3        (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_y1         (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_y2         (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_y3         (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_y4         (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_ga8_y5         (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_y1       (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_y2       (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_y3       (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_y4       (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
-mng_retcode magnify_rgba8_y5       (mng_datap  pData,
-                                    mng_int32  iS,
-                                    mng_int32  iM,
-                                    mng_uint32 iWidth,
-                                    mng_uint8p pSrcline1,
-                                    mng_uint8p pSrcline2,
-                                    mng_uint8p pDstline);
+mng_retcode magnify_g8_x2(mng_datap pData,
+                          mng_uint16 iMX,
+                          mng_uint16 iML,
+                          mng_uint16 iMR,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline,
+                          mng_uint8p pDstline);
+
+mng_retcode magnify_g8_x3(mng_datap pData,
+                          mng_uint16 iMX,
+                          mng_uint16 iML,
+                          mng_uint16 iMR,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline,
+                          mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_x1(mng_datap pData,
+                            mng_uint16 iMX,
+                            mng_uint16 iML,
+                            mng_uint16 iMR,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_x2(mng_datap pData,
+                            mng_uint16 iMX,
+                            mng_uint16 iML,
+                            mng_uint16 iMR,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_x3(mng_datap pData,
+                            mng_uint16 iMX,
+                            mng_uint16 iML,
+                            mng_uint16 iMR,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_x1(mng_datap pData,
+                           mng_uint16 iMX,
+                           mng_uint16 iML,
+                           mng_uint16 iMR,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_x2(mng_datap pData,
+                           mng_uint16 iMX,
+                           mng_uint16 iML,
+                           mng_uint16 iMR,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_x3(mng_datap pData,
+                           mng_uint16 iMX,
+                           mng_uint16 iML,
+                           mng_uint16 iMR,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_x4(mng_datap pData,
+                           mng_uint16 iMX,
+                           mng_uint16 iML,
+                           mng_uint16 iMR,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_x5(mng_datap pData,
+                           mng_uint16 iMX,
+                           mng_uint16 iML,
+                           mng_uint16 iMR,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_x1(mng_datap pData,
+                             mng_uint16 iMX,
+                             mng_uint16 iML,
+                             mng_uint16 iMR,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_x2(mng_datap pData,
+                             mng_uint16 iMX,
+                             mng_uint16 iML,
+                             mng_uint16 iMR,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_x3(mng_datap pData,
+                             mng_uint16 iMX,
+                             mng_uint16 iML,
+                             mng_uint16 iMR,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_x4(mng_datap pData,
+                             mng_uint16 iMX,
+                             mng_uint16 iML,
+                             mng_uint16 iMR,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_x5(mng_datap pData,
+                             mng_uint16 iMX,
+                             mng_uint16 iML,
+                             mng_uint16 iMR,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_g8_y1(mng_datap pData,
+                          mng_int32 iS,
+                          mng_int32 iM,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline1,
+                          mng_uint8p pSrcline2,
+                          mng_uint8p pDstline);
+
+mng_retcode magnify_g8_y2(mng_datap pData,
+                          mng_int32 iS,
+                          mng_int32 iM,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline1,
+                          mng_uint8p pSrcline2,
+                          mng_uint8p pDstline);
+
+mng_retcode magnify_g8_y3(mng_datap pData,
+                          mng_int32 iS,
+                          mng_int32 iM,
+                          mng_uint32 iWidth,
+                          mng_uint8p pSrcline1,
+                          mng_uint8p pSrcline2,
+                          mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_y1(mng_datap pData,
+                            mng_int32 iS,
+                            mng_int32 iM,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline1,
+                            mng_uint8p pSrcline2,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_y2(mng_datap pData,
+                            mng_int32 iS,
+                            mng_int32 iM,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline1,
+                            mng_uint8p pSrcline2,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_rgb8_y3(mng_datap pData,
+                            mng_int32 iS,
+                            mng_int32 iM,
+                            mng_uint32 iWidth,
+                            mng_uint8p pSrcline1,
+                            mng_uint8p pSrcline2,
+                            mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_y1(mng_datap pData,
+                           mng_int32 iS,
+                           mng_int32 iM,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline1,
+                           mng_uint8p pSrcline2,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_y2(mng_datap pData,
+                           mng_int32 iS,
+                           mng_int32 iM,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline1,
+                           mng_uint8p pSrcline2,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_y3(mng_datap pData,
+                           mng_int32 iS,
+                           mng_int32 iM,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline1,
+                           mng_uint8p pSrcline2,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_y4(mng_datap pData,
+                           mng_int32 iS,
+                           mng_int32 iM,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline1,
+                           mng_uint8p pSrcline2,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_ga8_y5(mng_datap pData,
+                           mng_int32 iS,
+                           mng_int32 iM,
+                           mng_uint32 iWidth,
+                           mng_uint8p pSrcline1,
+                           mng_uint8p pSrcline2,
+                           mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_y1(mng_datap pData,
+                             mng_int32 iS,
+                             mng_int32 iM,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline1,
+                             mng_uint8p pSrcline2,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_y2(mng_datap pData,
+                             mng_int32 iS,
+                             mng_int32 iM,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline1,
+                             mng_uint8p pSrcline2,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_y3(mng_datap pData,
+                             mng_int32 iS,
+                             mng_int32 iM,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline1,
+                             mng_uint8p pSrcline2,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_y4(mng_datap pData,
+                             mng_int32 iS,
+                             mng_int32 iM,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline1,
+                             mng_uint8p pSrcline2,
+                             mng_uint8p pDstline);
+
+mng_retcode magnify_rgba8_y5(mng_datap pData,
+                             mng_int32 iS,
+                             mng_int32 iM,
+                             mng_uint32 iWidth,
+                             mng_uint8p pSrcline1,
+                             mng_uint8p pSrcline2,
+                             mng_uint8p pDstline);
 
 /* ************************************************************************** */
 

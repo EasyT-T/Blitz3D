@@ -58,9 +58,11 @@
 #include "libmng_data.h"
 #include "libmng_error.h"
 #include "libmng_trace.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
+
 #include "libmng_memory.h"
 #include "libmng_chunks.h"
 #include "libmng_chunk_prc.h"
@@ -329,7 +331,7 @@ mng_retcode MNG_DECL mng_getchunk_chrm (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_cHRM)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *bEmpty       = pChunk->bEmpty;      /* fill the fields */     
+  *bEmpty       = pChunk->bEmpty;      /* fill the fields */
   *iWhitepointx = pChunk->iWhitepointx;
   *iWhitepointy = pChunk->iWhitepointy;
   *iRedx        = pChunk->iRedx;
@@ -367,7 +369,7 @@ mng_retcode MNG_DECL mng_getchunk_srgb (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_sRGB)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *bEmpty           = pChunk->bEmpty;  /* fill the fields */        
+  *bEmpty           = pChunk->bEmpty;  /* fill the fields */
   *iRenderingintent = pChunk->iRenderingintent;
 
 #ifdef MNG_SUPPORT_TRACE
@@ -402,7 +404,7 @@ mng_retcode MNG_DECL mng_getchunk_iccp (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_iCCP)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *bEmpty       = pChunk->bEmpty;      /* fill the fields */     
+  *bEmpty       = pChunk->bEmpty;      /* fill the fields */
   *iNamesize    = pChunk->iNamesize;
   *zName        = pChunk->zName;
   *iCompression = pChunk->iCompression;
@@ -672,7 +674,7 @@ mng_retcode MNG_DECL mng_getchunk_splt (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_sPLT)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *bEmpty       = pChunk->bEmpty;      /* fill the fields */      
+  *bEmpty       = pChunk->bEmpty;      /* fill the fields */
   *iNamesize    = pChunk->iNamesize;
   *zName        = pChunk->zName;
   *iSampledepth = pChunk->iSampledepth;
@@ -743,7 +745,7 @@ mng_retcode MNG_DECL mng_getchunk_time (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_tIME)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iYear   = pChunk->iYear;            /* fill the fields */ 
+  *iYear   = pChunk->iYear;            /* fill the fields */
   *iMonth  = pChunk->iMonth;
   *iDay    = pChunk->iDay;
   *iHour   = pChunk->iHour;
@@ -783,7 +785,7 @@ mng_retcode MNG_DECL mng_getchunk_mhdr (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_MHDR)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iWidth      = pChunk->iWidth;       /* fill the fields */   
+  *iWidth      = pChunk->iWidth;       /* fill the fields */
   *iHeight     = pChunk->iHeight;
   *iTicks      = pChunk->iTicks;
   *iLayercount = pChunk->iLayercount;
@@ -996,7 +998,7 @@ mng_retcode MNG_DECL mng_getchunk_clon (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_CLON)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iSourceid     = pChunk->iSourceid;  /* fill the fields */  
+  *iSourceid     = pChunk->iSourceid;  /* fill the fields */
   *iCloneid      = pChunk->iCloneid;
   *iClonetype    = pChunk->iClonetype;
   *iDonotshow    = pChunk->iDonotshow;
@@ -1212,7 +1214,7 @@ mng_retcode MNG_DECL mng_getchunk_fram (mng_handle  hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_FRAM)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *bEmpty          = pChunk->bEmpty;   /* fill the fields */      
+  *bEmpty          = pChunk->bEmpty;   /* fill the fields */
   *iMode           = pChunk->iMode;
   *iNamesize       = pChunk->iNamesize;
   *zName           = pChunk->zName;
@@ -1660,7 +1662,7 @@ mng_retcode MNG_DECL mng_getchunk_jhdr (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_JHDR)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iWidth            = pChunk->iWidth; /* fill the fields */          
+  *iWidth            = pChunk->iWidth; /* fill the fields */
   *iHeight           = pChunk->iHeight;
   *iColortype        = pChunk->iColortype;
   *iImagesampledepth = pChunk->iImagesampledepth;
@@ -1916,7 +1918,7 @@ mng_retcode MNG_DECL mng_getchunk_dbyk (mng_handle  hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_DBYK)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iChunkname    = pChunk->iChunkname; /* fill the fields */  
+  *iChunkname    = pChunk->iChunkname; /* fill the fields */
   *iPolarity     = pChunk->iPolarity;
   *iKeywordssize = pChunk->iKeywordssize;
   *zKeywords     = pChunk->zKeywords;
@@ -1948,7 +1950,7 @@ mng_retcode MNG_DECL mng_getchunk_ordr (mng_handle hHandle,
   if (pChunk->sHeader.iChunkname != MNG_UINT_ORDR)
     MNG_ERROR (pData, MNG_WRONGCHUNK)  /* ouch */
 
-  *iCount = pChunk->iCount;            /* fill the field */ 
+  *iCount = pChunk->iCount;            /* fill the field */
 
 #ifdef MNG_SUPPORT_TRACE
   MNG_TRACE (((mng_datap)hHandle), MNG_FN_GETCHUNK_ORDR, MNG_LC_END)
@@ -3964,7 +3966,7 @@ mng_retcode MNG_DECL mng_putchunk_save_entry (mng_handle     hHandle,
   {
     MNG_ALLOC (pData, pEntry->zName, iNamesize + 1)
     MNG_COPY (pEntry->zName, zName, iNamesize)
-  }  
+  }
 
 #ifdef MNG_SUPPORT_TRACE
   MNG_TRACE (((mng_datap)hHandle), MNG_FN_PUTCHUNK_SAVE_ENTRY, MNG_LC_END)
@@ -4058,7 +4060,7 @@ mng_retcode MNG_DECL mng_putchunk_expi (mng_handle hHandle,
   {
     MNG_ALLOC (pData, ((mng_expip)pChunk)->zName, iNamesize + 1)
     MNG_COPY (((mng_expip)pChunk)->zName, zName, iNamesize)
-  }  
+  }
 
   add_chunk (pData, pChunk);           /* add it to the list */
 
@@ -4656,7 +4658,7 @@ mng_retcode MNG_DECL mng_putchunk_drop (mng_handle   hHandle,
 
     MNG_ALLOC (pData, ((mng_dropp)pChunk)->pChunknames, iSize)
     MNG_COPY (((mng_dropp)pChunk)->pChunknames, pChunknames, iSize)
-  }  
+  }
 
   add_chunk (pData, pChunk);           /* add it to the list */
 
@@ -4707,7 +4709,7 @@ mng_retcode MNG_DECL mng_putchunk_dbyk (mng_handle  hHandle,
   {
     MNG_ALLOC (pData, ((mng_dbykp)pChunk)->zKeywords, iKeywordssize + 1)
     MNG_COPY (((mng_dbykp)pChunk)->zKeywords, zKeywords, iKeywordssize)
-  }  
+  }
 
   add_chunk (pData, pChunk);           /* add it to the list */
 

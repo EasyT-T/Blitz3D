@@ -32,9 +32,9 @@
 
 /* ************************************************************************** */
 
-mng_retcode process_eof  (mng_datap pData);
+mng_retcode process_eof(mng_datap pData);
 
-mng_retcode read_graphic (mng_datap pData);
+mng_retcode read_graphic(mng_datap pData);
 
 /* ************************************************************************** */
 

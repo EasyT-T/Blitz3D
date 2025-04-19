@@ -8,22 +8,24 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-struct Block{
+struct Block {
 
-	Block( Block *parent );
-	~Block();
+    Block(Block *parent);
 
-	void genCode( TNode *t ){ code.push_back( t ); }
-	void genData( TNode *t ){ data.push_back( t ); }
+    ~Block();
 
-	void generate( Codegen *gen );
+    void genCode(TNode *t) { code.push_back(t); }
+
+    void genData(TNode *t) { data.push_back(t); }
+
+    void generate(Codegen *gen);
 
 private:
-	Block *parent;
-	vector<Block*> children;
+    Block *parent;
+    vector<Block *> children;
 
-	vector<TNode*> code;
-	vector<TNode*> data;
+    vector<TNode *> code;
+    vector<TNode *> data;
 };
 
 #endif

@@ -56,15 +56,15 @@
 /* *                                                                        * */
 /* ************************************************************************** */
 
-mng_bool mng_store_error   (mng_datap   pData,
-                            mng_retcode iError,
-                            mng_retcode iExtra1,
-                            mng_retcode iExtra2);
+mng_bool mng_store_error(mng_datap pData,
+                         mng_retcode iError,
+                         mng_retcode iExtra1,
+                         mng_retcode iExtra2);
 
-mng_bool mng_process_error (mng_datap   pData,
-                            mng_retcode iError,
-                            mng_retcode iExtra1,
-                            mng_retcode iExtra2);
+mng_bool mng_process_error(mng_datap pData,
+                           mng_retcode iError,
+                           mng_retcode iExtra1,
+                           mng_retcode iExtra2);
 
 /* ************************************************************************** */
 /* *                                                                        * */
@@ -72,20 +72,20 @@ mng_bool mng_process_error (mng_datap   pData,
 /* *                                                                        * */
 /* ************************************************************************** */
 
-#define MNG_ERROR(D,C)      { mng_process_error (D, C, 0, 0); return C; }
-#define MNG_ERRORZ(D,Z)     { mng_process_error (D, MNG_ZLIBERROR, Z, 0); return MNG_ZLIBERROR; }
-#define MNG_ERRORJ(D,J)     { mng_process_error (D, MNG_JPEGERROR, J, 0); return MNG_JPEGERROR; }
-#define MNG_ERRORL(D,L)     { mng_process_error (D, MNG_LCMSERROR, L, 0); return MNG_LCMSERROR; }
+#define MNG_ERROR(D, C)      { mng_process_error (D, C, 0, 0); return C; }
+#define MNG_ERRORZ(D, Z)     { mng_process_error (D, MNG_ZLIBERROR, Z, 0); return MNG_ZLIBERROR; }
+#define MNG_ERRORJ(D, J)     { mng_process_error (D, MNG_JPEGERROR, J, 0); return MNG_JPEGERROR; }
+#define MNG_ERRORL(D, L)     { mng_process_error (D, MNG_LCMSERROR, L, 0); return MNG_LCMSERROR; }
 
-#define MNG_RETURN(D,C)     { mng_store_error (D, C, 0, 0); return C; }
+#define MNG_RETURN(D, C)     { mng_store_error (D, C, 0, 0); return C; }
 
-#define MNG_WARNING(D,C)    { if (!mng_process_error (D, C, 0, 0)) return C; }
+#define MNG_WARNING(D, C)    { if (!mng_process_error (D, C, 0, 0)) return C; }
 
 #define MNG_VALIDHANDLE(H)  { if ((H == 0) || (((mng_datap)H)->iMagic != MNG_MAGIC)) \
                                 return MNG_INVALIDHANDLE; }
 #define MNG_VALIDHANDLEX(H) { if ((H == 0) || (((mng_datap)H)->iMagic != MNG_MAGIC)) \
                                 return 0; }
-#define MNG_VALIDCB(D,C)    { if (!((mng_datap)D)->C) \
+#define MNG_VALIDCB(D, C)    { if (!((mng_datap)D)->C) \
                                 MNG_ERROR (((mng_datap)D), MNG_NOCALLBACK) }
 
 /* ************************************************************************** */
@@ -95,10 +95,10 @@ mng_bool mng_process_error (mng_datap   pData,
 /* ************************************************************************** */
 
 typedef struct {
-           mng_retcode iError;
-           mng_pchar   zErrortext;
-        } mng_error_entry;
-typedef mng_error_entry * mng_error_entryp;
+    mng_retcode iError;
+    mng_pchar zErrortext;
+} mng_error_entry;
+typedef mng_error_entry *mng_error_entryp;
 
 /* ************************************************************************** */
 

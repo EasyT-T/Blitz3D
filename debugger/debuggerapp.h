@@ -4,16 +4,17 @@
 
 #include "mainframe.h"
 
-class DebuggerApp : public CWinApp{
-	MainFrame *main_frame;
+class DebuggerApp : public CWinApp {
+    MainFrame *main_frame;
 
 public:
-	~DebuggerApp();
+    ~DebuggerApp();
 
-	virtual BOOL InitInstance();
-	virtual int ExitInstance();
+    virtual BOOL InitInstance();
 
-	MainFrame *mainFrame();
+    virtual int ExitInstance();
+
+    MainFrame *mainFrame();
 };
 
 extern DebuggerApp debuggerApp;

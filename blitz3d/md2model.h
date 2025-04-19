@@ -5,47 +5,52 @@
 #include "model.h"
 #include "md2rep.h"
 
-class MD2Model : public Model{
+class MD2Model : public Model {
 public:
-	MD2Model( const string &filename );
-	MD2Model( const MD2Model &t );
-	~MD2Model();
+    MD2Model(const string &filename);
 
-	//Entity interface
-	Entity *clone(){ return d_new MD2Model( *this ); }
-	MD2Model *getMD2Model(){ return this; }
+    MD2Model(const MD2Model &t);
 
-	//Object interface
-	void animate( float elapsed );
+    ~MD2Model();
 
-	//Model interface
-	bool render( const RenderContext &rc );
+    //Entity interface
+    Entity *clone() { return d_new MD2Model(*this); }
 
-	//MD2 interface
-	void startMD2Anim( int first,int last,int mode,float speed,float trans );
+    MD2Model *getMD2Model() { return this; }
 
-	int getMD2AnimLength()const;
-	bool getMD2Animating()const{ return !!anim_mode; }
-	float getMD2AnimTime()const{ return anim_time; }
+    //Object interface
+    void animate(float elapsed);
 
-	bool getValid()const;
+    //Model interface
+    bool render(const RenderContext &rc);
+
+    //MD2 interface
+    void startMD2Anim(int first, int last, int mode, float speed, float trans);
+
+    int getMD2AnimLength() const;
+
+    bool getMD2Animating() const { return !!anim_mode; }
+
+    float getMD2AnimTime() const { return anim_time; }
+
+    bool getValid() const;
 
 private:
-	struct Rep;
-	Rep *rep;
+    struct Rep;
+    Rep *rep;
 
-	int anim_mode;
-	float anim_time,anim_speed;
-	int anim_first,anim_last,anim_len;
+    int anim_mode;
+    float anim_time, anim_speed;
+    int anim_first, anim_last, anim_len;
 
-	float render_t;
-	int render_a,render_b;
+    float render_t;
+    int render_a, render_b;
 
-	float trans_time,trans_speed;
-	MD2Rep::Vert *trans_verts;
+    float trans_time, trans_speed;
+    MD2Rep::Vert *trans_verts;
 
-	//Unimplemented
-	MD2Model &operator=( const MD2Model & );
+    //Unimplemented
+    MD2Model &operator=(const MD2Model &);
 };
 
 #endif

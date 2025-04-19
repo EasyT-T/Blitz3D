@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(linker_dll)
 
 add_library(linker_dll MODULE
-		linker_dll.cpp
+        linker_dll.cpp
 )
 
 target_compile_options(linker_dll PRIVATE /Gz)

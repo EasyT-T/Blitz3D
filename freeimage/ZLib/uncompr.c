@@ -1,6 +1,6 @@
 /* uncompr.c -- decompress a memory buffer
  * Copyright (C) 1995-1998 Jean-loup Gailly.
- * For conditions of distribution and use, see copyright notice in zlib.h 
+ * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
 /* @(#) $Id: uncompr.c,v 1.0 2001-04-13 00:42:49+02 floris_van_den_berg Exp floris_van_den_berg $ */
@@ -22,26 +22,26 @@
    enough memory, Z_BUF_ERROR if there was not enough room in the output
    buffer, or Z_DATA_ERROR if the input data was corrupted.
 */
-int ZEXPORT uncompress (dest, destLen, source, sourceLen)
-    Bytef *dest;
-    uLongf *destLen;
-    const Bytef *source;
-    uLong sourceLen;
+int ZEXPORT uncompress(dest, destLen, source, sourceLen)
+        Bytef *dest;
+        uLongf *destLen;
+        const Bytef *source;
+        uLong sourceLen;
 {
     z_stream stream;
     int err;
 
-    stream.next_in = (Bytef*)source;
-    stream.avail_in = (uInt)sourceLen;
+    stream.next_in = (Bytef *) source;
+    stream.avail_in = (uInt) sourceLen;
     /* Check for source > 64K on 16-bit machine: */
-    if ((uLong)stream.avail_in != sourceLen) return Z_BUF_ERROR;
+    if ((uLong) stream.avail_in != sourceLen) return Z_BUF_ERROR;
 
     stream.next_out = dest;
-    stream.avail_out = (uInt)*destLen;
-    if ((uLong)stream.avail_out != *destLen) return Z_BUF_ERROR;
+    stream.avail_out = (uInt) *destLen;
+    if ((uLong) stream.avail_out != *destLen) return Z_BUF_ERROR;
 
-    stream.zalloc = (alloc_func)0;
-    stream.zfree = (free_func)0;
+    stream.zalloc = (alloc_func) 0;
+    stream.zfree = (free_func) 0;
 
     err = inflateInit(&stream);
     if (err != Z_OK) return err;

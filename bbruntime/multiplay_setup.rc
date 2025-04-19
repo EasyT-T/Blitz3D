@@ -22,27 +22,27 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
+        /////////////////////////////////////////////////////////////////////////////
+        //
+        // TEXTINCLUDE
+        //
 
-1 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "resource.h\0"
-END
+        1 TEXTINCLUDE DISCARDABLE
+        BEGIN
+            "resource.h\0"
+        END
 
-2 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
+        2 TEXTINCLUDE DISCARDABLE
+        BEGIN
+            "#include ""afxres.h""\r\n"
+            "\0"
+        END
 
-3 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "\r\n"
-    "\0"
-END
+        3 TEXTINCLUDE DISCARDABLE
+        BEGIN
+            "\r\n"
+            "\0"
+        END
 
 #endif    // APSTUDIO_INVOKED
 
@@ -52,23 +52,34 @@ END
 // Dialog
 //
 
-IDD_MULTIPLAYER DIALOG DISCARDABLE  0, 0, 190, 199
-STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_VISIBLE | 
-    WS_CAPTION | WS_SYSMENU
-CAPTION "Start Multiplayer Game"
+IDD_MULTIPLAYER
+DIALOG DISCARDABLE
+0, 0, 190, 199
+STYLE DS_MODALFRAME
+| DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_VISIBLE |
+WS_CAPTION |
+WS_SYSMENU
+        CAPTION
+"Start Multiplayer Game"
 FONT 8, "MS Sans Serif"
 BEGIN
-    PUSHBUTTON      "Cancel",IDC_CANCEL,135,178,45,14
-    PUSHBUTTON      "Create new game",IDC_HOSTGAME,10,178,67,14
-    EDITTEXT        IDC_GAMENAME,10,155,170,12,ES_AUTOHSCROLL | 
-                    ES_WANTRETURN
-    LISTBOX         IDC_GAMELIST,10,53,170,82,LBS_NOINTEGRALHEIGHT | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CONNECTIONS,10,22,170,60,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Connection",IDC_STATIC,10,11,170,8
-    LTEXT           "Games in progress",IDC_STATIC,10,42,170,8
-    LTEXT           "Name for new game",IDC_STATIC,10,144,170,8
+        PUSHBUTTON
+"Cancel",IDC_CANCEL,135,178,45,14
+PUSHBUTTON      "Create new game",IDC_HOSTGAME,10,178,67,14
+EDITTEXT        IDC_GAMENAME,10,155,170,12,ES_AUTOHSCROLL |
+ES_WANTRETURN
+        LISTBOX
+IDC_GAMELIST,10,53,170,82,LBS_NOINTEGRALHEIGHT |
+WS_VSCROLL |
+WS_TABSTOP
+        COMBOBOX
+IDC_CONNECTIONS,10,22,170,60,CBS_DROPDOWNLIST |
+WS_VSCROLL |
+WS_TABSTOP
+        LTEXT
+"Connection",IDC_STATIC,10,11,170,8
+LTEXT           "Games in progress",IDC_STATIC,10,42,170,8
+LTEXT           "Name for new game",IDC_STATIC,10,144,170,8
 END
 
 
@@ -78,7 +89,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_MULTIPLAYER, DIALOG
     BEGIN

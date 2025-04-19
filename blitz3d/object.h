@@ -8,106 +8,123 @@
 #include "animator.h"
 #include "collision.h"
 
-#if BB_FMOD_ENABLED
-class gxSound;
-#else
 struct Sound;
-#endif
 
-struct ObjCollision{
-	Object *with;
-	Vector coords;
-	Collision collision;
+struct ObjCollision {
+    Object *with;
+    Vector coords;
+    Collision collision;
 };
 
-class Object : public Entity{
+class Object : public Entity {
 public:
-	typedef std::vector<const ObjCollision*> Collisions;
+    typedef std::vector<const ObjCollision *> Collisions;
 
-	Object();
-	Object( const Object &object );
-	~Object();
+    Object();
 
-	//Entity interface
-	Object *getObject(){ return this; }
-	Entity *clone(){ return d_new Object( *this ); }
+    Object(const Object &object);
 
-	//deep object copy!
-	Object *copy();
+    ~Object();
 
-	//called by user
-	void reset();
-	void setCollisionType( int type );
-	void setCollisionRadii( const Vector &radii );
-	void setCollisionBox( const Box &box );
-	void setOrder( int n ){ order=n; }
-	void setPickGeometry( int n ){ pick_geom=n; }
-	void setObscurer( bool t ){ obscurer=t; }
-	void setAnimation( const Animation &t ){ anim=t; }
-	void setAnimator( Animator *t );
+    //Entity interface
+    Object *getObject() { return this; }
 
-#if BB_FMOD_ENABLED
-	gxChannel *emitSound( gxSound *sound );
-#else
-	uint32_t emitSound(Sound* sound);
-#endif
+    Entity *clone() { return d_new Object(*this); }
 
-	//overridables!
-	virtual bool collide( const Line &line,float radius,::Collision *curr_coll,const Transform &t ){ return false; }
-	virtual void capture();
-	virtual void animate( float e );
-	virtual bool beginRender( float tween );
-	virtual void endRender();
+    //deep object copy!
+    Object *copy();
 
-	//for use by world
-	void beginUpdate( float elapsed );
-	void addCollision( const ObjCollision *c );
-	void endUpdate();
+    //called by user
+    void reset();
 
-	//accessors
-	int getCollisionType()const;
-	const Vector &getCollisionRadii()const;
-	const Box &getCollisionBox()const;
-	int getOrder()const{ return order; }
-	const Vector &getVelocity()const;
-	const Collisions &getCollisions()const;
-	const Transform &getRenderTform()const;
-	const Transform &getPrevWorldTform()const;
-	int getPickGeometry()const{ return pick_geom; }
-	int getObscurer()const{ return obscurer; }
-	Animation getAnimation()const{ return anim; }
-	Animator *getAnimator()const{ return animator; }
-	Object *getLastCopy()const{ return last_copy; }
+    void setCollisionType(int type);
+
+    void setCollisionRadii(const Vector &radii);
+
+    void setCollisionBox(const Box &box);
+
+    void setOrder(int n) { order = n; }
+
+    void setPickGeometry(int n) { pick_geom = n; }
+
+    void setObscurer(bool t) { obscurer = t; }
+
+    void setAnimation(const Animation &t) { anim = t; }
+
+    void setAnimator(Animator *t);
+
+    uint32_t emitSound(Sound *sound);
+
+    //overridables!
+    virtual bool collide(const Line &line, float radius, ::Collision *curr_coll, const Transform &t) { return false; }
+
+    virtual void capture();
+
+    virtual void animate(float e);
+
+    virtual bool beginRender(float tween);
+
+    virtual void endRender();
+
+    //for use by world
+    void beginUpdate(float elapsed);
+
+    void addCollision(const ObjCollision *c);
+
+    void endUpdate();
+
+    //accessors
+    int getCollisionType() const;
+
+    const Vector &getCollisionRadii() const;
+
+    const Box &getCollisionBox() const;
+
+    int getOrder() const { return order; }
+
+    const Vector &getVelocity() const;
+
+    const Collisions &getCollisions() const;
+
+    const Transform &getRenderTform() const;
+
+    const Transform &getPrevWorldTform() const;
+
+    int getPickGeometry() const { return pick_geom; }
+
+    int getObscurer() const { return obscurer; }
+
+    Animation getAnimation() const { return anim; }
+
+    Animator *getAnimator() const { return animator; }
+
+    Object *getLastCopy() const { return last_copy; }
 
 private:
-	int coll_type;
-	int order;
-	Vector coll_radii;
-	Collisions colls;
-	bool captured;
-	Box coll_box;
-	int pick_geom;
-	bool obscurer;
-	float elapsed;
-	Vector velocity;
-#if BB_FMOD_ENABLED
-	vector<gxChannel*> channels;
-#else
-	vector<uint32_t> channels;
-#endif
-	Vector capt_pos,capt_scl;
-	Quat capt_rot;
-	mutable Object *last_copy;
+    int coll_type;
+    int order;
+    Vector coll_radii;
+    Collisions colls;
+    bool captured;
+    Box coll_box;
+    int pick_geom;
+    bool obscurer;
+    float elapsed;
+    Vector velocity;
+    vector<uint32_t> channels;
+    Vector capt_pos, capt_scl;
+    Quat capt_rot;
+    mutable Object *last_copy;
 
-	Transform prev_tform;
-	Transform captured_tform,tween_tform;
-	mutable Transform render_tform;
-	mutable bool render_tform_valid;
+    Transform prev_tform;
+    Transform captured_tform, tween_tform;
+    mutable Transform render_tform;
+    mutable bool render_tform_valid;
 
-	Animation anim;
-	Animator *animator;
+    Animation anim;
+    Animator *animator;
 
-	void updateSounds();
+    void updateSounds();
 };
 
 #endif

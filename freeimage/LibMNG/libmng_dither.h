@@ -32,8 +32,8 @@
 
 /* ************************************************************************** */
 
-mng_retcode dither_a_row (mng_datap  pData,
-                          mng_uint8p pRow);
+mng_retcode dither_a_row(mng_datap pData,
+                         mng_uint8p pRow);
 
 /* ************************************************************************** */
 

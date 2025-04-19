@@ -4,31 +4,34 @@
 
 #include "model.h"
 
-class Q3BSPModel : public Model{
+class Q3BSPModel : public Model {
 public:
-	Q3BSPModel( const string &f,float gamma_adj );
-	Q3BSPModel( const Q3BSPModel &m );
-	~Q3BSPModel();
+    Q3BSPModel(const string &f, float gamma_adj);
 
-	//Entity interface
-	Entity *clone(){ return d_new Q3BSPModel( *this ); }
+    Q3BSPModel(const Q3BSPModel &m);
 
-	//Object interface
-	virtual bool collide( const Line &line,float radius,Collision *curr_coll,const Transform &t );
+    ~Q3BSPModel();
 
-	//Model interface
-	Q3BSPModel *getBSPModel(){ return this; }
+    //Entity interface
+    Entity *clone() { return d_new Q3BSPModel(*this); }
 
-	bool render( const RenderContext &rc );
+    //Object interface
+    virtual bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t);
 
-	void setAmbient( const Vector &t );
-	void setLighting( bool use_lmap );
+    //Model interface
+    Q3BSPModel *getBSPModel() { return this; }
 
-	bool isValid()const;
+    bool render(const RenderContext &rc);
+
+    void setAmbient(const Vector &t);
+
+    void setLighting(bool use_lmap);
+
+    bool isValid() const;
 
 private:
-	struct Rep;
-	Rep *rep;
+    struct Rep;
+    Rep *rep;
 };
 
 #endif

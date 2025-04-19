@@ -16,7 +16,7 @@
 #define IDC_PROGRESS1                   1022
 #define IDC_CREDITS                     1023
 #define IDC_MONTHCALENDAR1              1024
-#define IDC_PRODUCT2					1025
+#define IDC_PRODUCT2                    1025
 #define ID_OPEN                         40001
 #define ID_SAVE                         40003
 #define ID_EXIT                         40004
@@ -71,7 +71,7 @@
 #define ID_SUPPORT                      40131
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133

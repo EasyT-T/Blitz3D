@@ -1,4 +1,3 @@
-
 #ifndef BBSYS_H
 #define BBSYS_H
 
@@ -8,13 +7,14 @@
 extern bool debug;
 extern gxRuntime *gx_runtime;
 
-struct bbEx{
-	const char *err;
-	bbEx( const char *e ):err(e){
-		if( e ) gx_runtime->debugError( e );
-	}
+struct bbEx {
+    const char *err;
+
+    bbEx(const char *e) : err(e) {
+        if (e) gx_runtime->debugError(e);
+    }
 };
 
-#define RTEX( _X_ ) throw bbEx( _X_ );
+#define RTEX(_X_) throw bbEx( _X_ );
 
 #endif

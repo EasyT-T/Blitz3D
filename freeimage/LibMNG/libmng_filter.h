@@ -35,32 +35,49 @@
 
 /* ************************************************************************** */
 
-mng_retcode filter_a_row      (mng_datap pData);
+mng_retcode filter_a_row(mng_datap pData);
 
-mng_retcode filter_sub        (mng_datap pData);
-mng_retcode filter_up         (mng_datap pData);
-mng_retcode filter_average    (mng_datap pData);
-mng_retcode filter_paeth      (mng_datap pData);
+mng_retcode filter_sub(mng_datap pData);
+
+mng_retcode filter_up(mng_datap pData);
+
+mng_retcode filter_average(mng_datap pData);
+
+mng_retcode filter_paeth(mng_datap pData);
 
 /* ************************************************************************** */
 
-mng_retcode init_rowdiffering (mng_datap pData);
+mng_retcode init_rowdiffering(mng_datap pData);
 
-mng_retcode differ_g1         (mng_datap pData);
-mng_retcode differ_g2         (mng_datap pData);
-mng_retcode differ_g4         (mng_datap pData);
-mng_retcode differ_g8         (mng_datap pData);
-mng_retcode differ_g16        (mng_datap pData);
-mng_retcode differ_rgb8       (mng_datap pData);
-mng_retcode differ_rgb16      (mng_datap pData);
-mng_retcode differ_idx1       (mng_datap pData);
-mng_retcode differ_idx2       (mng_datap pData);
-mng_retcode differ_idx4       (mng_datap pData);
-mng_retcode differ_idx8       (mng_datap pData);
-mng_retcode differ_ga8        (mng_datap pData);
-mng_retcode differ_ga16       (mng_datap pData);
-mng_retcode differ_rgba8      (mng_datap pData);
-mng_retcode differ_rgba16     (mng_datap pData);
+mng_retcode differ_g1(mng_datap pData);
+
+mng_retcode differ_g2(mng_datap pData);
+
+mng_retcode differ_g4(mng_datap pData);
+
+mng_retcode differ_g8(mng_datap pData);
+
+mng_retcode differ_g16(mng_datap pData);
+
+mng_retcode differ_rgb8(mng_datap pData);
+
+mng_retcode differ_rgb16(mng_datap pData);
+
+mng_retcode differ_idx1(mng_datap pData);
+
+mng_retcode differ_idx2(mng_datap pData);
+
+mng_retcode differ_idx4(mng_datap pData);
+
+mng_retcode differ_idx8(mng_datap pData);
+
+mng_retcode differ_ga8(mng_datap pData);
+
+mng_retcode differ_ga16(mng_datap pData);
+
+mng_retcode differ_rgba8(mng_datap pData);
+
+mng_retcode differ_rgba16(mng_datap pData);
 
 /* ************************************************************************** */
 

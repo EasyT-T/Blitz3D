@@ -153,15 +153,21 @@
 #include "libmng_data.h"
 #include "libmng_error.h"
 #include "libmng_trace.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
+
 #include "libmng_objects.h"
 #include "libmng_object_prc.h"
 #include "libmng_chunks.h"
+
 #ifdef MNG_CHECK_BAD_ICCP
+
 #include "libmng_chunk_prc.h"
+
 #endif
+
 #include "libmng_memory.h"
 #include "libmng_display.h"
 #include "libmng_zlib.h"
@@ -183,27 +189,24 @@
 /* ************************************************************************** */
 
 /* Make the table for a fast CRC. */
-void make_crc_table (mng_datap pData)
-{
-  mng_uint32 iC;
-  mng_int32  iN, iK;
+void make_crc_table(mng_datap pData) {
+    mng_uint32 iC;
+    mng_int32 iN, iK;
 
-  for (iN = 0; iN < 256; iN++)
-  {
-    iC = (mng_uint32) iN;
+    for (iN = 0; iN < 256; iN++) {
+        iC = (mng_uint32) iN;
 
-    for (iK = 0; iK < 8; iK++)
-    {
-      if (iC & 1)
-        iC = 0xedb88320U ^ (iC >> 1);
-      else
-        iC = iC >> 1;
+        for (iK = 0; iK < 8; iK++) {
+            if (iC & 1)
+                iC = 0xedb88320U ^ (iC >> 1);
+            else
+                iC = iC >> 1;
+        }
+
+        pData->aCRCtable[iN] = iC;
     }
 
-    pData->aCRCtable [iN] = iC;
-  }
-
-  pData->bCRCcomputed = MNG_TRUE;
+    pData->bCRCcomputed = MNG_TRUE;
 }
 
 /* Update a running CRC with the bytes buf[0..len-1]--the CRC
@@ -211,29 +214,27 @@ void make_crc_table (mng_datap pData)
    is the 1's complement of the final running CRC (see the
    crc() routine below). */
 
-mng_uint32 update_crc (mng_datap  pData,
-                       mng_uint32 iCrc,
-                       mng_uint8p pBuf,
-                       mng_int32  iLen)
-{
-  mng_uint32 iC = iCrc;
-  mng_int32 iN;
+mng_uint32 update_crc(mng_datap pData,
+                      mng_uint32 iCrc,
+                      mng_uint8p pBuf,
+                      mng_int32 iLen) {
+    mng_uint32 iC = iCrc;
+    mng_int32 iN;
 
-  if (!pData->bCRCcomputed)
-    make_crc_table (pData);
+    if (!pData->bCRCcomputed)
+        make_crc_table(pData);
 
-  for (iN = 0; iN < iLen; iN++)
-    iC = pData->aCRCtable [(iC ^ pBuf [iN]) & 0xff] ^ (iC >> 8);
+    for (iN = 0; iN < iLen; iN++)
+        iC = pData->aCRCtable[(iC ^ pBuf[iN]) & 0xff] ^ (iC >> 8);
 
-  return iC;
+    return iC;
 }
 
 /* Return the CRC of the bytes buf[0..len-1]. */
-mng_uint32 crc (mng_datap  pData,
-                mng_uint8p pBuf,
-                mng_int32  iLen)
-{
-  return update_crc (pData, 0xffffffffU, pBuf, iLen) ^ 0xffffffffU;
+mng_uint32 crc(mng_datap pData,
+               mng_uint8p pBuf,
+               mng_int32 iLen) {
+    return update_crc(pData, 0xffffffffU, pBuf, iLen) ^ 0xffffffffU;
 }
 
 /* ************************************************************************** */
@@ -247,64 +248,58 @@ mng_uint32 crc (mng_datap  pData,
 
 /* ************************************************************************** */
 
-mng_uint32 mng_get_uint32 (mng_uint8p pBuf)
-{
-   mng_uint32 i = ((mng_uint32)(*pBuf)       << 24) +
-                  ((mng_uint32)(*(pBuf + 1)) << 16) +
-                  ((mng_uint32)(*(pBuf + 2)) <<  8) +
+mng_uint32 mng_get_uint32(mng_uint8p pBuf) {
+    mng_uint32 i = ((mng_uint32)(*pBuf) << 24) +
+                   ((mng_uint32)(*(pBuf + 1)) << 16) +
+                   ((mng_uint32)(*(pBuf + 2)) << 8) +
                    (mng_uint32)(*(pBuf + 3));
-   return (i);
+    return (i);
 }
 
 /* ************************************************************************** */
 
-mng_int32 mng_get_int32 (mng_uint8p pBuf)
-{
-   mng_int32 i = ((mng_int32)(*pBuf)       << 24) +
-                 ((mng_int32)(*(pBuf + 1)) << 16) +
-                 ((mng_int32)(*(pBuf + 2)) <<  8) +
+mng_int32 mng_get_int32(mng_uint8p pBuf) {
+    mng_int32 i = ((mng_int32)(*pBuf) << 24) +
+                  ((mng_int32)(*(pBuf + 1)) << 16) +
+                  ((mng_int32)(*(pBuf + 2)) << 8) +
                   (mng_int32)(*(pBuf + 3));
-   return (i);
+    return (i);
 }
 
 /* ************************************************************************** */
 
-mng_uint16 mng_get_uint16 (mng_uint8p pBuf)
-{
-   mng_uint16 i = (mng_uint16)(((mng_uint16)(*pBuf) << 8) +
-                                (mng_uint16)(*(pBuf + 1)));
-   return (i);
+mng_uint16 mng_get_uint16(mng_uint8p pBuf) {
+    mng_uint16 i = (mng_uint16) (((mng_uint16) (*pBuf) << 8) +
+                                 (mng_uint16) (*(pBuf + 1)));
+    return (i);
 }
 
 /* ************************************************************************** */
 
-void mng_put_uint32 (mng_uint8p pBuf,
-                     mng_uint32 i)
-{
-   *pBuf     = (mng_uint8)((i >> 24) & 0xff);
-   *(pBuf+1) = (mng_uint8)((i >> 16) & 0xff);
-   *(pBuf+2) = (mng_uint8)((i >> 8) & 0xff);
-   *(pBuf+3) = (mng_uint8)(i & 0xff);
+void mng_put_uint32(mng_uint8p pBuf,
+                    mng_uint32 i) {
+    *pBuf = (mng_uint8) ((i >> 24) & 0xff);
+    *(pBuf + 1) = (mng_uint8) ((i >> 16) & 0xff);
+    *(pBuf + 2) = (mng_uint8) ((i >> 8) & 0xff);
+    *(pBuf + 3) = (mng_uint8) (i & 0xff);
 }
 
 /* ************************************************************************** */
 
-void mng_put_int32 (mng_uint8p pBuf,
-                    mng_int32  i)
-{
-   *pBuf     = (mng_uint8)((i >> 24) & 0xff);
-   *(pBuf+1) = (mng_uint8)((i >> 16) & 0xff);
-   *(pBuf+2) = (mng_uint8)((i >> 8) & 0xff);
-   *(pBuf+3) = (mng_uint8)(i & 0xff);
+void mng_put_int32(mng_uint8p pBuf,
+                   mng_int32 i) {
+    *pBuf = (mng_uint8) ((i >> 24) & 0xff);
+    *(pBuf + 1) = (mng_uint8) ((i >> 16) & 0xff);
+    *(pBuf + 2) = (mng_uint8) ((i >> 8) & 0xff);
+    *(pBuf + 3) = (mng_uint8) (i & 0xff);
 }
 
 /* ************************************************************************** */
 
-void mng_put_uint16 (mng_uint8p pBuf,
-                     mng_uint16 i)
-{
-   *pBuf     = (mng_uint8)((i >> 8) & 0xff);
-   *(pBuf+1) = (mng_uint8)(i & 0xff);
+void mng_put_uint16(mng_uint8p pBuf,
+                    mng_uint16 i) {
+    *pBuf = (mng_uint8) ((i >> 8) & 0xff);
+    *(pBuf + 1) = (mng_uint8) (i & 0xff);
 }
 
 /* ************************************************************************** */
@@ -321,78 +316,73 @@ void mng_put_uint16 (mng_uint8p pBuf,
 
 /* ************************************************************************** */
 
-mng_uint8p find_null (mng_uint8p pIn)
-{
-  mng_uint8p pOut = pIn;
+mng_uint8p find_null(mng_uint8p pIn) {
+    mng_uint8p pOut = pIn;
 
-  while (*pOut)                        /* the read_graphic routine has made sure there's */
-    pOut++;                            /* always at least 1 zero-byte in the buffer */
+    while (*pOut)                        /* the read_graphic routine has made sure there's */
+        pOut++;                            /* always at least 1 zero-byte in the buffer */
 
-  return pOut;
+    return pOut;
 }
 
 /* ************************************************************************** */
 
-mng_retcode inflate_buffer (mng_datap  pData,
-                            mng_uint8p pInbuf,
-                            mng_uint32 iInsize,
-                            mng_uint8p *pOutbuf,
-                            mng_uint32 *iOutsize,
-                            mng_uint32 *iRealsize)
-{
-  mng_retcode iRetcode = MNG_NOERROR;
+mng_retcode inflate_buffer(mng_datap pData,
+                           mng_uint8p pInbuf,
+                           mng_uint32 iInsize,
+                           mng_uint8p *pOutbuf,
+                           mng_uint32 *iOutsize,
+                           mng_uint32 *iRealsize) {
+    mng_retcode iRetcode = MNG_NOERROR;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INFLATE_BUFFER, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_INFLATE_BUFFER, MNG_LC_START)
 #endif
 
-  if (iInsize)                         /* anything to do ? */
-  {
-    *iOutsize = iInsize * 3;           /* estimate uncompressed size */
-                                       /* and allocate a temporary buffer */
-    MNG_ALLOC (pData, *pOutbuf, *iOutsize)
-
-    do
+    if (iInsize)                         /* anything to do ? */
     {
-      mngzlib_inflateinit (pData);     /* initialize zlib */
-                                       /* let zlib know where to store the output */
-      pData->sZlib.next_out  = *pOutbuf;
-                                       /* "size - 1" so we've got space for the
-                                          zero-termination of a possible string */
-      pData->sZlib.avail_out = *iOutsize - 1;
-                                       /* ok; let's inflate... */
-      iRetcode = mngzlib_inflatedata (pData, iInsize, pInbuf);
-                                       /* determine actual output size */
-      *iRealsize = (mng_uint32)pData->sZlib.total_out;
-
-      mngzlib_inflatefree (pData);     /* zlib's done */
-
-      if (iRetcode == MNG_BUFOVERFLOW) /* not enough space ? */
-      {                                /* then get some more */
-        MNG_FREEX (pData, *pOutbuf, *iOutsize)
-        *iOutsize = *iOutsize + iInsize;
+        *iOutsize = iInsize * 3;           /* estimate uncompressed size */
+        /* and allocate a temporary buffer */
         MNG_ALLOC (pData, *pOutbuf, *iOutsize)
-      }
-    }                                  /* repeat if we didn't have enough space */
-    while ((iRetcode == MNG_BUFOVERFLOW) &&
-           (*iOutsize < 20 * iInsize));
 
-    if (!iRetcode)                     /* if oke ? */
-      *((*pOutbuf) + *iRealsize) = 0;  /* then put terminator zero */
+        do {
+            mngzlib_inflateinit(pData);     /* initialize zlib */
+            /* let zlib know where to store the output */
+            pData->sZlib.next_out = *pOutbuf;
+            /* "size - 1" so we've got space for the
+                                          zero-termination of a possible string */
+            pData->sZlib.avail_out = *iOutsize - 1;
+            /* ok; let's inflate... */
+            iRetcode = mngzlib_inflatedata(pData, iInsize, pInbuf);
+            /* determine actual output size */
+            *iRealsize = (mng_uint32) pData->sZlib.total_out;
 
-  }
-  else
-  {
-    *pOutbuf   = 0;                    /* nothing to do; then there's no output */
-    *iOutsize  = 0;
-    *iRealsize = 0;
-  }
+            mngzlib_inflatefree(pData);     /* zlib's done */
+
+            if (iRetcode == MNG_BUFOVERFLOW) /* not enough space ? */
+            {                                /* then get some more */
+                MNG_FREEX (pData, *pOutbuf, *iOutsize)
+                *iOutsize = *iOutsize + iInsize;
+                MNG_ALLOC (pData, *pOutbuf, *iOutsize)
+            }
+        }                                  /* repeat if we didn't have enough space */
+        while ((iRetcode == MNG_BUFOVERFLOW) &&
+               (*iOutsize < 20 * iInsize));
+
+        if (!iRetcode)                     /* if oke ? */
+            *((*pOutbuf) + *iRealsize) = 0;  /* then put terminator zero */
+
+    } else {
+        *pOutbuf = 0;                    /* nothing to do; then there's no output */
+        *iOutsize = 0;
+        *iRealsize = 0;
+    }
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_INFLATE_BUFFER, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_INFLATE_BUFFER, MNG_LC_END)
 #endif
 
-  return iRetcode;
+    return iRetcode;
 }
 
 /* ************************************************************************** */
@@ -406,7 +396,7 @@ mng_retcode inflate_buffer (mng_datap  pData,
 /* ************************************************************************** */
 /* B004 */
 #ifdef MNG_INCLUDE_WRITE_PROCS
-/* B004 */
+                                                                                                                        /* B004 */
 /* ************************************************************************** */
 
 mng_retcode deflate_buffer (mng_datap  pData,
@@ -546,130 +536,114 @@ mng_retcode write_raw_chunk (mng_datap   pData,
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_ihdr)
-{
+READ_CHUNK (read_ihdr) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IHDR, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_IHDR, MNG_LC_START)
 #endif
 
-  if (iRawlen != 13)                   /* length oke ? */
+    if (iRawlen != 13)                   /* length oke ? */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
-                                       /* only allowed inside PNG or MNG */
-  if ((pData->eSigtype != mng_it_png) && (pData->eSigtype != mng_it_mng))
-    MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
-                                       /* sequence checks */
-  if ((pData->eSigtype == mng_it_png) && (pData->iChunkseq > 1))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* only allowed inside PNG or MNG */
+    if ((pData->eSigtype != mng_it_png) && (pData->eSigtype != mng_it_mng)) MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
+    /* sequence checks */
+    if ((pData->eSigtype == mng_it_png) && (pData->iChunkseq > 1)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasIDAT) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasIDAT) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasIDAT))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasIDAT))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  pData->bHasIHDR      = MNG_TRUE;     /* indicate IHDR is present */
-                                       /* and store interesting fields */
-  if ((!pData->bHasDHDR) || (pData->iDeltatype == MNG_DELTATYPE_NOCHANGE))
-  {
-    pData->iDatawidth  = mng_get_uint32 (pRawdata);
-    pData->iDataheight = mng_get_uint32 (pRawdata+4);
-  }
-  
-  pData->iBitdepth     = *(pRawdata+8);
-  pData->iColortype    = *(pRawdata+9);
-  pData->iCompression  = *(pRawdata+10);
-  pData->iFilter       = *(pRawdata+11);
-  pData->iInterlace    = *(pRawdata+12);
-
-  if ((pData->iBitdepth !=  1) &&      /* parameter validity checks */
-      (pData->iBitdepth !=  2) &&
-      (pData->iBitdepth !=  4) &&
-      (pData->iBitdepth !=  8) &&
-      (pData->iBitdepth != 16)    )
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
-
-  if ((pData->iColortype != MNG_COLORTYPE_GRAY   ) &&
-      (pData->iColortype != MNG_COLORTYPE_RGB    ) &&
-      (pData->iColortype != MNG_COLORTYPE_INDEXED) &&
-      (pData->iColortype != MNG_COLORTYPE_GRAYA  ) &&
-      (pData->iColortype != MNG_COLORTYPE_RGBA   )    )
-    MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
-
-  if ((pData->iColortype == MNG_COLORTYPE_INDEXED) && (pData->iBitdepth > 8))
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
-
-  if (((pData->iColortype == MNG_COLORTYPE_RGB    ) ||
-       (pData->iColortype == MNG_COLORTYPE_GRAYA  ) ||
-       (pData->iColortype == MNG_COLORTYPE_RGBA   )    ) &&
-      (pData->iBitdepth < 8                            )    )
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
-
-  if (pData->iCompression != MNG_COMPRESSION_DEFLATE)
-    MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
-
-  if ((pData->eSigtype == mng_it_png) && (pData->iFilter))
-    MNG_ERROR (pData, MNG_INVALIDFILTER)
-  else
-  if (pData->iFilter & (~MNG_FILTER_DIFFERING))
-    MNG_ERROR (pData, MNG_INVALIDFILTER)
-
-  if ((pData->iInterlace != MNG_INTERLACE_NONE ) &&
-      (pData->iInterlace != MNG_INTERLACE_ADAM7)    )
-    MNG_ERROR (pData, MNG_INVALIDINTERLACE)
-
-  if (pData->bHasDHDR)                 /* check the colortype for delta-images ! */
-  {
-    mng_imagedatap pBuf = ((mng_imagep)pData->pObjzero)->pImgbuf;
-
-    if (pData->iColortype != pBuf->iColortype)
-    {
-      if ( ( (pData->iColortype != MNG_COLORTYPE_INDEXED) ||
-             (pBuf->iColortype  == MNG_COLORTYPE_GRAY   )    ) &&
-           ( (pData->iColortype != MNG_COLORTYPE_GRAY   ) ||
-             (pBuf->iColortype  == MNG_COLORTYPE_INDEXED)    )    )
-        MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+    pData->bHasIHDR = MNG_TRUE;     /* indicate IHDR is present */
+    /* and store interesting fields */
+    if ((!pData->bHasDHDR) || (pData->iDeltatype == MNG_DELTATYPE_NOCHANGE)) {
+        pData->iDatawidth = mng_get_uint32(pRawdata);
+        pData->iDataheight = mng_get_uint32(pRawdata + 4);
     }
-  }
 
-  if (!pData->bHasheader)              /* first chunk ? */
-  {
-    pData->bHasheader = MNG_TRUE;      /* we've got a header */
-    pData->eImagetype = mng_it_png;    /* then this must be a PNG */
-    pData->iWidth     = pData->iDatawidth;
-    pData->iHeight    = pData->iDataheight;
-                                       /* predict alpha-depth ! */
-    if ((pData->iColortype == MNG_COLORTYPE_GRAYA  ) ||
-        (pData->iColortype == MNG_COLORTYPE_RGBA   )    )
-      pData->iAlphadepth = pData->iBitdepth;
-    else
-    if (pData->iColortype == MNG_COLORTYPE_INDEXED)
-      pData->iAlphadepth = 8;          /* worst case scenario */
-    else
-      pData->iAlphadepth = 0;
-                                       /* fits on maximum canvas ? */
-    if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight))
-      MNG_WARNING (pData, MNG_IMAGETOOLARGE)
+    pData->iBitdepth = *(pRawdata + 8);
+    pData->iColortype = *(pRawdata + 9);
+    pData->iCompression = *(pRawdata + 10);
+    pData->iFilter = *(pRawdata + 11);
+    pData->iInterlace = *(pRawdata + 12);
 
-    if (pData->fProcessheader)         /* inform the app ? */
-      if (!pData->fProcessheader (((mng_handle)pData), pData->iWidth, pData->iHeight))
-        MNG_ERROR (pData, MNG_APPMISCERROR)
-  }
+    if ((pData->iBitdepth != 1) &&      /* parameter validity checks */
+        (pData->iBitdepth != 2) &&
+        (pData->iBitdepth != 4) &&
+        (pData->iBitdepth != 8) &&
+        (pData->iBitdepth != 16)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-  if (!pData->bHasDHDR)
-    pData->iImagelevel++;              /* one level deeper */
+    if ((pData->iColortype != MNG_COLORTYPE_GRAY) &&
+        (pData->iColortype != MNG_COLORTYPE_RGB) &&
+        (pData->iColortype != MNG_COLORTYPE_INDEXED) &&
+        (pData->iColortype != MNG_COLORTYPE_GRAYA) &&
+        (pData->iColortype != MNG_COLORTYPE_RGBA)) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+
+    if ((pData->iColortype == MNG_COLORTYPE_INDEXED) && (pData->iBitdepth > 8)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+
+    if (((pData->iColortype == MNG_COLORTYPE_RGB) ||
+         (pData->iColortype == MNG_COLORTYPE_GRAYA) ||
+         (pData->iColortype == MNG_COLORTYPE_RGBA)) &&
+        (pData->iBitdepth < 8)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+
+    if (pData->iCompression != MNG_COMPRESSION_DEFLATE) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+
+    if ((pData->eSigtype == mng_it_png) && (pData->iFilter)) MNG_ERROR (pData, MNG_INVALIDFILTER)
+    else if (pData->iFilter & (~MNG_FILTER_DIFFERING)) MNG_ERROR (pData, MNG_INVALIDFILTER)
+
+    if ((pData->iInterlace != MNG_INTERLACE_NONE) &&
+        (pData->iInterlace != MNG_INTERLACE_ADAM7)) MNG_ERROR (pData, MNG_INVALIDINTERLACE)
+
+    if (pData->bHasDHDR)                 /* check the colortype for delta-images ! */
+    {
+        mng_imagedatap pBuf = ((mng_imagep) pData->pObjzero)->pImgbuf;
+
+        if (pData->iColortype != pBuf->iColortype) {
+            if (((pData->iColortype != MNG_COLORTYPE_INDEXED) ||
+                 (pBuf->iColortype == MNG_COLORTYPE_GRAY)) &&
+                ((pData->iColortype != MNG_COLORTYPE_GRAY) ||
+                 (pBuf->iColortype == MNG_COLORTYPE_INDEXED))) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+        }
+    }
+
+    if (!pData->bHasheader)              /* first chunk ? */
+    {
+        pData->bHasheader = MNG_TRUE;      /* we've got a header */
+        pData->eImagetype = mng_it_png;    /* then this must be a PNG */
+        pData->iWidth = pData->iDatawidth;
+        pData->iHeight = pData->iDataheight;
+        /* predict alpha-depth ! */
+        if ((pData->iColortype == MNG_COLORTYPE_GRAYA) ||
+            (pData->iColortype == MNG_COLORTYPE_RGBA))
+            pData->iAlphadepth = pData->iBitdepth;
+        else if (pData->iColortype == MNG_COLORTYPE_INDEXED)
+            pData->iAlphadepth = 8;          /* worst case scenario */
+        else
+            pData->iAlphadepth = 0;
+        /* fits on maximum canvas ? */
+        if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight)) MNG_WARNING (pData,
+                                                                                                     MNG_IMAGETOOLARGE)
+
+        if (pData->fProcessheader)         /* inform the app ? */
+            if (!pData->fProcessheader(((mng_handle) pData), pData->iWidth, pData->iHeight)) MNG_ERROR (pData,
+                                                                                                        MNG_APPMISCERROR)
+    }
+
+    if (!pData->bHasDHDR)
+        pData->iImagelevel++;              /* one level deeper */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode = process_display_ihdr (pData);
+    {
+        mng_retcode iRetcode = process_display_ihdr(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -687,162 +661,144 @@ READ_CHUNK (read_ihdr)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IHDR, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_IHDR, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_plte)
-{
+READ_CHUNK (read_plte) {
 #if defined(MNG_SUPPORT_DISPLAY) || defined(MNG_STORE_CHUNKS)
-  mng_uint32  iX;
-  mng_uint8p  pRawdata2;
+    mng_uint32 iX;
+    mng_uint8p pRawdata2;
 #endif
 #ifdef MNG_SUPPORT_DISPLAY
-  mng_uint32  iRawlen2;
+    mng_uint32 iRawlen2;
 #endif
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PLTE, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PLTE, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR)    )
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasJHDR))
+    if ((pData->bHasIDAT) || (pData->bHasJHDR))
 #else
-  if (pData->bHasIDAT)
-#endif  
+        if (pData->bHasIDAT)
+#endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* multiple PLTE only inside BASI */
-  if ((pData->bHasPLTE) && (!pData->bHasBASI))
-    MNG_ERROR (pData, MNG_MULTIPLEERROR)
-                                       /* length must be multiple of 3 */
-  if (((iRawlen % 3) != 0) || (iRawlen > 768))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* multiple PLTE only inside BASI */
+    if ((pData->bHasPLTE) && (!pData->bHasBASI)) MNG_ERROR (pData, MNG_MULTIPLEERROR)
+    /* length must be multiple of 3 */
+    if (((iRawlen % 3) != 0) || (iRawlen > 768)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {                                    /* only allowed for indexed-color or
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {                                    /* only allowed for indexed-color or
                                           rgb(a)-color! */
-    if ((pData->iColortype != 2) && (pData->iColortype != 3) && (pData->iColortype != 6))
-      MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
-                                       /* empty only allowed if global present */
-    if ((iRawlen == 0) && (!pData->bHasglobalPLTE))
+        if ((pData->iColortype != 2) && (pData->iColortype != 3) && (pData->iColortype != 6)) MNG_ERROR (pData,
+                                                                                                         MNG_CHUNKNOTALLOWED)
+        /* empty only allowed if global present */
+        if ((iRawlen == 0) && (!pData->bHasglobalPLTE)) MNG_ERROR (pData, MNG_CANNOTBEEMPTY)
+    } else {
+        if (iRawlen == 0)                  /* cannot be empty as global! */
         MNG_ERROR (pData, MNG_CANNOTBEEMPTY)
-  }
-  else
-  {
-    if (iRawlen == 0)                  /* cannot be empty as global! */
-      MNG_ERROR (pData, MNG_CANNOTBEEMPTY)
-  }
+    }
 
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-    pData->bHasPLTE = MNG_TRUE;        /* got it! */
-  else
-    pData->bHasglobalPLTE = MNG_TRUE;
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        pData->bHasPLTE = MNG_TRUE;        /* got it! */
+    else
+        pData->bHasglobalPLTE = MNG_TRUE;
 
-  pData->iPLTEcount = iRawlen / 3;  
+    pData->iPLTEcount = iRawlen / 3;
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {
-    mng_imagep     pImage;
-    mng_imagedatap pBuf;
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {
+        mng_imagep pImage;
+        mng_imagedatap pBuf;
 
-    if (pData->bHasDHDR)               /* processing delta-image ? */
-    {                                  /* store in object 0 !!! */
-      pImage           = (mng_imagep)pData->pObjzero;
-      pBuf             = pImage->pImgbuf;
-      pBuf->bHasPLTE   = MNG_TRUE;     /* it's definitely got a PLTE now */
-      pBuf->iPLTEcount = iRawlen / 3;  /* this is the exact length */
-      pRawdata2        = pRawdata;     /* copy the entries */
+        if (pData->bHasDHDR)               /* processing delta-image ? */
+        {                                  /* store in object 0 !!! */
+            pImage = (mng_imagep) pData->pObjzero;
+            pBuf = pImage->pImgbuf;
+            pBuf->bHasPLTE = MNG_TRUE;     /* it's definitely got a PLTE now */
+            pBuf->iPLTEcount = iRawlen / 3;  /* this is the exact length */
+            pRawdata2 = pRawdata;     /* copy the entries */
 
-      for (iX = 0; iX < iRawlen / 3; iX++)
-      {
-        pBuf->aPLTEentries[iX].iRed   = *pRawdata2;
-        pBuf->aPLTEentries[iX].iGreen = *(pRawdata2+1);
-        pBuf->aPLTEentries[iX].iBlue  = *(pRawdata2+2);
+            for (iX = 0; iX < iRawlen / 3; iX++) {
+                pBuf->aPLTEentries[iX].iRed = *pRawdata2;
+                pBuf->aPLTEentries[iX].iGreen = *(pRawdata2 + 1);
+                pBuf->aPLTEentries[iX].iBlue = *(pRawdata2 + 2);
 
-        pRawdata2 += 3;
-      }
-    }
-    else
-    {                                  /* get the current object */
-      pImage = (mng_imagep)pData->pCurrentobj;
+                pRawdata2 += 3;
+            }
+        } else {                                  /* get the current object */
+            pImage = (mng_imagep) pData->pCurrentobj;
 
-      if (!pImage)                     /* no object then dump it in obj 0 */
-        pImage = (mng_imagep)pData->pObjzero;
+            if (!pImage)                     /* no object then dump it in obj 0 */
+                pImage = (mng_imagep) pData->pObjzero;
 
-      pBuf = pImage->pImgbuf;          /* address the object buffer */
-      pBuf->bHasPLTE = MNG_TRUE;       /* and tell it it's got a PLTE now */
+            pBuf = pImage->pImgbuf;          /* address the object buffer */
+            pBuf->bHasPLTE = MNG_TRUE;       /* and tell it it's got a PLTE now */
 
-      if (!iRawlen)                    /* if empty, inherit from global */
-      {
-        pBuf->iPLTEcount = pData->iGlobalPLTEcount;
-        MNG_COPY (pBuf->aPLTEentries, pData->aGlobalPLTEentries,
-                  sizeof (pBuf->aPLTEentries))
+            if (!iRawlen)                    /* if empty, inherit from global */
+            {
+                pBuf->iPLTEcount = pData->iGlobalPLTEcount;
+                MNG_COPY (pBuf->aPLTEentries, pData->aGlobalPLTEentries,
+                          sizeof(pBuf->aPLTEentries))
 
-        if (pData->bHasglobalTRNS)     /* also copy global tRNS ? */
-        {                              /* indicate tRNS available */
-          pBuf->bHasTRNS = MNG_TRUE;
+                if (pData->bHasglobalTRNS)     /* also copy global tRNS ? */
+                {                              /* indicate tRNS available */
+                    pBuf->bHasTRNS = MNG_TRUE;
 
-          iRawlen2  = pData->iGlobalTRNSrawlen;
-          pRawdata2 = (mng_uint8p)(pData->aGlobalTRNSrawdata);
-                                       /* global length oke ? */
-          if ((iRawlen2 == 0) || (iRawlen2 > pBuf->iPLTEcount))
-            MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
-                                       /* copy it */
-          pBuf->iTRNScount = iRawlen2;
-          MNG_COPY (pBuf->aTRNSentries, pRawdata2, iRawlen2)
+                    iRawlen2 = pData->iGlobalTRNSrawlen;
+                    pRawdata2 = (mng_uint8p) (pData->aGlobalTRNSrawdata);
+                    /* global length oke ? */
+                    if ((iRawlen2 == 0) || (iRawlen2 > pBuf->iPLTEcount)) MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
+                    /* copy it */
+                    pBuf->iTRNScount = iRawlen2;
+                    MNG_COPY (pBuf->aTRNSentries, pRawdata2, iRawlen2)
+                }
+            } else {                                /* store fields for future reference */
+                pBuf->iPLTEcount = iRawlen / 3;
+                pRawdata2 = pRawdata;
+
+                for (iX = 0; iX < pBuf->iPLTEcount; iX++) {
+                    pBuf->aPLTEentries[iX].iRed = *pRawdata2;
+                    pBuf->aPLTEentries[iX].iGreen = *(pRawdata2 + 1);
+                    pBuf->aPLTEentries[iX].iBlue = *(pRawdata2 + 2);
+
+                    pRawdata2 += 3;
+                }
+            }
         }
-      }
-      else
-      {                                /* store fields for future reference */
-        pBuf->iPLTEcount = iRawlen / 3;
-        pRawdata2        = pRawdata;
-
-        for (iX = 0; iX < pBuf->iPLTEcount; iX++)
-        {
-          pBuf->aPLTEentries[iX].iRed   = *pRawdata2;
-          pBuf->aPLTEentries[iX].iGreen = *(pRawdata2+1);
-          pBuf->aPLTEentries[iX].iBlue  = *(pRawdata2+2);
-
-          pRawdata2 += 3;
-        }
-      }
-    }
-  }
-  else                                 /* store as global */
-  {
-    pData->iGlobalPLTEcount = iRawlen / 3;
-    pRawdata2               = pRawdata;
-
-    for (iX = 0; iX < pData->iGlobalPLTEcount; iX++)
+    } else                                 /* store as global */
     {
-      pData->aGlobalPLTEentries[iX].iRed   = *pRawdata2;
-      pData->aGlobalPLTEentries[iX].iGreen = *(pRawdata2+1);
-      pData->aGlobalPLTEentries[iX].iBlue  = *(pRawdata2+2);
+        pData->iGlobalPLTEcount = iRawlen / 3;
+        pRawdata2 = pRawdata;
 
-      pRawdata2 += 3;
+        for (iX = 0; iX < pData->iGlobalPLTEcount; iX++) {
+            pData->aGlobalPLTEentries[iX].iRed = *pRawdata2;
+            pData->aGlobalPLTEentries[iX].iGreen = *(pRawdata2 + 1);
+            pData->aGlobalPLTEentries[iX].iBlue = *(pRawdata2 + 2);
+
+            pRawdata2 += 3;
+        }
+
+        {                                  /* create an animation object */
+            mng_retcode iRetcode = create_ani_plte(pData, pData->iGlobalPLTEcount,
+                                                   pData->aGlobalPLTEentries);
+
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
     }
-
-    {                                  /* create an animation object */
-      mng_retcode iRetcode = create_ani_plte (pData, pData->iGlobalPLTEcount,
-                                              pData->aGlobalPLTEentries);
-
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
-    }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -865,59 +821,52 @@ READ_CHUNK (read_plte)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PLTE, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PLTE, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_idat)
-{
+READ_CHUNK (read_idat) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IDAT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_IDAT, MNG_LC_START)
 #endif
 
 #ifdef MNG_INCLUDE_JNG                 /* sequence checks */
-  if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR))
+        if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasJHDR) &&
-      (pData->iJHDRalphacompression != MNG_COMPRESSION_DEFLATE))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if ((pData->bHasJHDR) &&
+        (pData->iJHDRalphacompression != MNG_COMPRESSION_DEFLATE)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->bHasJSEP)
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if (pData->bHasJSEP) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 #endif
-                                       /* not allowed for for deltatype NO_CHANGE */
-  if ((pData->bHasDHDR) && ((pData->iDeltatype == MNG_DELTATYPE_NOCHANGE)))
-    MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
-                                       /* can only be empty in BASI-block! */
-  if ((iRawlen == 0) && (!pData->bHasBASI))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
-                                       /* indexed-color requires PLTE */
-  if ((pData->bHasIHDR) && (pData->iColortype == 3) && (!pData->bHasPLTE))
-    MNG_ERROR (pData, MNG_PLTEMISSING)
+    /* not allowed for for deltatype NO_CHANGE */
+    if ((pData->bHasDHDR) && ((pData->iDeltatype == MNG_DELTATYPE_NOCHANGE))) MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
+    /* can only be empty in BASI-block! */
+    if ((iRawlen == 0) && (!pData->bHasBASI)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* indexed-color requires PLTE */
+    if ((pData->bHasIHDR) && (pData->iColortype == 3) && (!pData->bHasPLTE)) MNG_ERROR (pData, MNG_PLTEMISSING)
 
-  pData->bHasIDAT = MNG_TRUE;          /* got some IDAT now, don't we */
+    pData->bHasIDAT = MNG_TRUE;          /* got some IDAT now, don't we */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if (iRawlen)
-  {                                    /* display processing */
-    mng_retcode iRetcode = process_display_idat (pData, iRawlen, pRawdata);
+    if (iRawlen) {                                    /* display processing */
+        mng_retcode iRetcode = process_display_idat(pData, iRawlen, pRawdata);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -936,77 +885,75 @@ READ_CHUNK (read_idat)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IDAT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_IDAT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_iend)
-{
+READ_CHUNK (read_iend) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IEND, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_IEND, MNG_LC_START)
 #endif
 
-  if (iRawlen > 0)                     /* must not contain data! */
+    if (iRawlen > 0)                     /* must not contain data! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH);
 
 #ifdef MNG_INCLUDE_JNG                 /* sequence checks */
-  if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR))
+        if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* IHDR-block requires IDAT */
-  if ((pData->bHasIHDR) && (!pData->bHasIDAT))
-    MNG_ERROR (pData, MNG_IDATMISSING)
+    /* IHDR-block requires IDAT */
+    if ((pData->bHasIHDR) && (!pData->bHasIDAT)) MNG_ERROR (pData, MNG_IDATMISSING)
 
-  pData->iImagelevel--;                /* one level up */
+    pData->iImagelevel--;                /* one level up */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {                                    /* create an animation object */
-    mng_retcode iRetcode = create_ani_image (pData);
+    {                                    /* create an animation object */
+        mng_retcode iRetcode = create_ani_image(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-                                       /* display processing */
-    iRetcode = process_display_iend (pData);
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+        /* display processing */
+        iRetcode = process_display_iend(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if (!pData->bTimerset)               /* reset only if not broken !!! */
-  {
+    if (!pData->bTimerset)               /* reset only if not broken !!! */
+    {
 #endif
-                                       /* IEND signals the end for most ... */
-    pData->bHasIHDR         = MNG_FALSE;
-    pData->bHasBASI         = MNG_FALSE;
-    pData->bHasDHDR         = MNG_FALSE;
+        /* IEND signals the end for most ... */
+        pData->bHasIHDR = MNG_FALSE;
+        pData->bHasBASI = MNG_FALSE;
+        pData->bHasDHDR = MNG_FALSE;
 #ifdef MNG_INCLUDE_JNG
-    pData->bHasJHDR         = MNG_FALSE;
-    pData->bHasJSEP         = MNG_FALSE;
-    pData->bHasJDAA         = MNG_FALSE;
-    pData->bHasJDAT         = MNG_FALSE;
+        pData->bHasJHDR = MNG_FALSE;
+        pData->bHasJSEP = MNG_FALSE;
+        pData->bHasJDAA = MNG_FALSE;
+        pData->bHasJDAT = MNG_FALSE;
 #endif
-    pData->bHasPLTE         = MNG_FALSE;
-    pData->bHasTRNS         = MNG_FALSE;
-    pData->bHasGAMA         = MNG_FALSE;
-    pData->bHasCHRM         = MNG_FALSE;
-    pData->bHasSRGB         = MNG_FALSE;
-    pData->bHasICCP         = MNG_FALSE;
-    pData->bHasBKGD         = MNG_FALSE;
-    pData->bHasIDAT         = MNG_FALSE;
+        pData->bHasPLTE = MNG_FALSE;
+        pData->bHasTRNS = MNG_FALSE;
+        pData->bHasGAMA = MNG_FALSE;
+        pData->bHasCHRM = MNG_FALSE;
+        pData->bHasSRGB = MNG_FALSE;
+        pData->bHasICCP = MNG_FALSE;
+        pData->bHasBKGD = MNG_FALSE;
+        pData->bHasIDAT = MNG_FALSE;
 #ifdef MNG_SUPPORT_DISPLAY
-  }
-#endif  
+    }
+#endif
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1016,199 +963,181 @@ READ_CHUNK (read_iend)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IEND, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_IEND, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_trns)
-{
+READ_CHUNK (read_trns) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TRNS, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_TRNS, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR)    )
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasJHDR))
+    if ((pData->bHasIDAT) || (pData->bHasJHDR))
 #else
-  if (pData->bHasIDAT)
-#endif  
+        if (pData->bHasIDAT)
+#endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* multiple tRNS only inside BASI */
-  if ((pData->bHasTRNS) && (!pData->bHasBASI))
-    MNG_ERROR (pData, MNG_MULTIPLEERROR)
+    /* multiple tRNS only inside BASI */
+    if ((pData->bHasTRNS) && (!pData->bHasBASI)) MNG_ERROR (pData, MNG_MULTIPLEERROR)
 
-  if (iRawlen > 256)                   /* it just can't be bigger than that! */
+    if (iRawlen > 256)                   /* it just can't be bigger than that! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {                                    /* not allowed with full alpha-channel */
-    if ((pData->iColortype == 4) || (pData->iColortype == 6))
-      MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
+    if ((pData->bHasIHDR) || (pData->bHasBASI) ||
+        (pData->bHasDHDR)) {                                    /* not allowed with full alpha-channel */
+        if ((pData->iColortype == 4) || (pData->iColortype == 6)) MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
 
-    if (iRawlen != 0)                  /* filled ? */
-    {                                  /* length checks */
-      if ((pData->iColortype == 0) && (iRawlen != 2))
-        MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if (iRawlen != 0)                  /* filled ? */
+        {                                  /* length checks */
+            if ((pData->iColortype == 0) && (iRawlen != 2)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-      if ((pData->iColortype == 2) && (iRawlen != 6))
-        MNG_ERROR (pData, MNG_INVALIDLENGTH)
+            if ((pData->iColortype == 2) && (iRawlen != 6)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-      if (pData->iColortype == 3)
-      {
-        mng_imagep     pImage = (mng_imagep)pData->pCurrentobj;
-        mng_imagedatap pBuf;
+            if (pData->iColortype == 3) {
+                mng_imagep pImage = (mng_imagep) pData->pCurrentobj;
+                mng_imagedatap pBuf;
 
-        if (!pImage)                   /* no object then check obj 0 */
-          pImage = (mng_imagep)pData->pObjzero;
+                if (!pImage)                   /* no object then check obj 0 */
+                    pImage = (mng_imagep) pData->pObjzero;
 
-        pBuf = pImage->pImgbuf;        /* address object buffer */
+                pBuf = pImage->pImgbuf;        /* address object buffer */
 
-        if ((iRawlen == 0) || (iRawlen > pBuf->iPLTEcount))
-          MNG_ERROR (pData, MNG_INVALIDLENGTH)
-      }
+                if ((iRawlen == 0) || (iRawlen > pBuf->iPLTEcount)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+            }
 #endif
+        } else                               /* if empty there must be global stuff! */
+        {
+            if (!pData->bHasglobalTRNS) MNG_ERROR (pData, MNG_CANNOTBEEMPTY)
+        }
     }
-    else                               /* if empty there must be global stuff! */
-    {
-      if (!pData->bHasglobalTRNS)
-        MNG_ERROR (pData, MNG_CANNOTBEEMPTY)
-    }
-  }
 
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-    pData->bHasTRNS = MNG_TRUE;        /* indicate tRNS available */
-  else
-    pData->bHasglobalTRNS = MNG_TRUE;
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        pData->bHasTRNS = MNG_TRUE;        /* indicate tRNS available */
+    else
+        pData->bHasglobalTRNS = MNG_TRUE;
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {
-    mng_imagep     pImage;
-    mng_imagedatap pBuf;
-    mng_uint8p     pRawdata2;
-    mng_uint32     iRawlen2;
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {
+        mng_imagep pImage;
+        mng_imagedatap pBuf;
+        mng_uint8p pRawdata2;
+        mng_uint32 iRawlen2;
 
-    if (pData->bHasDHDR)               /* processing delta-image ? */
-    {                                  /* store in object 0 !!! */
-      pImage = (mng_imagep)pData->pObjzero;
-      pBuf   = pImage->pImgbuf;        /* address object buffer */
+        if (pData->bHasDHDR)               /* processing delta-image ? */
+        {                                  /* store in object 0 !!! */
+            pImage = (mng_imagep) pData->pObjzero;
+            pBuf = pImage->pImgbuf;        /* address object buffer */
 
-      switch (pData->iColortype)       /* store fields for future reference */
-      {
-        case 0: {                      /* gray */
-                  pBuf->iTRNSgray  = mng_get_uint16 (pRawdata);
-                  pBuf->iTRNSred   = 0;
-                  pBuf->iTRNSgreen = 0;
-                  pBuf->iTRNSblue  = 0;
-                  pBuf->iTRNScount = 0;
-                  break;
+            switch (pData->iColortype)       /* store fields for future reference */
+            {
+                case 0: {                      /* gray */
+                    pBuf->iTRNSgray = mng_get_uint16(pRawdata);
+                    pBuf->iTRNSred = 0;
+                    pBuf->iTRNSgreen = 0;
+                    pBuf->iTRNSblue = 0;
+                    pBuf->iTRNScount = 0;
+                    break;
                 }
-        case 2: {                      /* rgb */
-                  pBuf->iTRNSgray  = 0;
-                  pBuf->iTRNSred   = mng_get_uint16 (pRawdata);
-                  pBuf->iTRNSgreen = mng_get_uint16 (pRawdata+2);
-                  pBuf->iTRNSblue  = mng_get_uint16 (pRawdata+4);
-                  pBuf->iTRNScount = 0;
-                  break;
+                case 2: {                      /* rgb */
+                    pBuf->iTRNSgray = 0;
+                    pBuf->iTRNSred = mng_get_uint16(pRawdata);
+                    pBuf->iTRNSgreen = mng_get_uint16(pRawdata + 2);
+                    pBuf->iTRNSblue = mng_get_uint16(pRawdata + 4);
+                    pBuf->iTRNScount = 0;
+                    break;
                 }
-        case 3: {                      /* indexed */
-                  pBuf->iTRNSgray  = 0;
-                  pBuf->iTRNSred   = 0;
-                  pBuf->iTRNSgreen = 0;
-                  pBuf->iTRNSblue  = 0;
-                  pBuf->iTRNScount = iRawlen;
-                  MNG_COPY (pBuf->aTRNSentries, pRawdata, iRawlen)
-                  break;
+                case 3: {                      /* indexed */
+                    pBuf->iTRNSgray = 0;
+                    pBuf->iTRNSred = 0;
+                    pBuf->iTRNSgreen = 0;
+                    pBuf->iTRNSblue = 0;
+                    pBuf->iTRNScount = iRawlen;
+                    MNG_COPY (pBuf->aTRNSentries, pRawdata, iRawlen)
+                    break;
                 }
-      }
+            }
 
-      pBuf->bHasTRNS = MNG_TRUE;       /* tell it it's got a tRNS now */
+            pBuf->bHasTRNS = MNG_TRUE;       /* tell it it's got a tRNS now */
+        } else {                                  /* address current object */
+            pImage = (mng_imagep) pData->pCurrentobj;
+
+            if (!pImage)                     /* no object then dump it in obj 0 */
+                pImage = (mng_imagep) pData->pObjzero;
+
+            pBuf = pImage->pImgbuf;          /* address object buffer */
+            pBuf->bHasTRNS = MNG_TRUE;       /* and tell it it's got a tRNS now */
+
+            if (iRawlen == 0)                /* if empty, inherit from global */
+            {
+                iRawlen2 = pData->iGlobalTRNSrawlen;
+                pRawdata2 = (mng_ptr) (pData->aGlobalTRNSrawdata);
+                /* global length oke ? */
+                if ((pData->iColortype == 0) && (iRawlen2 != 2)) MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
+
+                if ((pData->iColortype == 2) && (iRawlen2 != 6)) MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
+
+                if ((pData->iColortype == 3) && ((iRawlen2 == 0) || (iRawlen2 > pBuf->iPLTEcount))) MNG_ERROR (pData,
+                                                                                                               MNG_GLOBALLENGTHERR)
+            } else {
+                iRawlen2 = iRawlen;
+                pRawdata2 = pRawdata;
+            }
+
+            switch (pData->iColortype)        /* store fields for future reference */
+            {
+                case 0: {                      /* gray */
+                    pBuf->iTRNSgray = mng_get_uint16(pRawdata2);
+                    pBuf->iTRNSred = 0;
+                    pBuf->iTRNSgreen = 0;
+                    pBuf->iTRNSblue = 0;
+                    pBuf->iTRNScount = 0;
+                    break;
+                }
+                case 2: {                      /* rgb */
+                    pBuf->iTRNSgray = 0;
+                    pBuf->iTRNSred = mng_get_uint16(pRawdata2);
+                    pBuf->iTRNSgreen = mng_get_uint16(pRawdata2 + 2);
+                    pBuf->iTRNSblue = mng_get_uint16(pRawdata2 + 4);
+                    pBuf->iTRNScount = 0;
+                    break;
+                }
+                case 3: {                      /* indexed */
+                    pBuf->iTRNSgray = 0;
+                    pBuf->iTRNSred = 0;
+                    pBuf->iTRNSgreen = 0;
+                    pBuf->iTRNSblue = 0;
+                    pBuf->iTRNScount = iRawlen2;
+                    MNG_COPY (pBuf->aTRNSentries, pRawdata2, iRawlen2)
+                    break;
+                }
+            }
+        }
+    } else                                 /* store as global */
+    {
+        pData->iGlobalTRNSrawlen = iRawlen;
+        MNG_COPY (pData->aGlobalTRNSrawdata, pRawdata, iRawlen)
+
+        {                                  /* create an animation object */
+            mng_retcode iRetcode = create_ani_trns(pData, pData->iGlobalTRNSrawlen,
+                                                   pData->aGlobalTRNSrawdata);
+
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
     }
-    else
-    {                                  /* address current object */
-      pImage = (mng_imagep)pData->pCurrentobj;
-
-      if (!pImage)                     /* no object then dump it in obj 0 */
-        pImage = (mng_imagep)pData->pObjzero;
-
-      pBuf = pImage->pImgbuf;          /* address object buffer */
-      pBuf->bHasTRNS = MNG_TRUE;       /* and tell it it's got a tRNS now */
-
-      if (iRawlen == 0)                /* if empty, inherit from global */
-      {
-        iRawlen2  = pData->iGlobalTRNSrawlen;
-        pRawdata2 = (mng_ptr)(pData->aGlobalTRNSrawdata);
-                                         /* global length oke ? */
-        if ((pData->iColortype == 0) && (iRawlen2 != 2))
-          MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
-
-        if ((pData->iColortype == 2) && (iRawlen2 != 6))
-          MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
-
-        if ((pData->iColortype == 3) && ((iRawlen2 == 0) || (iRawlen2 > pBuf->iPLTEcount)))
-          MNG_ERROR (pData, MNG_GLOBALLENGTHERR)
-      }
-      else
-      {
-        iRawlen2  = iRawlen;
-        pRawdata2 = pRawdata;
-      }
-
-      switch (pData->iColortype)        /* store fields for future reference */
-      {
-        case 0: {                      /* gray */
-                  pBuf->iTRNSgray  = mng_get_uint16 (pRawdata2);
-                  pBuf->iTRNSred   = 0;
-                  pBuf->iTRNSgreen = 0;
-                  pBuf->iTRNSblue  = 0;
-                  pBuf->iTRNScount = 0;
-                  break;
-                }
-        case 2: {                      /* rgb */
-                  pBuf->iTRNSgray  = 0;
-                  pBuf->iTRNSred   = mng_get_uint16 (pRawdata2);
-                  pBuf->iTRNSgreen = mng_get_uint16 (pRawdata2+2);
-                  pBuf->iTRNSblue  = mng_get_uint16 (pRawdata2+4);
-                  pBuf->iTRNScount = 0;
-                  break;
-                }
-        case 3: {                      /* indexed */
-                  pBuf->iTRNSgray  = 0;
-                  pBuf->iTRNSred   = 0;
-                  pBuf->iTRNSgreen = 0;
-                  pBuf->iTRNSblue  = 0;
-                  pBuf->iTRNScount = iRawlen2;
-                  MNG_COPY (pBuf->aTRNSentries, pRawdata2, iRawlen2)
-                  break;
-                }
-      }
-    }  
-  }
-  else                                 /* store as global */
-  {
-    pData->iGlobalTRNSrawlen = iRawlen;
-    MNG_COPY (pData->aGlobalTRNSrawdata, pRawdata, iRawlen)
-
-    {                                  /* create an animation object */
-      mng_retcode iRetcode = create_ani_trns (pData, pData->iGlobalTRNSrawlen,
-                                              pData->aGlobalTRNSrawdata);
-
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
-    }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1259,104 +1188,95 @@ READ_CHUNK (read_trns)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TRNS, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_TRNS, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_gama)
-{
+READ_CHUNK (read_gama) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_GAMA, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_GAMA, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if ((pData->bHasIDAT) || (pData->bHasPLTE))
+        if ((pData->bHasIDAT) || (pData->bHasPLTE))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-  {                                    /* length must be exactly 4 */
-    if (iRawlen != 4)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {                                    /* length must be empty or exactly 4 */
-    if ((iRawlen != 0) && (iRawlen != 4))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
+    {                                    /* length must be exactly 4 */
+        if (iRawlen != 4) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {                                    /* length must be empty or exactly 4 */
+        if ((iRawlen != 0) && (iRawlen != 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-    pData->bHasGAMA = MNG_TRUE;        /* indicate we've got it */
-  else
-    pData->bHasglobalGAMA = (mng_bool)(iRawlen != 0);
+        pData->bHasGAMA = MNG_TRUE;        /* indicate we've got it */
+    else
+        pData->bHasglobalGAMA = (mng_bool) (iRawlen != 0);
 
 #ifdef MNG_SUPPORT_DISPLAY
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-  {
-    mng_imagep pImage;
-
-    if (pData->bHasDHDR)               /* update delta image ? */
-    {                                  /* store in object 0 ! */
-      pImage = (mng_imagep)pData->pObjzero;
-                                       /* store for color-processing routines */
-      pImage->pImgbuf->iGamma   = mng_get_uint32 (pRawdata);
-      pImage->pImgbuf->bHasGAMA = MNG_TRUE;
-    }
-    else
     {
-      pImage = (mng_imagep)pData->pCurrentobj;
+        mng_imagep pImage;
 
-      if (!pImage)                     /* no object then dump it in obj 0 */
-        pImage = (mng_imagep)pData->pObjzero;
-                                       /* store for color-processing routines */
-      pImage->pImgbuf->iGamma   = mng_get_uint32 (pRawdata);
-      pImage->pImgbuf->bHasGAMA = MNG_TRUE;
+        if (pData->bHasDHDR)               /* update delta image ? */
+        {                                  /* store in object 0 ! */
+            pImage = (mng_imagep) pData->pObjzero;
+            /* store for color-processing routines */
+            pImage->pImgbuf->iGamma = mng_get_uint32(pRawdata);
+            pImage->pImgbuf->bHasGAMA = MNG_TRUE;
+        } else {
+            pImage = (mng_imagep) pData->pCurrentobj;
+
+            if (!pImage)                     /* no object then dump it in obj 0 */
+                pImage = (mng_imagep) pData->pObjzero;
+            /* store for color-processing routines */
+            pImage->pImgbuf->iGamma = mng_get_uint32(pRawdata);
+            pImage->pImgbuf->bHasGAMA = MNG_TRUE;
+        }
+    } else {                                    /* store as global */
+        if (iRawlen != 0)
+            pData->iGlobalGamma = mng_get_uint32(pRawdata);
+
+        {                                  /* create an animation object */
+            mng_retcode iRetcode = create_ani_gama(pData, (mng_bool) (iRawlen == 0),
+                                                   pData->iGlobalGamma);
+
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
     }
-  }
-  else
-  {                                    /* store as global */
-    if (iRawlen != 0)
-      pData->iGlobalGamma = mng_get_uint32 (pRawdata);
-
-    {                                  /* create an animation object */
-      mng_retcode iRetcode = create_ani_gama (pData, (mng_bool)(iRawlen == 0),
-                                              pData->iGlobalGamma);
-
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
-    }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1372,151 +1292,141 @@ READ_CHUNK (read_gama)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_GAMA, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_GAMA, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_chrm)
-{
+READ_CHUNK (read_chrm) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CHRM, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_CHRM, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if ((pData->bHasIDAT) || (pData->bHasPLTE))
+        if ((pData->bHasIDAT) || (pData->bHasPLTE))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-  {                                    /* length must be exactly 32 */
-    if (iRawlen != 32)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {                                    /* length must be empty or exactly 32 */
-    if ((iRawlen != 0) && (iRawlen != 32))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-
-#ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
-#else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-#endif
-    pData->bHasCHRM = MNG_TRUE;        /* indicate we've got it */
-  else
-    pData->bHasglobalCHRM = (mng_bool)(iRawlen != 0);
-
-#ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint32 iWhitepointx,   iWhitepointy;
-    mng_uint32 iPrimaryredx,   iPrimaryredy;
-    mng_uint32 iPrimarygreenx, iPrimarygreeny;
-    mng_uint32 iPrimarybluex,  iPrimarybluey;
-
-    iWhitepointx   = mng_get_uint32 (pRawdata);
-    iWhitepointy   = mng_get_uint32 (pRawdata+4);
-    iPrimaryredx   = mng_get_uint32 (pRawdata+8);
-    iPrimaryredy   = mng_get_uint32 (pRawdata+12);
-    iPrimarygreenx = mng_get_uint32 (pRawdata+16);
-    iPrimarygreeny = mng_get_uint32 (pRawdata+20);
-    iPrimarybluex  = mng_get_uint32 (pRawdata+24);
-    iPrimarybluey  = mng_get_uint32 (pRawdata+28);
+    {                                    /* length must be exactly 32 */
+        if (iRawlen != 32) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {                                    /* length must be empty or exactly 32 */
+        if ((iRawlen != 0) && (iRawlen != 32)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
 
 #ifdef MNG_INCLUDE_JNG
     if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-    {
-      mng_imagep     pImage;
-      mng_imagedatap pBuf;
-
-      if (pData->bHasDHDR)             /* update delta image ? */
-      {                                /* store it in object 0 ! */
-        pImage = (mng_imagep)pData->pObjzero;
-
-        pBuf = pImage->pImgbuf;        /* address object buffer */
-        pBuf->bHasCHRM = MNG_TRUE;     /* and tell it it's got a CHRM now */
-                                       /* store for color-processing routines */
-        pBuf->iWhitepointx   = iWhitepointx;
-        pBuf->iWhitepointy   = iWhitepointy;
-        pBuf->iPrimaryredx   = iPrimaryredx;
-        pBuf->iPrimaryredy   = iPrimaryredy;
-        pBuf->iPrimarygreenx = iPrimarygreenx;
-        pBuf->iPrimarygreeny = iPrimarygreeny;
-        pBuf->iPrimarybluex  = iPrimarybluex;
-        pBuf->iPrimarybluey  = iPrimarybluey;
-      }
-      else
-      {
-        pImage = (mng_imagep)pData->pCurrentobj;
-
-        if (!pImage)                   /* no object then dump it in obj 0 */
-          pImage = (mng_imagep)pData->pObjzero;
-
-        pBuf = pImage->pImgbuf;        /* address object buffer */
-        pBuf->bHasCHRM = MNG_TRUE;     /* and tell it it's got a CHRM now */
-                                       /* store for color-processing routines */
-        pBuf->iWhitepointx   = iWhitepointx;
-        pBuf->iWhitepointy   = iWhitepointy;
-        pBuf->iPrimaryredx   = iPrimaryredx;
-        pBuf->iPrimaryredy   = iPrimaryredy;
-        pBuf->iPrimarygreenx = iPrimarygreenx;
-        pBuf->iPrimarygreeny = iPrimarygreeny;
-        pBuf->iPrimarybluex  = iPrimarybluex;
-        pBuf->iPrimarybluey  = iPrimarybluey;
-      }
-    }
+        pData->bHasCHRM = MNG_TRUE;        /* indicate we've got it */
     else
-    {                                  /* store as global */
-      if (iRawlen != 0)
-      {
-        pData->iGlobalWhitepointx   = iWhitepointx;
-        pData->iGlobalWhitepointy   = iWhitepointy;
-        pData->iGlobalPrimaryredx   = iPrimaryredx;
-        pData->iGlobalPrimaryredy   = iPrimaryredy;
-        pData->iGlobalPrimarygreenx = iPrimarygreenx;
-        pData->iGlobalPrimarygreeny = iPrimarygreeny;
-        pData->iGlobalPrimarybluex  = iPrimarybluex;
-        pData->iGlobalPrimarybluey  = iPrimarybluey;
-      }
+        pData->bHasglobalCHRM = (mng_bool) (iRawlen != 0);
 
-      {                                /* create an animation object */
-        mng_retcode iRetcode = create_ani_chrm (pData, (mng_bool)(iRawlen == 0),
-                                                iWhitepointx,   iWhitepointy,
-                                                iPrimaryredx,   iPrimaryredy,
-                                                iPrimarygreenx, iPrimarygreeny,
-                                                iPrimarybluex,  iPrimarybluey);
+#ifdef MNG_SUPPORT_DISPLAY
+    {
+        mng_uint32 iWhitepointx, iWhitepointy;
+        mng_uint32 iPrimaryredx, iPrimaryredy;
+        mng_uint32 iPrimarygreenx, iPrimarygreeny;
+        mng_uint32 iPrimarybluex, iPrimarybluey;
 
-        if (iRetcode)                  /* on error bail out */
-          return iRetcode;
-      }
+        iWhitepointx = mng_get_uint32(pRawdata);
+        iWhitepointy = mng_get_uint32(pRawdata + 4);
+        iPrimaryredx = mng_get_uint32(pRawdata + 8);
+        iPrimaryredy = mng_get_uint32(pRawdata + 12);
+        iPrimarygreenx = mng_get_uint32(pRawdata + 16);
+        iPrimarygreeny = mng_get_uint32(pRawdata + 20);
+        iPrimarybluex = mng_get_uint32(pRawdata + 24);
+        iPrimarybluey = mng_get_uint32(pRawdata + 28);
+
+#ifdef MNG_INCLUDE_JNG
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+#else
+            if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+#endif
+        {
+            mng_imagep pImage;
+            mng_imagedatap pBuf;
+
+            if (pData->bHasDHDR)             /* update delta image ? */
+            {                                /* store it in object 0 ! */
+                pImage = (mng_imagep) pData->pObjzero;
+
+                pBuf = pImage->pImgbuf;        /* address object buffer */
+                pBuf->bHasCHRM = MNG_TRUE;     /* and tell it it's got a CHRM now */
+                /* store for color-processing routines */
+                pBuf->iWhitepointx = iWhitepointx;
+                pBuf->iWhitepointy = iWhitepointy;
+                pBuf->iPrimaryredx = iPrimaryredx;
+                pBuf->iPrimaryredy = iPrimaryredy;
+                pBuf->iPrimarygreenx = iPrimarygreenx;
+                pBuf->iPrimarygreeny = iPrimarygreeny;
+                pBuf->iPrimarybluex = iPrimarybluex;
+                pBuf->iPrimarybluey = iPrimarybluey;
+            } else {
+                pImage = (mng_imagep) pData->pCurrentobj;
+
+                if (!pImage)                   /* no object then dump it in obj 0 */
+                    pImage = (mng_imagep) pData->pObjzero;
+
+                pBuf = pImage->pImgbuf;        /* address object buffer */
+                pBuf->bHasCHRM = MNG_TRUE;     /* and tell it it's got a CHRM now */
+                /* store for color-processing routines */
+                pBuf->iWhitepointx = iWhitepointx;
+                pBuf->iWhitepointy = iWhitepointy;
+                pBuf->iPrimaryredx = iPrimaryredx;
+                pBuf->iPrimaryredy = iPrimaryredy;
+                pBuf->iPrimarygreenx = iPrimarygreenx;
+                pBuf->iPrimarygreeny = iPrimarygreeny;
+                pBuf->iPrimarybluex = iPrimarybluex;
+                pBuf->iPrimarybluey = iPrimarybluey;
+            }
+        } else {                                  /* store as global */
+            if (iRawlen != 0) {
+                pData->iGlobalWhitepointx = iWhitepointx;
+                pData->iGlobalWhitepointy = iWhitepointy;
+                pData->iGlobalPrimaryredx = iPrimaryredx;
+                pData->iGlobalPrimaryredy = iPrimaryredy;
+                pData->iGlobalPrimarygreenx = iPrimarygreenx;
+                pData->iGlobalPrimarygreeny = iPrimarygreeny;
+                pData->iGlobalPrimarybluex = iPrimarybluex;
+                pData->iGlobalPrimarybluey = iPrimarybluey;
+            }
+
+            {                                /* create an animation object */
+                mng_retcode iRetcode = create_ani_chrm(pData, (mng_bool) (iRawlen == 0),
+                                                       iWhitepointx, iWhitepointy,
+                                                       iPrimaryredx, iPrimaryredy,
+                                                       iPrimarygreenx, iPrimarygreeny,
+                                                       iPrimarybluex, iPrimarybluey);
+
+                if (iRetcode)                  /* on error bail out */
+                    return iRetcode;
+            }
+        }
     }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1535,109 +1445,100 @@ READ_CHUNK (read_chrm)
       ((mng_chrmp)*ppChunk)->iGreeny      = mng_get_uint32 (pRawdata+20);
       ((mng_chrmp)*ppChunk)->iBluex       = mng_get_uint32 (pRawdata+24);
       ((mng_chrmp)*ppChunk)->iBluey       = mng_get_uint32 (pRawdata+28);
-    }  
+    }
   }
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CHRM, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_CHRM, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_srgb)
-{
+READ_CHUNK (read_srgb) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SRGB, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SRGB, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if ((pData->bHasIDAT) || (pData->bHasPLTE))
+        if ((pData->bHasIDAT) || (pData->bHasPLTE))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-  {                                    /* length must be exactly 1 */
-    if (iRawlen != 1)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {                                    /* length must be empty or exactly 1 */
-    if ((iRawlen != 0) && (iRawlen != 1))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
+    {                                    /* length must be exactly 1 */
+        if (iRawlen != 1) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {                                    /* length must be empty or exactly 1 */
+        if ((iRawlen != 0) && (iRawlen != 1)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-    pData->bHasSRGB = MNG_TRUE;        /* indicate we've got it */
-  else
-    pData->bHasglobalSRGB = (mng_bool)(iRawlen != 0);
+        pData->bHasSRGB = MNG_TRUE;        /* indicate we've got it */
+    else
+        pData->bHasglobalSRGB = (mng_bool) (iRawlen != 0);
 
 #ifdef MNG_SUPPORT_DISPLAY
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-  {
-    mng_imagep pImage;
-
-    if (pData->bHasDHDR)               /* update delta image ? */
-    {                                  /* store in object 0 ! */
-      pImage = (mng_imagep)pData->pObjzero;
-                                       /* store for color-processing routines */
-      pImage->pImgbuf->iRenderingintent = *pRawdata;
-      pImage->pImgbuf->bHasSRGB         = MNG_TRUE;
-    }
-    else
     {
-      pImage = (mng_imagep)pData->pCurrentobj;
+        mng_imagep pImage;
 
-      if (!pImage)                     /* no object then dump it in obj 0 */
-        pImage = (mng_imagep)pData->pObjzero;
-                                       /* store for color-processing routines */
-      pImage->pImgbuf->iRenderingintent = *pRawdata;
-      pImage->pImgbuf->bHasSRGB         = MNG_TRUE;
+        if (pData->bHasDHDR)               /* update delta image ? */
+        {                                  /* store in object 0 ! */
+            pImage = (mng_imagep) pData->pObjzero;
+            /* store for color-processing routines */
+            pImage->pImgbuf->iRenderingintent = *pRawdata;
+            pImage->pImgbuf->bHasSRGB = MNG_TRUE;
+        } else {
+            pImage = (mng_imagep) pData->pCurrentobj;
+
+            if (!pImage)                     /* no object then dump it in obj 0 */
+                pImage = (mng_imagep) pData->pObjzero;
+            /* store for color-processing routines */
+            pImage->pImgbuf->iRenderingintent = *pRawdata;
+            pImage->pImgbuf->bHasSRGB = MNG_TRUE;
+        }
+    } else {                                    /* store as global */
+        if (iRawlen != 0)
+            pData->iGlobalRendintent = *pRawdata;
+
+        {                                  /* create an animation object */
+            mng_retcode iRetcode = create_ani_srgb(pData, (mng_bool) (iRawlen == 0),
+                                                   pData->iGlobalRendintent);
+
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
     }
-  }
-  else
-  {                                    /* store as global */
-    if (iRawlen != 0)
-      pData->iGlobalRendintent = *pRawdata;
-
-    {                                  /* create an animation object */
-      mng_retcode iRetcode = create_ani_srgb (pData, (mng_bool)(iRawlen == 0),
-                                              pData->iGlobalRendintent);
-
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
-    }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1653,173 +1554,158 @@ READ_CHUNK (read_srgb)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SRGB, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SRGB, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_iccp)
-{
-  mng_retcode iRetcode;
-  mng_uint8p  pTemp;
-  mng_uint32  iCompressedsize;
-  mng_uint32  iProfilesize;
-  mng_uint32  iBufsize = 0;
-  mng_uint8p  pBuf = 0;
+READ_CHUNK (read_iccp) {
+    mng_retcode iRetcode;
+    mng_uint8p pTemp;
+    mng_uint32 iCompressedsize;
+    mng_uint32 iProfilesize;
+    mng_uint32 iBufsize = 0;
+    mng_uint8p pBuf = 0;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ICCP, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_ICCP, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasPLTE) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if ((pData->bHasIDAT) || (pData->bHasPLTE))
+        if ((pData->bHasIDAT) || (pData->bHasPLTE))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
-#else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-#endif
-  {                                    /* length must be at least 2 */
-    if (iRawlen < 2)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {                                    /* length must be empty or at least 2 */
-    if ((iRawlen != 0) && (iRawlen < 2))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-
-  pTemp = find_null (pRawdata);        /* find null-separator */
-                                       /* not found inside input-data ? */
-  if ((pTemp - pRawdata) > (mng_int32)iRawlen)
-    MNG_ERROR (pData, MNG_NULLNOTFOUND)
-                                       /* determine size of compressed profile */
-  iCompressedsize = (mng_uint32)(iRawlen - (pTemp - pRawdata) - 2);
-                                       /* decompress the profile */
-  iRetcode = inflate_buffer (pData, pTemp+2, iCompressedsize,
-                             &pBuf, &iBufsize, &iProfilesize);
-
-#ifdef MNG_CHECK_BAD_ICCP              /* Check for bad iCCP chunk */
-  if ((iRetcode) && (!strncmp ((char *)pRawdata, "Photoshop ICC profile", 21)))
-  {
-    if (iRawlen == 2615)               /* is it the sRGB profile ? */
-    {
-      mng_chunk_header chunk_srgb = {MNG_UINT_sRGB, init_srgb, free_srgb,
-                                     read_srgb, write_srgb, 0, 0};
-                                       /* pretend it's an sRGB chunk then ! */
-      iRetcode = read_srgb (pData, &chunk_srgb, 1, (mng_ptr)"0", ppChunk);
-
-      if (iRetcode)                    /* on error bail out */
-      {                                /* don't forget to drop the temp buffer */
-        MNG_FREEX (pData, pBuf, iBufsize)
-        return iRetcode;
-      }
-    }
-  }
-  else
-  {
-#endif /* MNG_CHECK_BAD_ICCP */
-
-    if (iRetcode)                      /* on error bail out */
-    {                                  /* don't forget to drop the temp buffer */
-      MNG_FREEX (pData, pBuf, iBufsize)
-      return iRetcode;
-    }
-
-#ifdef MNG_INCLUDE_JNG
     if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-      pData->bHasICCP = MNG_TRUE;      /* indicate we've got it */
-    else
-      pData->bHasglobalICCP = (mng_bool)(iRawlen != 0);
+    {                                    /* length must be at least 2 */
+        if (iRawlen < 2) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {                                    /* length must be empty or at least 2 */
+        if ((iRawlen != 0) && (iRawlen < 2)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
+
+    pTemp = find_null(pRawdata);        /* find null-separator */
+    /* not found inside input-data ? */
+    if ((pTemp - pRawdata) > (mng_int32) iRawlen) MNG_ERROR (pData, MNG_NULLNOTFOUND)
+    /* determine size of compressed profile */
+    iCompressedsize = (mng_uint32)(iRawlen - (pTemp - pRawdata) - 2);
+    /* decompress the profile */
+    iRetcode = inflate_buffer(pData, pTemp + 2, iCompressedsize,
+                              &pBuf, &iBufsize, &iProfilesize);
+
+#ifdef MNG_CHECK_BAD_ICCP              /* Check for bad iCCP chunk */
+    if ((iRetcode) && (!strncmp((char *) pRawdata, "Photoshop ICC profile", 21))) {
+        if (iRawlen == 2615)               /* is it the sRGB profile ? */
+        {
+            mng_chunk_header chunk_srgb = {MNG_UINT_sRGB, init_srgb, free_srgb,
+                                           read_srgb, write_srgb, 0, 0};
+            /* pretend it's an sRGB chunk then ! */
+            iRetcode = read_srgb(pData, &chunk_srgb, 1, (mng_ptr) "0", ppChunk);
+
+            if (iRetcode)                    /* on error bail out */
+            {                                /* don't forget to drop the temp buffer */
+                MNG_FREEX (pData, pBuf, iBufsize)
+                return iRetcode;
+            }
+        }
+    } else {
+#endif /* MNG_CHECK_BAD_ICCP */
+
+        if (iRetcode)                      /* on error bail out */
+        {                                  /* don't forget to drop the temp buffer */
+            MNG_FREEX (pData, pBuf, iBufsize)
+            return iRetcode;
+        }
+
+#ifdef MNG_INCLUDE_JNG
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+#else
+            if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+#endif
+            pData->bHasICCP = MNG_TRUE;      /* indicate we've got it */
+        else
+            pData->bHasglobalICCP = (mng_bool) (iRawlen != 0);
 
 #ifdef MNG_SUPPORT_DISPLAY
 #ifdef MNG_INCLUDE_JNG
-    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+            if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-    {
-      mng_imagep pImage;
+        {
+            mng_imagep pImage;
 
-      if (pData->bHasDHDR)             /* update delta image ? */
-      {                                /* store in object 0 ! */
-        pImage = (mng_imagep)pData->pObjzero;
+            if (pData->bHasDHDR)             /* update delta image ? */
+            {                                /* store in object 0 ! */
+                pImage = (mng_imagep) pData->pObjzero;
 
-        if (pImage->pImgbuf->pProfile) /* profile existed ? */
-          MNG_FREEX (pData, pImage->pImgbuf->pProfile, pImage->pImgbuf->iProfilesize)
-                                       /* allocate a buffer & copy it */
-        MNG_ALLOC (pData, pImage->pImgbuf->pProfile, iProfilesize)
-        MNG_COPY  (pImage->pImgbuf->pProfile, pBuf, iProfilesize)
-                                       /* store it's length as well */
-        pImage->pImgbuf->iProfilesize = iProfilesize;
-        pImage->pImgbuf->bHasICCP     = MNG_TRUE;
-      }
-      else
-      {
-        pImage = (mng_imagep)pData->pCurrentobj;
+                if (pImage->pImgbuf->pProfile) /* profile existed ? */
+                MNG_FREEX (pData, pImage->pImgbuf->pProfile, pImage->pImgbuf->iProfilesize)
+                /* allocate a buffer & copy it */
+                MNG_ALLOC (pData, pImage->pImgbuf->pProfile, iProfilesize)
+                MNG_COPY  (pImage->pImgbuf->pProfile, pBuf, iProfilesize)
+                /* store it's length as well */
+                pImage->pImgbuf->iProfilesize = iProfilesize;
+                pImage->pImgbuf->bHasICCP = MNG_TRUE;
+            } else {
+                pImage = (mng_imagep) pData->pCurrentobj;
 
-        if (!pImage)                   /* no object then dump it in obj 0 */
-          pImage = (mng_imagep)pData->pObjzero;
+                if (!pImage)                   /* no object then dump it in obj 0 */
+                    pImage = (mng_imagep) pData->pObjzero;
 
-        if (pImage->pImgbuf->pProfile) /* profile existed ? */
-          MNG_FREEX (pData, pImage->pImgbuf->pProfile, pImage->pImgbuf->iProfilesize)
-                                       /* allocate a buffer & copy it */
-        MNG_ALLOC (pData, pImage->pImgbuf->pProfile, iProfilesize)
-        MNG_COPY  (pImage->pImgbuf->pProfile, pBuf, iProfilesize)
-                                       /* store it's length as well */
-        pImage->pImgbuf->iProfilesize = iProfilesize;
-        pImage->pImgbuf->bHasICCP     = MNG_TRUE;
-      }
-    }
-    else
-    {                                  /* store as global */
-      if (iRawlen == 0)                /* empty chunk ? */
-      {
-        if (pData->pGlobalProfile)     /* did we have a global profile ? */
-          MNG_FREEX (pData, pData->pGlobalProfile, pData->iGlobalProfilesize)
+                if (pImage->pImgbuf->pProfile) /* profile existed ? */
+                MNG_FREEX (pData, pImage->pImgbuf->pProfile, pImage->pImgbuf->iProfilesize)
+                /* allocate a buffer & copy it */
+                MNG_ALLOC (pData, pImage->pImgbuf->pProfile, iProfilesize)
+                MNG_COPY  (pImage->pImgbuf->pProfile, pBuf, iProfilesize)
+                /* store it's length as well */
+                pImage->pImgbuf->iProfilesize = iProfilesize;
+                pImage->pImgbuf->bHasICCP = MNG_TRUE;
+            }
+        } else {                                  /* store as global */
+            if (iRawlen == 0)                /* empty chunk ? */
+            {
+                if (pData->pGlobalProfile)     /* did we have a global profile ? */
+                MNG_FREEX (pData, pData->pGlobalProfile, pData->iGlobalProfilesize)
 
-        pData->iGlobalProfilesize = 0; /* reset to null */
-        pData->pGlobalProfile     = MNG_NULL; 
-      }
-      else
-      {                                /* allocate a global buffer & copy it */
-        MNG_ALLOC (pData, pData->pGlobalProfile, iProfilesize)
-        MNG_COPY  (pData->pGlobalProfile, pBuf, iProfilesize)
-                                       /* store it's length as well */
-        pData->iGlobalProfilesize = iProfilesize;
-      }
+                pData->iGlobalProfilesize = 0; /* reset to null */
+                pData->pGlobalProfile = MNG_NULL;
+            } else {                                /* allocate a global buffer & copy it */
+                MNG_ALLOC (pData, pData->pGlobalProfile, iProfilesize)
+                MNG_COPY  (pData->pGlobalProfile, pBuf, iProfilesize)
+                /* store it's length as well */
+                pData->iGlobalProfilesize = iProfilesize;
+            }
 
-                                       /* create an animation object */
-      iRetcode = create_ani_iccp (pData, (mng_bool)(iRawlen == 0),
-                                  pData->iGlobalProfilesize,
-                                  pData->pGlobalProfile);
+            /* create an animation object */
+            iRetcode = create_ani_iccp(pData, (mng_bool) (iRawlen == 0),
+                                       pData->iGlobalProfilesize,
+                                       pData->pGlobalProfile);
 
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
-    }
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-    if (pData->bStorechunks)
+                                                                                                                                if (pData->bStorechunks)
     {                                  /* initialize storage */
       iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1871,85 +1757,81 @@ READ_CHUNK (read_iccp)
     }
 #endif /* MNG_STORE_CHUNKS */
 
-    if (pBuf)                          /* free the temporary buffer */
-      MNG_FREEX (pData, pBuf, iBufsize)
+        if (pBuf)                          /* free the temporary buffer */
+        MNG_FREEX (pData, pBuf, iBufsize)
 
 #ifdef MNG_CHECK_BAD_ICCP
-  }
+    }
 #endif
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ICCP, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_ICCP, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_text)
-{
-  mng_uint32 iKeywordlen, iTextlen;
-  mng_pchar  zKeyword, zText;
-  mng_uint8p pTemp;
+READ_CHUNK (read_text) {
+    mng_uint32 iKeywordlen, iTextlen;
+    mng_pchar zKeyword, zText;
+    mng_uint8p pTemp;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TEXT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_TEXT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 2)                     /* length must be at least 2 */
+    if (iRawlen < 2)                     /* length must be at least 2 */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pTemp = find_null (pRawdata);        /* find the null separator */
-                                       /* not found inside input-data ? */
-  if ((pTemp - pRawdata) > (mng_int32)iRawlen)
-    MNG_ERROR (pData, MNG_NULLNOTFOUND)
+    pTemp = find_null(pRawdata);        /* find the null separator */
+    /* not found inside input-data ? */
+    if ((pTemp - pRawdata) > (mng_int32) iRawlen) MNG_ERROR (pData, MNG_NULLNOTFOUND)
 
-  if (pTemp == pRawdata)               /* there must be at least 1 char for keyword */
+    if (pTemp == pRawdata)               /* there must be at least 1 char for keyword */
     MNG_ERROR (pData, MNG_KEYWORDNULL)
 
-  iKeywordlen = (mng_uint32)(pTemp - pRawdata);
-  iTextlen    = iRawlen - iKeywordlen - 1;
+    iKeywordlen = (mng_uint32)(pTemp - pRawdata);
+    iTextlen = iRawlen - iKeywordlen - 1;
 
-  if (pData->fProcesstext)             /* inform the application ? */
-  {
-    mng_bool bOke;
-
-    MNG_ALLOC (pData, zKeyword, iKeywordlen + 1)
-    MNG_COPY  (zKeyword, pRawdata, iKeywordlen)
-
-    MNG_ALLOCX (pData, zText, iTextlen + 1)
-
-    if (!zText)                        /* on error bail out */
+    if (pData->fProcesstext)             /* inform the application ? */
     {
-      MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
-      MNG_ERROR (pData, MNG_OUTOFMEMORY)
+        mng_bool bOke;
+
+        MNG_ALLOC (pData, zKeyword, iKeywordlen + 1)
+        MNG_COPY  (zKeyword, pRawdata, iKeywordlen)
+
+        MNG_ALLOCX (pData, zText, iTextlen + 1)
+
+        if (!zText)                        /* on error bail out */
+        {
+            MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+            MNG_ERROR (pData, MNG_OUTOFMEMORY)
+        }
+
+        if (iTextlen) MNG_COPY (zText, pTemp + 1, iTextlen)
+
+        bOke = pData->fProcesstext((mng_handle) pData, MNG_TYPE_TEXT, zKeyword, zText, 0, 0);
+
+        MNG_FREEX (pData, zText, iTextlen + 1)
+        MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+
+        if (!bOke) MNG_ERROR (pData, MNG_APPMISCERROR)
+
     }
 
-    if (iTextlen)
-      MNG_COPY (zText, pTemp+1, iTextlen)
-
-    bOke = pData->fProcesstext ((mng_handle)pData, MNG_TYPE_TEXT, zKeyword, zText, 0, 0);
-
-    MNG_FREEX (pData, zText, iTextlen + 1)
-    MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
-
-    if (!bOke)
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-
-  }
-
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -1974,88 +1856,86 @@ READ_CHUNK (read_text)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TEXT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_TEXT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_ztxt)
-{
-  mng_retcode iRetcode;
-  mng_uint32  iKeywordlen, iTextlen;
-  mng_pchar   zKeyword;
-  mng_uint8p  pTemp;
-  mng_uint32  iCompressedsize;
-  mng_uint32  iBufsize;
-  mng_uint8p  pBuf;
+READ_CHUNK (read_ztxt) {
+    mng_retcode iRetcode;
+    mng_uint32 iKeywordlen, iTextlen;
+    mng_pchar zKeyword;
+    mng_uint8p pTemp;
+    mng_uint32 iCompressedsize;
+    mng_uint32 iBufsize;
+    mng_uint8p pBuf;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ZTXT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_ZTXT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 3)                     /* length must be at least 3 */
+    if (iRawlen < 3)                     /* length must be at least 3 */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pTemp = find_null (pRawdata);        /* find the null separator */
-                                       /* not found inside input-data ? */
-  if ((pTemp - pRawdata) > (mng_int32)iRawlen)
-    MNG_ERROR (pData, MNG_NULLNOTFOUND)
+    pTemp = find_null(pRawdata);        /* find the null separator */
+    /* not found inside input-data ? */
+    if ((pTemp - pRawdata) > (mng_int32) iRawlen) MNG_ERROR (pData, MNG_NULLNOTFOUND)
 
-  if (pTemp == pRawdata)               /* there must be at least 1 char for keyword */
+    if (pTemp == pRawdata)               /* there must be at least 1 char for keyword */
     MNG_ERROR (pData, MNG_KEYWORDNULL)
 
-  if (*(pTemp+1) != 0)                 /* only deflate compression-method allowed */
+    if (*(pTemp + 1) != 0)                 /* only deflate compression-method allowed */
     MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-  iKeywordlen     = (mng_uint32)(pTemp - pRawdata);
-  iCompressedsize = (mng_uint32)(iRawlen - iKeywordlen - 2);
+    iKeywordlen = (mng_uint32)(pTemp - pRawdata);
+    iCompressedsize = (mng_uint32)(iRawlen - iKeywordlen - 2);
 
-  zKeyword        = 0;                 /* there's no keyword buffer yet */
-  pBuf            = 0;                 /* or a temporary buffer ! */
+    zKeyword = 0;                 /* there's no keyword buffer yet */
+    pBuf = 0;                 /* or a temporary buffer ! */
 
-  if (pData->fProcesstext)             /* inform the application ? */
-  {                                    /* decompress the text */
-    iRetcode = inflate_buffer (pData, pTemp+2, iCompressedsize,
-                               &pBuf, &iBufsize, &iTextlen);
+    if (pData->fProcesstext)             /* inform the application ? */
+    {                                    /* decompress the text */
+        iRetcode = inflate_buffer(pData, pTemp + 2, iCompressedsize,
+                                  &pBuf, &iBufsize, &iTextlen);
 
-    if (iRetcode)                      /* on error bail out */
-    {                                  /* don't forget to drop the temp buffers */
-      MNG_FREEX (pData, pBuf, iBufsize)
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+        {                                  /* don't forget to drop the temp buffers */
+            MNG_FREEX (pData, pBuf, iBufsize)
+            return iRetcode;
+        }
+
+        MNG_ALLOCX (pData, zKeyword, iKeywordlen + 1)
+
+        if (!zKeyword)                     /* on error bail out */
+        {                                  /* don't forget to drop the temp buffers */
+            MNG_FREEX (pData, pBuf, iBufsize)
+            MNG_ERROR (pData, MNG_OUTOFMEMORY);
+        }
+
+        MNG_COPY (zKeyword, pRawdata, iKeywordlen)
+
+        if (!pData->fProcesstext((mng_handle) pData, MNG_TYPE_ZTXT, zKeyword, (mng_pchar) pBuf, 0,
+                                 0)) {                                  /* don't forget to drop the temp buffers */
+            MNG_FREEX (pData, pBuf, iBufsize)
+            MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+            MNG_ERROR (pData, MNG_APPMISCERROR)
+        }
     }
-
-    MNG_ALLOCX (pData, zKeyword, iKeywordlen+1)
-
-    if (!zKeyword)                     /* on error bail out */
-    {                                  /* don't forget to drop the temp buffers */
-      MNG_FREEX (pData, pBuf, iBufsize)
-      MNG_ERROR (pData, MNG_OUTOFMEMORY);
-    }
-
-    MNG_COPY (zKeyword, pRawdata, iKeywordlen)
-
-    if (!pData->fProcesstext ((mng_handle)pData, MNG_TYPE_ZTXT, zKeyword, (mng_pchar)pBuf, 0, 0))
-    {                                  /* don't forget to drop the temp buffers */
-      MNG_FREEX (pData, pBuf, iBufsize)
-      MNG_FREEX (pData, zKeyword, iKeywordlen+1)
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-    }
-  }
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                                if (pData->bStorechunks)
   {                                    /* initialize storage */
     iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2111,128 +1991,123 @@ READ_CHUNK (read_ztxt)
   }
 #endif /* MNG_STORE_CHUNKS */
 
-  MNG_FREEX (pData, pBuf, iBufsize)    /* free the temporary buffers */
-  MNG_FREEX (pData, zKeyword, iKeywordlen+1)
+    MNG_FREEX (pData, pBuf, iBufsize)    /* free the temporary buffers */
+    MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ZTXT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_ZTXT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_itxt)
-{
-  mng_retcode iRetcode;
-  mng_uint32  iKeywordlen, iTextlen, iLanguagelen, iTranslationlen;
-  mng_pchar   zKeyword, zLanguage, zTranslation;
-  mng_uint8p  pNull1, pNull2, pNull3;
-  mng_uint32  iCompressedsize;
-  mng_uint8   iCompressionflag;
-  mng_uint32  iBufsize;
-  mng_uint8p  pBuf;
+READ_CHUNK (read_itxt) {
+    mng_retcode iRetcode;
+    mng_uint32 iKeywordlen, iTextlen, iLanguagelen, iTranslationlen;
+    mng_pchar zKeyword, zLanguage, zTranslation;
+    mng_uint8p pNull1, pNull2, pNull3;
+    mng_uint32 iCompressedsize;
+    mng_uint8 iCompressionflag;
+    mng_uint32 iBufsize;
+    mng_uint8p pBuf;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ITXT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_ITXT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 6)                     /* length must be at least 6 */
+    if (iRawlen < 6)                     /* length must be at least 6 */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pNull1 = find_null (pRawdata);       /* find the null separators */
-  pNull2 = find_null (pNull1+3);
-  pNull3 = find_null (pNull2+1);
-                                       /* not found inside input-data ? */
-  if (((pNull1 - pRawdata) > (mng_int32)iRawlen) ||
-      ((pNull2 - pRawdata) > (mng_int32)iRawlen) ||
-      ((pNull3 - pRawdata) > (mng_int32)iRawlen)    )
-    MNG_ERROR (pData, MNG_NULLNOTFOUND)
+    pNull1 = find_null(pRawdata);       /* find the null separators */
+    pNull2 = find_null(pNull1 + 3);
+    pNull3 = find_null(pNull2 + 1);
+    /* not found inside input-data ? */
+    if (((pNull1 - pRawdata) > (mng_int32) iRawlen) ||
+        ((pNull2 - pRawdata) > (mng_int32) iRawlen) ||
+        ((pNull3 - pRawdata) > (mng_int32) iRawlen)) MNG_ERROR (pData, MNG_NULLNOTFOUND)
 
-  if (pNull1 == pRawdata)              /* there must be at least 1 char for keyword */
+    if (pNull1 == pRawdata)              /* there must be at least 1 char for keyword */
     MNG_ERROR (pData, MNG_KEYWORDNULL)
-                                       /* compression or not ? */
-  if ((*(pNull1+1) != 0) && (*(pNull1+1) != 1))
+    /* compression or not ? */
+    if ((*(pNull1 + 1) != 0) && (*(pNull1 + 1) != 1)) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+
+    if (*(pNull1 + 2) != 0)                /* only deflate compression-method allowed */
     MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-  if (*(pNull1+2) != 0)                /* only deflate compression-method allowed */
-    MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+    iKeywordlen = (mng_uint32)(pNull1 - pRawdata);
+    iLanguagelen = (mng_uint32)(pNull2 - pNull1 - 3);
+    iTranslationlen = (mng_uint32)(pNull3 - pNull2 - 1);
+    iCompressedsize = (mng_uint32)(iRawlen - iKeywordlen - iLanguagelen - iTranslationlen - 5);
+    iCompressionflag = *(pNull1 + 1);
 
-  iKeywordlen      = (mng_uint32)(pNull1 - pRawdata);
-  iLanguagelen     = (mng_uint32)(pNull2 - pNull1 - 3);
-  iTranslationlen  = (mng_uint32)(pNull3 - pNull2 - 1);
-  iCompressedsize  = (mng_uint32)(iRawlen - iKeywordlen - iLanguagelen - iTranslationlen - 5);
-  iCompressionflag = *(pNull1+1);
+    zKeyword = 0;                    /* no buffers acquired yet */
+    zLanguage = 0;
+    zTranslation = 0;
+    pBuf = 0;
+    iTextlen = 0;
 
-  zKeyword     = 0;                    /* no buffers acquired yet */
-  zLanguage    = 0;
-  zTranslation = 0;
-  pBuf         = 0;
-  iTextlen     = 0;
-
-  if (pData->fProcesstext)             /* inform the application ? */
-  {
-    if (iCompressionflag)              /* decompress the text ? */
+    if (pData->fProcesstext)             /* inform the application ? */
     {
-      iRetcode = inflate_buffer (pData, pNull3+1, iCompressedsize,
-                                 &pBuf, &iBufsize, &iTextlen);
+        if (iCompressionflag)              /* decompress the text ? */
+        {
+            iRetcode = inflate_buffer(pData, pNull3 + 1, iCompressedsize,
+                                      &pBuf, &iBufsize, &iTextlen);
 
-      if (iRetcode)                    /* on error bail out */
-      {                                /* don't forget to drop the temp buffer */
-        MNG_FREEX (pData, pBuf, iBufsize)
-        return iRetcode;
-      }
+            if (iRetcode)                    /* on error bail out */
+            {                                /* don't forget to drop the temp buffer */
+                MNG_FREEX (pData, pBuf, iBufsize)
+                return iRetcode;
+            }
+        } else {
+            iTextlen = iCompressedsize;
+            iBufsize = iTextlen + 1;           /* plus 1 for terminator byte!!! */
+
+            MNG_ALLOCX (pData, pBuf, iBufsize);
+            MNG_COPY   (pBuf, pNull3 + 1, iTextlen);
+        }
+
+        MNG_ALLOCX (pData, zKeyword, iKeywordlen + 1)
+        MNG_ALLOCX (pData, zLanguage, iLanguagelen + 1)
+        MNG_ALLOCX (pData, zTranslation, iTranslationlen + 1)
+        /* on error bail out */
+        if ((!zKeyword) || (!zLanguage) ||
+            (!zTranslation)) {                                  /* don't forget to drop the temp buffers */
+            MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
+            MNG_FREEX (pData, zLanguage, iLanguagelen + 1)
+            MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+            MNG_FREEX (pData, pBuf, iBufsize)
+            MNG_ERROR (pData, MNG_OUTOFMEMORY)
+        }
+
+        MNG_COPY (zKeyword, pRawdata, iKeywordlen)
+        MNG_COPY (zLanguage, pNull1 + 3, iLanguagelen)
+        MNG_COPY (zTranslation, pNull2 + 1, iTranslationlen)
+
+        if (!pData->fProcesstext((mng_handle) pData, MNG_TYPE_ITXT, zKeyword, (mng_pchar) pBuf,
+                                 zLanguage,
+                                 zTranslation)) {                                  /* don't forget to drop the temp buffers */
+            MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
+            MNG_FREEX (pData, zLanguage, iLanguagelen + 1)
+            MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+            MNG_FREEX (pData, pBuf, iBufsize)
+
+            MNG_ERROR (pData, MNG_APPMISCERROR)
+        }
     }
-    else
-    {
-      iTextlen = iCompressedsize;
-      iBufsize = iTextlen+1;           /* plus 1 for terminator byte!!! */
-
-      MNG_ALLOCX (pData, pBuf, iBufsize);
-      MNG_COPY   (pBuf, pNull3+1, iTextlen);
-    }
-
-    MNG_ALLOCX (pData, zKeyword,     iKeywordlen     + 1)
-    MNG_ALLOCX (pData, zLanguage,    iLanguagelen    + 1)
-    MNG_ALLOCX (pData, zTranslation, iTranslationlen + 1)
-                                       /* on error bail out */
-    if ((!zKeyword) || (!zLanguage) || (!zTranslation))
-    {                                  /* don't forget to drop the temp buffers */
-      MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
-      MNG_FREEX (pData, zLanguage,    iLanguagelen    + 1)
-      MNG_FREEX (pData, zKeyword,     iKeywordlen     + 1)
-      MNG_FREEX (pData, pBuf, iBufsize)
-      MNG_ERROR (pData, MNG_OUTOFMEMORY)
-    }
-
-    MNG_COPY (zKeyword,     pRawdata, iKeywordlen)
-    MNG_COPY (zLanguage,    pNull1+3, iLanguagelen)
-    MNG_COPY (zTranslation, pNull2+1, iTranslationlen)
-
-    if (!pData->fProcesstext ((mng_handle)pData, MNG_TYPE_ITXT, zKeyword, (mng_pchar)pBuf,
-                                                                zLanguage, zTranslation))
-    {                                  /* don't forget to drop the temp buffers */
-      MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
-      MNG_FREEX (pData, zLanguage,    iLanguagelen    + 1)
-      MNG_FREEX (pData, zKeyword,     iKeywordlen     + 1)
-      MNG_FREEX (pData, pBuf,         iBufsize)
-      
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-    }
-  }
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                                if (pData->bStorechunks)
   {                                    /* initialize storage */
     iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2315,163 +2190,151 @@ READ_CHUNK (read_itxt)
     }
   }
 #endif /* MNG_STORE_CHUNKS */
-                                       /* free the temporary buffers */
-  MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
-  MNG_FREEX (pData, zLanguage,    iLanguagelen    + 1)
-  MNG_FREEX (pData, zKeyword,     iKeywordlen     + 1)
-  MNG_FREEX (pData, pBuf,         iBufsize)
+    /* free the temporary buffers */
+    MNG_FREEX (pData, zTranslation, iTranslationlen + 1)
+    MNG_FREEX (pData, zLanguage, iLanguagelen + 1)
+    MNG_FREEX (pData, zKeyword, iKeywordlen + 1)
+    MNG_FREEX (pData, pBuf, iBufsize)
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ITXT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_ITXT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_bkgd)
-{
+READ_CHUNK (read_bkgd) {
 #ifdef MNG_SUPPORT_DISPLAY
-  mng_imagep     pImage = (mng_imagep)pData->pCurrentobj;
-  mng_imagedatap pBuf;
+    mng_imagep pImage = (mng_imagep) pData->pCurrentobj;
+    mng_imagedatap pBuf;
 #endif
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BKGD, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_BKGD, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if (pData->bHasIDAT)
+        if (pData->bHasIDAT)
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen > 6)                     /* it just can't be bigger than that! */
+    if (iRawlen > 6)                     /* it just can't be bigger than that! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_INCLUDE_JNG                 /* length checks */
-  if (pData->bHasJHDR)
-  {
-    if (((pData->iJHDRcolortype == 8) || (pData->iJHDRcolortype == 12)) && (iRawlen != 2))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if (pData->bHasJHDR) {
+        if (((pData->iJHDRcolortype == 8) || (pData->iJHDRcolortype == 12)) && (iRawlen != 2)) MNG_ERROR (pData,
+                                                                                                          MNG_INVALIDLENGTH)
 
-    if (((pData->iJHDRcolortype == 10) || (pData->iJHDRcolortype == 14)) && (iRawlen != 6))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
+        if (((pData->iJHDRcolortype == 10) || (pData->iJHDRcolortype == 14)) && (iRawlen != 6)) MNG_ERROR (pData,
+                                                                                                           MNG_INVALIDLENGTH)
+    } else
 #endif /* MNG_INCLUDE_JNG */
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {
-    if (((pData->iColortype == 0) || (pData->iColortype == 4)) && (iRawlen != 2))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {
+        if (((pData->iColortype == 0) || (pData->iColortype == 4)) && (iRawlen != 2)) MNG_ERROR (pData,
+                                                                                                 MNG_INVALIDLENGTH)
 
-    if (((pData->iColortype == 2) || (pData->iColortype == 6)) && (iRawlen != 6))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if (((pData->iColortype == 2) || (pData->iColortype == 6)) && (iRawlen != 6)) MNG_ERROR (pData,
+                                                                                                 MNG_INVALIDLENGTH)
 
-    if ((pData->iColortype == 3) && (iRawlen != 1))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {
-    if (iRawlen != 6)                  /* global is always 16-bit RGB ! */
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
+        if ((pData->iColortype == 3) && (iRawlen != 1)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {
+        if (iRawlen != 6)                  /* global is always 16-bit RGB ! */
+        MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
-    pData->bHasBKGD = MNG_TRUE;        /* indicate bKGD available */
-  else
-    pData->bHasglobalBKGD = (mng_bool)(iRawlen != 0);
+        pData->bHasBKGD = MNG_TRUE;        /* indicate bKGD available */
+    else
+        pData->bHasglobalBKGD = (mng_bool) (iRawlen != 0);
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if (!pImage)                         /* if no object dump it in obj 0 */
-    pImage = (mng_imagep)pData->pObjzero;
+    if (!pImage)                         /* if no object dump it in obj 0 */
+        pImage = (mng_imagep) pData->pObjzero;
 
-  pBuf = pImage->pImgbuf;              /* address object buffer */
+    pBuf = pImage->pImgbuf;              /* address object buffer */
 
 #ifdef MNG_INCLUDE_JNG
-  if (pData->bHasJHDR)
-  {
-    pBuf->bHasBKGD = MNG_TRUE;         /* tell the object it's got bKGD now */
+    if (pData->bHasJHDR) {
+        pBuf->bHasBKGD = MNG_TRUE;         /* tell the object it's got bKGD now */
 
-    switch (pData->iJHDRcolortype)     /* store fields for future reference */
-    {
-      case  8 : ;                      /* gray */
-      case 12 : {                      /* graya */
-                  pBuf->iBKGDgray  = mng_get_uint16 (pRawdata);
-                  break;
-                }
-      case 10 : ;                      /* rgb */
-      case 14 : {                      /* rgba */
-                  pBuf->iBKGDred   = mng_get_uint16 (pRawdata);
-                  pBuf->iBKGDgreen = mng_get_uint16 (pRawdata+2);
-                  pBuf->iBKGDblue  = mng_get_uint16 (pRawdata+4);
-                  break;
-                }
-    }
-  }
-  else
+        switch (pData->iJHDRcolortype)     /* store fields for future reference */
+        {
+            case 8 :;                      /* gray */
+            case 12 : {                      /* graya */
+                pBuf->iBKGDgray = mng_get_uint16(pRawdata);
+                break;
+            }
+            case 10 :;                      /* rgb */
+            case 14 : {                      /* rgba */
+                pBuf->iBKGDred = mng_get_uint16(pRawdata);
+                pBuf->iBKGDgreen = mng_get_uint16(pRawdata + 2);
+                pBuf->iBKGDblue = mng_get_uint16(pRawdata + 4);
+                break;
+            }
+        }
+    } else
 #endif /* MNG_INCLUDE_JNG */
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {
-    pBuf->bHasBKGD = MNG_TRUE;         /* tell the object it's got bKGD now */
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {
+        pBuf->bHasBKGD = MNG_TRUE;         /* tell the object it's got bKGD now */
 
-    switch (pData->iColortype)         /* store fields for future reference */
+        switch (pData->iColortype)         /* store fields for future reference */
+        {
+            case 0 :;                        /* gray */
+            case 4 : {                        /* graya */
+                pBuf->iBKGDgray = mng_get_uint16(pRawdata);
+                break;
+            }
+            case 2 :;                        /* rgb */
+            case 6 : {                        /* rgba */
+                pBuf->iBKGDred = mng_get_uint16(pRawdata);
+                pBuf->iBKGDgreen = mng_get_uint16(pRawdata + 2);
+                pBuf->iBKGDblue = mng_get_uint16(pRawdata + 4);
+                break;
+            }
+            case 3 : {                        /* indexed */
+                pBuf->iBKGDindex = *pRawdata;
+                break;
+            }
+        }
+    } else                                 /* store as global */
     {
-      case 0 : ;                        /* gray */
-      case 4 : {                        /* graya */
-                 pBuf->iBKGDgray  = mng_get_uint16 (pRawdata);
-                 break;
-               }
-      case 2 : ;                        /* rgb */
-      case 6 : {                        /* rgba */
-                 pBuf->iBKGDred   = mng_get_uint16 (pRawdata);
-                 pBuf->iBKGDgreen = mng_get_uint16 (pRawdata+2);
-                 pBuf->iBKGDblue  = mng_get_uint16 (pRawdata+4);
-                 break;
-               }
-      case 3 : {                        /* indexed */
-                 pBuf->iBKGDindex = *pRawdata;
-                 break;
-               }
-    }
-  }
-  else                                 /* store as global */
-  {
-    if (iRawlen)
-    {
-      pData->iGlobalBKGDred   = mng_get_uint16 (pRawdata);
-      pData->iGlobalBKGDgreen = mng_get_uint16 (pRawdata+2);
-      pData->iGlobalBKGDblue  = mng_get_uint16 (pRawdata+4);
-    }
+        if (iRawlen) {
+            pData->iGlobalBKGDred = mng_get_uint16(pRawdata);
+            pData->iGlobalBKGDgreen = mng_get_uint16(pRawdata + 2);
+            pData->iGlobalBKGDblue = mng_get_uint16(pRawdata + 4);
+        }
 
-    {                                  /* create an animation object */
-      mng_retcode iRetcode = create_ani_bkgd (pData, pData->iGlobalBKGDred,
-                                              pData->iGlobalBKGDgreen,
-                                              pData->iGlobalBKGDblue);
+        {                                  /* create an animation object */
+            mng_retcode iRetcode = create_ani_bkgd(pData, pData->iGlobalBKGDred,
+                                                   pData->iGlobalBKGDgreen,
+                                                   pData->iGlobalBKGDblue);
 
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
+        }
     }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2508,51 +2371,49 @@ READ_CHUNK (read_bkgd)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BKGD, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_BKGD, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_phys)
-{
+READ_CHUNK (read_phys) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PHYS, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PHYS, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if (pData->bHasIDAT)
+        if (pData->bHasIDAT)
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* it's 9 bytes or empty; no more, no less! */
-  if ((iRawlen != 9) && (iRawlen != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* it's 9 bytes or empty; no more, no less! */
+    if ((iRawlen != 9) && (iRawlen != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2571,91 +2432,75 @@ READ_CHUNK (read_phys)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PHYS, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PHYS, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_sbit)
-{
+READ_CHUNK (read_sbit) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SBIT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SBIT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasPLTE) || (pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
+    if ((pData->bHasPLTE) || (pData->bHasIDAT) || (pData->bHasJDAT) || (pData->bHasJDAA))
 #else
-  if ((pData->bHasPLTE) || (pData->bHasIDAT))
+        if ((pData->bHasPLTE) || (pData->bHasIDAT))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen > 4)                     /* it just can't be bigger than that! */
+    if (iRawlen > 4)                     /* it just can't be bigger than that! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_INCLUDE_JNG                 /* length checks */
-  if (pData->bHasJHDR)
-  {
-    if ((pData->iJHDRcolortype ==  8) && (iRawlen != 1))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if (pData->bHasJHDR) {
+        if ((pData->iJHDRcolortype == 8) && (iRawlen != 1)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iJHDRcolortype == 10) && (iRawlen != 3))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((pData->iJHDRcolortype == 10) && (iRawlen != 3)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iJHDRcolortype == 12) && (iRawlen != 2))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((pData->iJHDRcolortype == 12) && (iRawlen != 2)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iJHDRcolortype == 14) && (iRawlen != 4))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
+        if ((pData->iJHDRcolortype == 14) && (iRawlen != 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else
 #endif /* MNG_INCLUDE_JNG */
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
-  {
-    if ((pData->iColortype == 0) && (iRawlen != 1))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR)) {
+        if ((pData->iColortype == 0) && (iRawlen != 1)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iColortype == 2) && (iRawlen != 3))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((pData->iColortype == 2) && (iRawlen != 3)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iColortype == 3) && (iRawlen != 3))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((pData->iColortype == 3) && (iRawlen != 3)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iColortype == 4) && (iRawlen != 2))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((pData->iColortype == 4) && (iRawlen != 2)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-    if ((pData->iColortype == 6) && (iRawlen != 4))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
-  else
-  {                                    /* global = empty or RGBA */
-    if ((iRawlen != 0) && (iRawlen != 4))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-  }
+        if ((pData->iColortype == 6) && (iRawlen != 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    } else {                                    /* global = empty or RGBA */
+        if ((iRawlen != 0) && (iRawlen != 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2690,71 +2535,62 @@ READ_CHUNK (read_sbit)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SBIT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SBIT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_splt)
-{
-  mng_uint8p pTemp;
-  mng_uint32 iNamelen;
-  mng_uint8  iSampledepth;
-  mng_uint32 iRemain;
+READ_CHUNK (read_splt) {
+    mng_uint8p pTemp;
+    mng_uint32 iNamelen;
+    mng_uint8 iSampledepth;
+    mng_uint32 iRemain;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SPLT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SPLT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR)    )
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->bHasIDAT)
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if (pData->bHasIDAT) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen)
-  {
-    pTemp = find_null (pRawdata);      /* find null-separator */
-                                       /* not found inside input-data ? */
-    if ((pTemp - pRawdata) > (mng_int32)iRawlen)
-      MNG_ERROR (pData, MNG_NULLNOTFOUND)
+    if (iRawlen) {
+        pTemp = find_null(pRawdata);      /* find null-separator */
+        /* not found inside input-data ? */
+        if ((pTemp - pRawdata) > (mng_int32) iRawlen) MNG_ERROR (pData, MNG_NULLNOTFOUND)
 
-    iNamelen     = (mng_uint32)(pTemp - pRawdata);
-    iSampledepth = *(pTemp+1);
-    iRemain      = (iRawlen - 2 - iNamelen);
+        iNamelen = (mng_uint32)(pTemp - pRawdata);
+        iSampledepth = *(pTemp + 1);
+        iRemain = (iRawlen - 2 - iNamelen);
 
-    if ((iSampledepth != 1) && (iSampledepth != 2))
-      MNG_ERROR (pData, MNG_INVSAMPLEDEPTH)
-                                       /* check remaining length */
-    if ( ((iSampledepth == 1) && (iRemain %  6 != 0)) ||
-         ((iSampledepth == 2) && (iRemain % 10 != 0))    )
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if ((iSampledepth != 1) && (iSampledepth != 2)) MNG_ERROR (pData, MNG_INVSAMPLEDEPTH)
+        /* check remaining length */
+        if (((iSampledepth == 1) && (iRemain % 6 != 0)) ||
+            ((iSampledepth == 2) && (iRemain % 10 != 0))) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  }
-  else
-  {
-    pTemp        = MNG_NULL;
-    iNamelen     = 0;
-    iSampledepth = 0;
-    iRemain      = 0;
-  }
+    } else {
+        pTemp = MNG_NULL;
+        iNamelen = 0;
+        iSampledepth = 0;
+        iRemain = 0;
+    }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2789,41 +2625,37 @@ READ_CHUNK (read_splt)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SPLT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SPLT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_hist)
-{
+READ_CHUNK (read_hist) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_HIST, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_HIST, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR)    )
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasIHDR) && (!pData->bHasBASI) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if ((!pData->bHasPLTE) || (pData->bHasIDAT))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* length oke ? */
-  if ( ((iRawlen & 0x01) != 0) || ((iRawlen >> 1) != pData->iPLTEcount) )
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if ((!pData->bHasPLTE) || (pData->bHasIDAT)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* length oke ? */
+    if (((iRawlen & 0x01) != 0) || ((iRawlen >> 1) != pData->iPLTEcount)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {
     mng_uint32 iX;
                                        /* initialize storage */
@@ -2843,30 +2675,29 @@ READ_CHUNK (read_hist)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_HIST, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_HIST, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_time)
-{
+READ_CHUNK (read_time) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TIME, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_TIME, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 7)                    /* length must be exactly 7 */
+    if (iRawlen != 7)                    /* length must be exactly 7 */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 /*  if (pData->fProcesstime) */            /* inform the application ? */
@@ -2876,7 +2707,7 @@ READ_CHUNK (read_time)
   } */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2893,84 +2724,79 @@ READ_CHUNK (read_time)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TIME, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_TIME, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_mhdr)
-{
+READ_CHUNK (read_mhdr) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MHDR, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_MHDR, MNG_LC_START)
 #endif
 
-  if (pData->eSigtype != mng_it_mng)   /* sequence checks */
+    if (pData->eSigtype != mng_it_mng)   /* sequence checks */
     MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
 
-  if (pData->bHasheader)               /* can only be the first chunk! */
+    if (pData->bHasheader)               /* can only be the first chunk! */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* correct length ? */
-  if ((iRawlen != 28) && (iRawlen != 12))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH);
+    /* correct length ? */
+    if ((iRawlen != 28) && (iRawlen != 12)) MNG_ERROR (pData, MNG_INVALIDLENGTH);
 
-  pData->bHasMHDR       = MNG_TRUE;    /* oh boy, a real MNG */
-  pData->bHasheader     = MNG_TRUE;    /* we've got a header */
-  pData->eImagetype     = mng_it_mng;  /* fill header fields */
-  pData->iWidth         = mng_get_uint32 (pRawdata);
-  pData->iHeight        = mng_get_uint32 (pRawdata+4);
-  pData->iTicks         = mng_get_uint32 (pRawdata+8);
+    pData->bHasMHDR = MNG_TRUE;    /* oh boy, a real MNG */
+    pData->bHasheader = MNG_TRUE;    /* we've got a header */
+    pData->eImagetype = mng_it_mng;  /* fill header fields */
+    pData->iWidth = mng_get_uint32(pRawdata);
+    pData->iHeight = mng_get_uint32(pRawdata + 4);
+    pData->iTicks = mng_get_uint32(pRawdata + 8);
 
-  if (iRawlen == 28)                   /* proper MHDR ? */
-  {
-    pData->iLayercount  = mng_get_uint32 (pRawdata+12);
-    pData->iFramecount  = mng_get_uint32 (pRawdata+16);
-    pData->iPlaytime    = mng_get_uint32 (pRawdata+20);
-    pData->iSimplicity  = mng_get_uint32 (pRawdata+24);
+    if (iRawlen == 28)                   /* proper MHDR ? */
+    {
+        pData->iLayercount = mng_get_uint32(pRawdata + 12);
+        pData->iFramecount = mng_get_uint32(pRawdata + 16);
+        pData->iPlaytime = mng_get_uint32(pRawdata + 20);
+        pData->iSimplicity = mng_get_uint32(pRawdata + 24);
 
-    pData->bPreDraft48  = MNG_FALSE;
-  }
-  else                                 /* probably pre-draft48 then */
-  {
-    pData->iLayercount  = 0;
-    pData->iFramecount  = 0;
-    pData->iPlaytime    = 0;
-    pData->iSimplicity  = 0;
+        pData->bPreDraft48 = MNG_FALSE;
+    } else                                 /* probably pre-draft48 then */
+    {
+        pData->iLayercount = 0;
+        pData->iFramecount = 0;
+        pData->iPlaytime = 0;
+        pData->iSimplicity = 0;
 
-    pData->bPreDraft48  = MNG_TRUE;
-  }
-                                       /* predict alpha-depth */
-  if ((pData->iSimplicity & 0x00000001) == 0)
-    pData->iAlphadepth = 16;           /* no indicators = assume the worst */
-  else
-  if ((pData->iSimplicity & 0x00000008) == 0)
-    pData->iAlphadepth = 0;            /* no transparency at all */
-  else
-  if ((pData->iSimplicity & 0x00000140) == 0x00000040)
-    pData->iAlphadepth = 1;            /* no semi-transparency guaranteed */
-  else
-    pData->iAlphadepth = 16;           /* anything else = assume the worst */
+        pData->bPreDraft48 = MNG_TRUE;
+    }
+    /* predict alpha-depth */
+    if ((pData->iSimplicity & 0x00000001) == 0)
+        pData->iAlphadepth = 16;           /* no indicators = assume the worst */
+    else if ((pData->iSimplicity & 0x00000008) == 0)
+        pData->iAlphadepth = 0;            /* no transparency at all */
+    else if ((pData->iSimplicity & 0x00000140) == 0x00000040)
+        pData->iAlphadepth = 1;            /* no semi-transparency guaranteed */
+    else
+        pData->iAlphadepth = 16;           /* anything else = assume the worst */
 
 #ifdef MNG_INCLUDE_JNG                 /* can we handle the complexity ? */
-  if (pData->iSimplicity & 0x0000FC00)
+    if (pData->iSimplicity & 0x0000FC00)
 #else
-  if (pData->iSimplicity & 0x0000FC10)
+        if (pData->iSimplicity & 0x0000FC10)
 #endif
     MNG_ERROR (pData, MNG_MNGTOOCOMPLEX)
-                                       /* fits on maximum canvas ? */
-  if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight))
-    MNG_WARNING (pData, MNG_IMAGETOOLARGE)
+    /* fits on maximum canvas ? */
+    if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight)) MNG_WARNING (pData,
+                                                                                                 MNG_IMAGETOOLARGE)
 
-  if (pData->fProcessheader)           /* inform the app ? */
-    if (!pData->fProcessheader (((mng_handle)pData), pData->iWidth, pData->iHeight))
-      MNG_ERROR (pData, MNG_APPMISCERROR)
+    if (pData->fProcessheader)           /* inform the app ? */
+        if (!pData->fProcessheader(((mng_handle) pData), pData->iWidth, pData->iHeight)) MNG_ERROR (pData,
+                                                                                                    MNG_APPMISCERROR)
 
-  pData->iImagelevel++;                /* one level deeper */
+    pData->iImagelevel++;                /* one level deeper */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -2988,39 +2814,38 @@ READ_CHUNK (read_mhdr)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MHDR, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_MHDR, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_mend)
-{
+READ_CHUNK (read_mend) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MEND, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_MEND, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen > 0)                     /* must not contain data! */
+    if (iRawlen > 0)                     /* must not contain data! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {                                    /* do something */
-    mng_retcode iRetcode = process_display_mend (pData);
+    {                                    /* do something */
+        mng_retcode iRetcode = process_display_mend(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
-  pData->bHasMHDR = MNG_FALSE;         /* end of the line, bro! */
+    pData->bHasMHDR = MNG_FALSE;         /* end of the line, bro! */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3030,96 +2855,86 @@ READ_CHUNK (read_mend)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MEND, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_MEND, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_loop)
-{
+READ_CHUNK (read_loop) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_LOOP, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_LOOP, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (!pData->bCacheplayback)          /* must store playback info to work!! */
+    if (!pData->bCacheplayback)          /* must store playback info to work!! */
     MNG_ERROR (pData, MNG_LOOPWITHCACHEOFF)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen >= 5)                    /* length checks */
-  {
-    if (iRawlen >= 6)
+    if (iRawlen >= 5)                    /* length checks */
     {
-      if ((iRawlen - 6) % 4 != 0)
-        MNG_ERROR (pData, MNG_INVALIDLENGTH)
-    }
-  }
-  else
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        if (iRawlen >= 6) {
+            if ((iRawlen - 6) % 4 != 0) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+        }
+    } else MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint8   iLevel;
-    mng_uint32  iRepeat;
-    mng_uint8   iTermination = 0;
-    mng_uint32  iItermin     = 1;
-    mng_uint32  iItermax     = 0x7fffffffL;
-    mng_retcode iRetcode;
-
-    pData->bHasLOOP = MNG_TRUE;        /* indicate we're inside a loop */
-
-    iLevel = *pRawdata;                /* determine the fields for processing */
-
-    if (pData->bPreDraft48)
     {
-      iTermination = *(pRawdata+1);
+        mng_uint8 iLevel;
+        mng_uint32 iRepeat;
+        mng_uint8 iTermination = 0;
+        mng_uint32 iItermin = 1;
+        mng_uint32 iItermax = 0x7fffffffL;
+        mng_retcode iRetcode;
 
-      iRepeat = mng_get_uint32 (pRawdata+2);
-    }
-    else
-      iRepeat = mng_get_uint32 (pRawdata+1);
+        pData->bHasLOOP = MNG_TRUE;        /* indicate we're inside a loop */
 
-    if (iRawlen >= 6)
-    {
-      if (!pData->bPreDraft48)
-        iTermination = *(pRawdata+5);
+        iLevel = *pRawdata;                /* determine the fields for processing */
 
-      if (iRawlen >= 10)
-      {
-        iItermin = mng_get_uint32 (pRawdata+6);
+        if (pData->bPreDraft48) {
+            iTermination = *(pRawdata + 1);
 
-        if (iRawlen >= 14)
-        {
-          iItermax = mng_get_uint32 (pRawdata+10);
+            iRepeat = mng_get_uint32(pRawdata + 2);
+        } else
+            iRepeat = mng_get_uint32(pRawdata + 1);
 
-          /* TODO: process signals */
+        if (iRawlen >= 6) {
+            if (!pData->bPreDraft48)
+                iTermination = *(pRawdata + 5);
 
+            if (iRawlen >= 10) {
+                iItermin = mng_get_uint32(pRawdata + 6);
+
+                if (iRawlen >= 14) {
+                    iItermax = mng_get_uint32(pRawdata + 10);
+
+                    /* TODO: process signals */
+
+                }
+            }
         }
-      }
+
+        /* create the LOOP ani-object */
+        iRetcode = create_ani_loop(pData, iLevel, iRepeat, iTermination,
+                                   iItermin, iItermax, 0, 0);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
     }
-
-                                       /* create the LOOP ani-object */
-    iRetcode = create_ani_loop (pData, iLevel, iRepeat, iTermination,
-                                       iItermin, iItermax, 0, 0);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3184,64 +2999,61 @@ READ_CHUNK (read_loop)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_LOOP, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_LOOP, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_endl)
-{
+READ_CHUNK (read_endl) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ENDL, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_ENDL, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 1)                    /* length must be exactly 1 */
+    if (iRawlen != 1)                    /* length must be exactly 1 */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    if (pData->bHasLOOP)               /* are we really processing a loop ? */
     {
-      mng_uint8 iLevel = *pRawdata;    /* get the nest level */
-                                       /* create an ENDL animation object */
-      mng_retcode iRetcode = create_ani_endl (pData, iLevel);
+        if (pData->bHasLOOP)               /* are we really processing a loop ? */
+        {
+            mng_uint8 iLevel = *pRawdata;    /* get the nest level */
+            /* create an ENDL animation object */
+            mng_retcode iRetcode = create_ani_endl(pData, iLevel);
 
-      if (iRetcode)                    /* on error bail out */
-        return iRetcode;
+            if (iRetcode)                    /* on error bail out */
+                return iRetcode;
 
-      {                                /* process it */
-        mng_ani_endlp pENDL = (mng_ani_endlp)pData->pLastaniobj;
+            {                                /* process it */
+                mng_ani_endlp pENDL = (mng_ani_endlp) pData->pLastaniobj;
 
-        iRetcode = pENDL->sHeader.fProcess (pData, pENDL);
+                iRetcode = pENDL->sHeader.fProcess(pData, pENDL);
 
-        if (iRetcode)                  /* on error bail out */
-          return iRetcode;
-      }
+                if (iRetcode)                  /* on error bail out */
+                    return iRetcode;
+            }
+        } else {
+
+            /* TODO: error abort ??? */
+
+        }
     }
-    else
-    {
-
-      /* TODO: error abort ??? */
-
-    }
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3253,105 +3065,91 @@ READ_CHUNK (read_endl)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ENDL, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_ENDL, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_defi)
-{
+READ_CHUNK (read_defi) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DEFI, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_DEFI, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check the length */
-  if ((iRawlen != 2) && (iRawlen != 3) && (iRawlen != 4) &&
-      (iRawlen != 12) && (iRawlen != 28))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 2) && (iRawlen != 3) && (iRawlen != 4) &&
+        (iRawlen != 12) && (iRawlen != 28)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
-
-    pData->iDEFIobjectid       = mng_get_uint16 (pRawdata);
-
-    if (iRawlen > 2)
     {
-      pData->bDEFIhasdonotshow = MNG_TRUE;
-      pData->iDEFIdonotshow    = *(pRawdata+2);
-    }
-    else
-    {
-      pData->bDEFIhasdonotshow = MNG_FALSE;
-      pData->iDEFIdonotshow    = 0;
-    }
+        mng_retcode iRetcode;
 
-    if (iRawlen > 3)
-    {
-      pData->bDEFIhasconcrete  = MNG_TRUE;
-      pData->iDEFIconcrete     = *(pRawdata+3);
-    }
-    else
-    {
-      pData->bDEFIhasconcrete  = MNG_FALSE;
-      pData->iDEFIconcrete     = 0;
-    }
+        pData->iDEFIobjectid = mng_get_uint16(pRawdata);
 
-    if (iRawlen > 4)
-    {
-      pData->bDEFIhasloca      = MNG_TRUE;
-      pData->iDEFIlocax        = mng_get_int32 (pRawdata+4);
-      pData->iDEFIlocay        = mng_get_int32 (pRawdata+8);
-    }
-    else
-    {
-      pData->bDEFIhasloca      = MNG_FALSE;
-      pData->iDEFIlocax        = 0;
-      pData->iDEFIlocay        = 0;
-    }
+        if (iRawlen > 2) {
+            pData->bDEFIhasdonotshow = MNG_TRUE;
+            pData->iDEFIdonotshow = *(pRawdata + 2);
+        } else {
+            pData->bDEFIhasdonotshow = MNG_FALSE;
+            pData->iDEFIdonotshow = 0;
+        }
 
-    if (iRawlen > 12)
-    {
-      pData->bDEFIhasclip      = MNG_TRUE;
-      pData->iDEFIclipl        = mng_get_int32 (pRawdata+12);
-      pData->iDEFIclipr        = mng_get_int32 (pRawdata+16);
-      pData->iDEFIclipt        = mng_get_int32 (pRawdata+20);
-      pData->iDEFIclipb        = mng_get_int32 (pRawdata+24);
+        if (iRawlen > 3) {
+            pData->bDEFIhasconcrete = MNG_TRUE;
+            pData->iDEFIconcrete = *(pRawdata + 3);
+        } else {
+            pData->bDEFIhasconcrete = MNG_FALSE;
+            pData->iDEFIconcrete = 0;
+        }
+
+        if (iRawlen > 4) {
+            pData->bDEFIhasloca = MNG_TRUE;
+            pData->iDEFIlocax = mng_get_int32(pRawdata + 4);
+            pData->iDEFIlocay = mng_get_int32(pRawdata + 8);
+        } else {
+            pData->bDEFIhasloca = MNG_FALSE;
+            pData->iDEFIlocax = 0;
+            pData->iDEFIlocay = 0;
+        }
+
+        if (iRawlen > 12) {
+            pData->bDEFIhasclip = MNG_TRUE;
+            pData->iDEFIclipl = mng_get_int32(pRawdata + 12);
+            pData->iDEFIclipr = mng_get_int32(pRawdata + 16);
+            pData->iDEFIclipt = mng_get_int32(pRawdata + 20);
+            pData->iDEFIclipb = mng_get_int32(pRawdata + 24);
+        } else {
+            pData->bDEFIhasclip = MNG_FALSE;
+            pData->iDEFIclipl = 0;
+            pData->iDEFIclipr = 0;
+            pData->iDEFIclipt = 0;
+            pData->iDEFIclipb = 0;
+        }
+        /* create an animation object */
+        iRetcode = create_ani_defi(pData);
+
+        if (!iRetcode)                     /* do display processing */
+            iRetcode = process_display_defi(pData);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-    else
-    {
-      pData->bDEFIhasclip      = MNG_FALSE;
-      pData->iDEFIclipl        = 0;
-      pData->iDEFIclipr        = 0;
-      pData->iDEFIclipt        = 0;
-      pData->iDEFIclipb        = 0;
-    }
-                                       /* create an animation object */
-    iRetcode = create_ani_defi (pData);
-
-    if (!iRetcode)                     /* do display processing */
-      iRetcode = process_display_defi (pData);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3400,119 +3198,109 @@ READ_CHUNK (read_defi)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DEFI, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_DEFI, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_basi)
-{
+READ_CHUNK (read_basi) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BASI, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_BASI, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check the length */
-  if ((iRawlen != 13) && (iRawlen != 19) && (iRawlen != 21) && (iRawlen != 22))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 13) && (iRawlen != 19) && (iRawlen != 21) && (iRawlen != 22)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasBASI     = MNG_TRUE;      /* inside a BASI-IEND block now */
-                                       /* store interesting fields */
-  pData->iDatawidth   = mng_get_uint32 (pRawdata);
-  pData->iDataheight  = mng_get_uint32 (pRawdata+4);
-  pData->iBitdepth    = *(pRawdata+8);
-  pData->iColortype   = *(pRawdata+9);
-  pData->iCompression = *(pRawdata+10);
-  pData->iFilter      = *(pRawdata+11);
-  pData->iInterlace   = *(pRawdata+12);
+    pData->bHasBASI = MNG_TRUE;      /* inside a BASI-IEND block now */
+    /* store interesting fields */
+    pData->iDatawidth = mng_get_uint32(pRawdata);
+    pData->iDataheight = mng_get_uint32(pRawdata + 4);
+    pData->iBitdepth = *(pRawdata + 8);
+    pData->iColortype = *(pRawdata + 9);
+    pData->iCompression = *(pRawdata + 10);
+    pData->iFilter = *(pRawdata + 11);
+    pData->iInterlace = *(pRawdata + 12);
 
-  if ((pData->iBitdepth !=  1) &&      /* parameter validity checks */
-      (pData->iBitdepth !=  2) &&
-      (pData->iBitdepth !=  4) &&
-      (pData->iBitdepth !=  8) &&
-      (pData->iBitdepth != 16)    )
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    if ((pData->iBitdepth != 1) &&      /* parameter validity checks */
+        (pData->iBitdepth != 2) &&
+        (pData->iBitdepth != 4) &&
+        (pData->iBitdepth != 8) &&
+        (pData->iBitdepth != 16)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-  if ((pData->iColortype != MNG_COLORTYPE_GRAY   ) &&
-      (pData->iColortype != MNG_COLORTYPE_RGB    ) &&
-      (pData->iColortype != MNG_COLORTYPE_INDEXED) &&
-      (pData->iColortype != MNG_COLORTYPE_GRAYA  ) &&
-      (pData->iColortype != MNG_COLORTYPE_RGBA   )    )
-    MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+    if ((pData->iColortype != MNG_COLORTYPE_GRAY) &&
+        (pData->iColortype != MNG_COLORTYPE_RGB) &&
+        (pData->iColortype != MNG_COLORTYPE_INDEXED) &&
+        (pData->iColortype != MNG_COLORTYPE_GRAYA) &&
+        (pData->iColortype != MNG_COLORTYPE_RGBA)) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
 
-  if ((pData->iColortype == MNG_COLORTYPE_INDEXED) && (pData->iBitdepth > 8))
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    if ((pData->iColortype == MNG_COLORTYPE_INDEXED) && (pData->iBitdepth > 8)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-  if (((pData->iColortype == MNG_COLORTYPE_RGB    ) ||
-       (pData->iColortype == MNG_COLORTYPE_GRAYA  ) ||
-       (pData->iColortype == MNG_COLORTYPE_RGBA   )    ) &&
-      (pData->iBitdepth < 8                            )    )
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    if (((pData->iColortype == MNG_COLORTYPE_RGB) ||
+         (pData->iColortype == MNG_COLORTYPE_GRAYA) ||
+         (pData->iColortype == MNG_COLORTYPE_RGBA)) &&
+        (pData->iBitdepth < 8)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-  if (pData->iCompression != MNG_COMPRESSION_DEFLATE)
-    MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+    if (pData->iCompression != MNG_COMPRESSION_DEFLATE) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-  if (pData->iFilter & (~MNG_FILTER_DIFFERING))
-    MNG_ERROR (pData, MNG_INVALIDFILTER)
+    if (pData->iFilter & (~MNG_FILTER_DIFFERING)) MNG_ERROR (pData, MNG_INVALIDFILTER)
 
-  if ((pData->iInterlace != MNG_INTERLACE_NONE ) &&
-      (pData->iInterlace != MNG_INTERLACE_ADAM7)    )
-    MNG_ERROR (pData, MNG_INVALIDINTERLACE)
+    if ((pData->iInterlace != MNG_INTERLACE_NONE) &&
+        (pData->iInterlace != MNG_INTERLACE_ADAM7)) MNG_ERROR (pData, MNG_INVALIDINTERLACE)
 
-  pData->iImagelevel++;                /* one level deeper */
+    pData->iImagelevel++;                /* one level deeper */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint16  iRed      = 0;
-    mng_uint16  iGreen    = 0;
-    mng_uint16  iBlue     = 0;
-    mng_bool    bHasalpha = MNG_FALSE;
-    mng_uint16  iAlpha    = 0xFFFF;
-    mng_uint8   iViewable = 0;
-    mng_retcode iRetcode;
-
-    if (iRawlen > 13)                  /* get remaining fields, if any */
     {
-      iRed      = mng_get_uint16 (pRawdata+13);
-      iGreen    = mng_get_uint16 (pRawdata+15);
-      iBlue     = mng_get_uint16 (pRawdata+17);
+        mng_uint16 iRed = 0;
+        mng_uint16 iGreen = 0;
+        mng_uint16 iBlue = 0;
+        mng_bool bHasalpha = MNG_FALSE;
+        mng_uint16 iAlpha = 0xFFFF;
+        mng_uint8 iViewable = 0;
+        mng_retcode iRetcode;
+
+        if (iRawlen > 13)                  /* get remaining fields, if any */
+        {
+            iRed = mng_get_uint16(pRawdata + 13);
+            iGreen = mng_get_uint16(pRawdata + 15);
+            iBlue = mng_get_uint16(pRawdata + 17);
+        }
+
+        if (iRawlen > 19) {
+            bHasalpha = MNG_TRUE;
+            iAlpha = mng_get_uint16(pRawdata + 19);
+        }
+
+        if (iRawlen > 21)
+            iViewable = *(pRawdata + 21);
+        /* create an animation object */
+        iRetcode = create_ani_basi(pData, iRed, iGreen, iBlue,
+                                   bHasalpha, iAlpha, iViewable);
+
+        if (!iRetcode)                     /* display-processing... */
+            iRetcode = process_display_basi(pData, iRed, iGreen, iBlue,
+                                            bHasalpha, iAlpha, iViewable);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-
-    if (iRawlen > 19)
-    {
-      bHasalpha = MNG_TRUE;
-      iAlpha    = mng_get_uint16 (pRawdata+19);
-    }
-
-    if (iRawlen > 21)
-      iViewable = *(pRawdata+21);
-                                       /* create an animation object */
-    iRetcode = create_ani_basi (pData, iRed, iGreen, iBlue,
-                                bHasalpha, iAlpha, iViewable);
-
-    if (!iRetcode)                     /* display-processing... */
-      iRetcode = process_display_basi (pData, iRed, iGreen, iBlue,
-                                       bHasalpha, iAlpha, iViewable);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3544,87 +3332,83 @@ READ_CHUNK (read_basi)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BASI, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_BASI, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_clon)
-{
+READ_CHUNK (read_clon) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CLON, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_CLON, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check the length */
-  if ((iRawlen != 4) && (iRawlen != 5) && (iRawlen != 6) &&
-      (iRawlen != 7) && (iRawlen != 16))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 4) && (iRawlen != 5) && (iRawlen != 6) &&
+        (iRawlen != 7) && (iRawlen != 16)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint16  iSourceid, iCloneid;
-    mng_uint8   iClonetype    = 0;
-    mng_bool    bHasdonotshow = MNG_FALSE;
-    mng_uint8   iDonotshow    = 0;
-    mng_uint8   iConcrete     = 0;
-    mng_bool    bHasloca      = MNG_FALSE;
-    mng_uint8   iLocationtype = 0;
-    mng_int32   iLocationx    = 0;
-    mng_int32   iLocationy    = 0;
-    mng_retcode iRetcode;
-
-    iSourceid       = mng_get_uint16 (pRawdata);
-    iCloneid        = mng_get_uint16 (pRawdata+2);
-
-    if (iRawlen > 4)
-      iClonetype    = *(pRawdata+4);
-
-    if (iRawlen > 5)
     {
-      bHasdonotshow = MNG_TRUE;
-      iDonotshow    = *(pRawdata+5);
+        mng_uint16 iSourceid, iCloneid;
+        mng_uint8 iClonetype = 0;
+        mng_bool bHasdonotshow = MNG_FALSE;
+        mng_uint8 iDonotshow = 0;
+        mng_uint8 iConcrete = 0;
+        mng_bool bHasloca = MNG_FALSE;
+        mng_uint8 iLocationtype = 0;
+        mng_int32 iLocationx = 0;
+        mng_int32 iLocationy = 0;
+        mng_retcode iRetcode;
+
+        iSourceid = mng_get_uint16(pRawdata);
+        iCloneid = mng_get_uint16(pRawdata + 2);
+
+        if (iRawlen > 4)
+            iClonetype = *(pRawdata + 4);
+
+        if (iRawlen > 5) {
+            bHasdonotshow = MNG_TRUE;
+            iDonotshow = *(pRawdata + 5);
+        }
+
+        if (iRawlen > 6)
+            iConcrete = *(pRawdata + 6);
+
+        if (iRawlen > 7) {
+            bHasloca = MNG_TRUE;
+            iLocationtype = *(pRawdata + 7);
+            iLocationx = mng_get_int32(pRawdata + 8);
+            iLocationy = mng_get_int32(pRawdata + 12);
+        }
+
+        iRetcode = create_ani_clon(pData, iSourceid, iCloneid, iClonetype,
+                                   bHasdonotshow, iDonotshow, iConcrete,
+                                   bHasloca, iLocationtype, iLocationx, iLocationy);
+
+        if (!iRetcode)                     /* do display processing */
+            iRetcode = process_display_clon(pData, iSourceid, iCloneid, iClonetype,
+                                            bHasdonotshow, iDonotshow, iConcrete,
+                                            bHasloca, iLocationtype, iLocationx, iLocationy);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-
-    if (iRawlen > 6)
-      iConcrete     = *(pRawdata+6);
-
-    if (iRawlen > 7)
-    {
-      bHasloca      = MNG_TRUE;
-      iLocationtype = *(pRawdata+7);
-      iLocationx    = mng_get_int32 (pRawdata+8);
-      iLocationy    = mng_get_int32 (pRawdata+12);
-    }
-
-    iRetcode = create_ani_clon (pData, iSourceid, iCloneid, iClonetype,
-                                bHasdonotshow, iDonotshow, iConcrete,
-                                bHasloca, iLocationtype, iLocationx, iLocationy);
-
-    if (!iRetcode)                     /* do display processing */
-      iRetcode = process_display_clon (pData, iSourceid, iCloneid, iClonetype,
-                                       bHasdonotshow, iDonotshow, iConcrete,
-                                       bHasloca, iLocationtype, iLocationx, iLocationy);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3658,54 +3442,52 @@ READ_CHUNK (read_clon)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CLON, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_CLON, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_past)
-{
+READ_CHUNK (read_past) {
 #ifdef MNG_STORE_CHUNKS
-  mng_uint32 iCount;
+    mng_uint32 iCount;
 #endif
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PAST, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PAST, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-                                       /* check the length */
-  if ((iRawlen < 41) || (((iRawlen - 11) % 30) != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen < 41) || (((iRawlen - 11) % 30) != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_STORE_CHUNKS
-  iCount = ((iRawlen - 11) / 30);      /* how many entries again */
+    iCount = ((iRawlen - 11) / 30);      /* how many entries again */
 #endif
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {
     mng_uint32       iX;
     mng_past_sourcep pSource;
@@ -3748,46 +3530,45 @@ READ_CHUNK (read_past)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PAST, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PAST, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_disc)
-{
+READ_CHUNK (read_disc) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DISC, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_DISC, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if ((iRawlen % 2) != 0)              /* check the length */
+    if ((iRawlen % 2) != 0)              /* check the length */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {                                    /* process it */
-    mng_retcode iRetcode = process_display_disc (pData, (iRawlen / 2),
-                                                 (mng_uint16p)pRawdata);
+    {                                    /* process it */
+        mng_retcode iRetcode = process_display_disc(pData, (iRawlen / 2),
+                                                    (mng_uint16p) pRawdata);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3817,68 +3598,66 @@ READ_CHUNK (read_disc)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DISC, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_DISC, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_back)
-{
+READ_CHUNK (read_back) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BACK, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_BACK, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check the length */
-  if ((iRawlen != 6) && (iRawlen != 7) && (iRawlen != 9) && (iRawlen != 10))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 6) && (iRawlen != 7) && (iRawlen != 9) && (iRawlen != 10)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
-                                       /* retrieve the fields */
-    pData->bHasBACK         = MNG_TRUE;
-    pData->iBACKred         = mng_get_uint16 (pRawdata);
-    pData->iBACKgreen       = mng_get_uint16 (pRawdata+2);
-    pData->iBACKblue        = mng_get_uint16 (pRawdata+4);
+    {
+        mng_retcode iRetcode;
+        /* retrieve the fields */
+        pData->bHasBACK = MNG_TRUE;
+        pData->iBACKred = mng_get_uint16(pRawdata);
+        pData->iBACKgreen = mng_get_uint16(pRawdata + 2);
+        pData->iBACKblue = mng_get_uint16(pRawdata + 4);
 
-    if (iRawlen > 6)
-      pData->iBACKmandatory = *(pRawdata+6);
-    else
-      pData->iBACKmandatory = 0;
+        if (iRawlen > 6)
+            pData->iBACKmandatory = *(pRawdata + 6);
+        else
+            pData->iBACKmandatory = 0;
 
-    if (iRawlen > 7)
-      pData->iBACKimageid   = mng_get_uint16 (pRawdata+7);
-    else
-      pData->iBACKimageid   = 0;
+        if (iRawlen > 7)
+            pData->iBACKimageid = mng_get_uint16(pRawdata + 7);
+        else
+            pData->iBACKimageid = 0;
 
-    if (iRawlen > 9)
-      pData->iBACKtile      = *(pRawdata+9);
-    else
-      pData->iBACKtile      = 0;
+        if (iRawlen > 9)
+            pData->iBACKtile = *(pRawdata + 9);
+        else
+            pData->iBACKtile = 0;
 
-    iRetcode = create_ani_back (pData, pData->iBACKred, pData->iBACKgreen,
-                                pData->iBACKblue, pData->iBACKmandatory,
-                                pData->iBACKimageid, pData->iBACKtile);
+        iRetcode = create_ani_back(pData, pData->iBACKred, pData->iBACKgreen,
+                                   pData->iBACKblue, pData->iBACKmandatory,
+                                   pData->iBACKimageid, pData->iBACKtile);
 
-    if (iRetcode)                    /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                    /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -3902,167 +3681,174 @@ READ_CHUNK (read_back)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_BACK, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_BACK, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_fram)
-{
-  mng_uint8p pTemp;
+READ_CHUNK (read_fram) {
+    mng_uint8p pTemp;
 #ifdef MNG_STORE_CHUNKS
-  mng_uint32 iNamelen;
+    mng_uint32 iNamelen;
 #endif
-  mng_uint32 iRemain;
-  mng_uint32 iRequired = 0;
+    mng_uint32 iRemain;
+    mng_uint32 iRequired = 0;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_FRAM, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_FRAM, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen <= 1)                    /* only framing-mode ? */
-  {
-#ifdef MNG_STORE_CHUNKS
-    iNamelen = 0;                      /* indicate so */
-#endif
-    iRemain  = 0;
-    pTemp    = MNG_NULL;
-  }
-  else
-  {
-    pTemp = find_null (pRawdata+1);    /* find null-separator */
-                                       /* not found inside input-data ? */
-    if ((pTemp - pRawdata) > (mng_int32)iRawlen)
-      MNG_ERROR (pData, MNG_NULLNOTFOUND)
-
-#ifdef MNG_STORE_CHUNKS
-    iNamelen = (mng_uint32)((pTemp - pRawdata) - 1);
-#endif
-    iRemain  = (mng_uint32)(iRawlen - (pTemp - pRawdata) - 1);
-                                       /* remains must be empty or at least 4 bytes */
-    if ((iRemain != 0) && (iRemain < 4))
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-
-    if (iRemain)
+    if (iRawlen <= 1)                    /* only framing-mode ? */
     {
-      iRequired = 4;                   /* calculate and check required remaining length */
+#ifdef MNG_STORE_CHUNKS
+        iNamelen = 0;                      /* indicate so */
+#endif
+        iRemain = 0;
+        pTemp = MNG_NULL;
+    } else {
+        pTemp = find_null(pRawdata + 1);    /* find null-separator */
+        /* not found inside input-data ? */
+        if ((pTemp - pRawdata) > (mng_int32) iRawlen) MNG_ERROR (pData, MNG_NULLNOTFOUND)
 
-      if (*(pTemp+1)) { iRequired += 4; }
-      if (*(pTemp+2)) { iRequired += 4; }
-      if (*(pTemp+3)) { iRequired += 17; }
+#ifdef MNG_STORE_CHUNKS
+        iNamelen = (mng_uint32)((pTemp - pRawdata) - 1);
+#endif
+        iRemain = (mng_uint32)(iRawlen - (pTemp - pRawdata) - 1);
+        /* remains must be empty or at least 4 bytes */
+        if ((iRemain != 0) && (iRemain < 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-      if (*(pTemp+4))
-      {
-        if ((iRemain - iRequired) % 4 != 0)
-          MNG_ERROR (pData, MNG_INVALIDLENGTH)
-      }
-      else
-      {
-        if (iRemain != iRequired)
-          MNG_ERROR (pData, MNG_INVALIDLENGTH)
-      }
+        if (iRemain) {
+            iRequired = 4;                   /* calculate and check required remaining length */
+
+            if (*(pTemp + 1)) { iRequired += 4; }
+            if (*(pTemp + 2)) { iRequired += 4; }
+            if (*(pTemp + 3)) { iRequired += 17; }
+
+            if (*(pTemp + 4)) {
+                if ((iRemain - iRequired) % 4 != 0) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+            } else {
+                if (iRemain != iRequired) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+            }
+        }
     }
-  }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint8p  pWork           = pTemp;
-    mng_uint8   iFramemode      = 0;
-    mng_uint8   iChangedelay    = 0;
-    mng_uint32  iDelay          = 0;
-    mng_uint8   iChangetimeout  = 0;
-    mng_uint32  iTimeout        = 0;
-    mng_uint8   iChangeclipping = 0;
-    mng_uint8   iCliptype       = 0;
-    mng_int32   iClipl          = 0;
-    mng_int32   iClipr          = 0;
-    mng_int32   iClipt          = 0;
-    mng_int32   iClipb          = 0;
-    mng_retcode iRetcode;
-
-    if (iRawlen)                       /* any data specified ? */
     {
-      if (*(pRawdata))                 /* save the new framing mode ? */
-      {
-        iFramemode = *(pRawdata);
+        mng_uint8p pWork = pTemp;
+        mng_uint8 iFramemode = 0;
+        mng_uint8 iChangedelay = 0;
+        mng_uint32 iDelay = 0;
+        mng_uint8 iChangetimeout = 0;
+        mng_uint32 iTimeout = 0;
+        mng_uint8 iChangeclipping = 0;
+        mng_uint8 iCliptype = 0;
+        mng_int32 iClipl = 0;
+        mng_int32 iClipr = 0;
+        mng_int32 iClipt = 0;
+        mng_int32 iClipb = 0;
+        mng_retcode iRetcode;
 
-        if (pData->bPreDraft48)        /* old style input-stream ? */
+        if (iRawlen)                       /* any data specified ? */
         {
-          switch (iFramemode)
-          {
-            case  0: { break; }
-            case  1: { iFramemode = 3; break; }
-            case  2: { iFramemode = 4; break; }
-            case  3: { iFramemode = 1; break; }
-            case  4: { iFramemode = 1; break; }
-            case  5: { iFramemode = 2; break; }
-            default: { iFramemode = 1; break; }
-          }
-        }
-      }
+            if (*(pRawdata))                 /* save the new framing mode ? */
+            {
+                iFramemode = *(pRawdata);
 
-      if (iRemain)
-      {
-        iChangedelay    = *(pWork+1);
-        iChangetimeout  = *(pWork+2);
-        iChangeclipping = *(pWork+3);
-        pWork += 5;
+                if (pData->bPreDraft48)        /* old style input-stream ? */
+                {
+                    switch (iFramemode) {
+                        case 0: {
+                            break;
+                        }
+                        case 1: {
+                            iFramemode = 3;
+                            break;
+                        }
+                        case 2: {
+                            iFramemode = 4;
+                            break;
+                        }
+                        case 3: {
+                            iFramemode = 1;
+                            break;
+                        }
+                        case 4: {
+                            iFramemode = 1;
+                            break;
+                        }
+                        case 5: {
+                            iFramemode = 2;
+                            break;
+                        }
+                        default: {
+                            iFramemode = 1;
+                            break;
+                        }
+                    }
+                }
+            }
 
-        if (iChangedelay)              /* delay changed ? */
-        {
-          iDelay = mng_get_uint32 (pWork);
-          pWork += 4;
+            if (iRemain) {
+                iChangedelay = *(pWork + 1);
+                iChangetimeout = *(pWork + 2);
+                iChangeclipping = *(pWork + 3);
+                pWork += 5;
+
+                if (iChangedelay)              /* delay changed ? */
+                {
+                    iDelay = mng_get_uint32(pWork);
+                    pWork += 4;
+                }
+
+                if (iChangetimeout)            /* timeout changed ? */
+                {
+                    iTimeout = mng_get_uint32(pWork);
+                    pWork += 4;
+                }
+
+                if (iChangeclipping)           /* clipping changed ? */
+                {
+                    iCliptype = *pWork;
+                    iClipl = mng_get_int32(pWork + 1);
+                    iClipr = mng_get_int32(pWork + 5);
+                    iClipt = mng_get_int32(pWork + 9);
+                    iClipb = mng_get_int32(pWork + 13);
+                }
+            }
         }
 
-        if (iChangetimeout)            /* timeout changed ? */
-        {
-          iTimeout = mng_get_uint32 (pWork);
-          pWork += 4;
-        }
+        iRetcode = create_ani_fram(pData, iFramemode, iChangedelay, iDelay,
+                                   iChangetimeout, iTimeout,
+                                   iChangeclipping, iCliptype,
+                                   iClipl, iClipr, iClipt, iClipb);
 
-        if (iChangeclipping)           /* clipping changed ? */
-        {
-          iCliptype = *pWork;
-          iClipl    = mng_get_int32 (pWork+1);
-          iClipr    = mng_get_int32 (pWork+5);
-          iClipt    = mng_get_int32 (pWork+9);
-          iClipb    = mng_get_int32 (pWork+13);
-        }
-      }
+        if (!iRetcode)                     /* now go and do something */
+            iRetcode = process_display_fram(pData, iFramemode, iChangedelay, iDelay,
+                                            iChangetimeout, iTimeout,
+                                            iChangeclipping, iCliptype,
+                                            iClipl, iClipr, iClipt, iClipb);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-
-    iRetcode = create_ani_fram (pData, iFramemode, iChangedelay, iDelay,
-                                iChangetimeout, iTimeout,
-                                iChangeclipping, iCliptype,
-                                iClipl, iClipr, iClipt, iClipb);
-
-    if (!iRetcode)                     /* now go and do something */
-      iRetcode = process_display_fram (pData, iFramemode, iChangedelay, iDelay,
-                                       iChangetimeout, iTimeout,
-                                       iChangeclipping, iCliptype,
-                                       iClipl, iClipr, iClipt, iClipb);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4160,59 +3946,58 @@ READ_CHUNK (read_fram)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_FRAM, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_FRAM, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_move)
-{
+READ_CHUNK (read_move) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MOVE, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_MOVE, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 13)                   /* check the length */
+    if (iRawlen != 13)                   /* check the length */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
-                                       /* create a MOVE animation object */
-    iRetcode = create_ani_move (pData, mng_get_uint16 (pRawdata),
-                                       mng_get_uint16 (pRawdata+2),
-                                       *(pRawdata+4),
-                                       mng_get_int32 (pRawdata+5),
-                                       mng_get_int32 (pRawdata+9));
+    {
+        mng_retcode iRetcode;
+        /* create a MOVE animation object */
+        iRetcode = create_ani_move(pData, mng_get_uint16(pRawdata),
+                                   mng_get_uint16(pRawdata + 2),
+                                   *(pRawdata + 4),
+                                   mng_get_int32(pRawdata + 5),
+                                   mng_get_int32(pRawdata + 9));
 
-    if (!iRetcode)                     /* process the move */
-      iRetcode = process_display_move (pData,
-                                       mng_get_uint16 (pRawdata),
-                                       mng_get_uint16 (pRawdata+2),
-                                       *(pRawdata+4),
-                                       mng_get_int32 (pRawdata+5),
-                                       mng_get_int32 (pRawdata+9));
+        if (!iRetcode)                     /* process the move */
+            iRetcode = process_display_move(pData,
+                                            mng_get_uint16(pRawdata),
+                                            mng_get_uint16(pRawdata + 2),
+                                            *(pRawdata + 4),
+                                            mng_get_int32(pRawdata + 5),
+                                            mng_get_int32(pRawdata + 9));
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4228,63 +4013,62 @@ READ_CHUNK (read_move)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MOVE, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_MOVE, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_clip)
-{
+READ_CHUNK (read_clip) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CLIP, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_CLIP, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 21)                   /* check the length */
+    if (iRawlen != 21)                   /* check the length */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
-                                       /* create a CLIP animation object */
-    iRetcode = create_ani_clip (pData, mng_get_uint16 (pRawdata),
-                                       mng_get_uint16 (pRawdata+2),
-                                       *(pRawdata+4),
-                                       mng_get_int32 (pRawdata+5),
-                                       mng_get_int32 (pRawdata+9),
-                                       mng_get_int32 (pRawdata+13),
-                                       mng_get_int32 (pRawdata+17));
+    {
+        mng_retcode iRetcode;
+        /* create a CLIP animation object */
+        iRetcode = create_ani_clip(pData, mng_get_uint16(pRawdata),
+                                   mng_get_uint16(pRawdata + 2),
+                                   *(pRawdata + 4),
+                                   mng_get_int32(pRawdata + 5),
+                                   mng_get_int32(pRawdata + 9),
+                                   mng_get_int32(pRawdata + 13),
+                                   mng_get_int32(pRawdata + 17));
 
-    if (!iRetcode)                     /* process the clipping */
-      iRetcode = process_display_clip (pData,
-                                       mng_get_uint16 (pRawdata),
-                                       mng_get_uint16 (pRawdata+2),
-                                       *(pRawdata+4),
-                                       mng_get_int32 (pRawdata+5),
-                                       mng_get_int32 (pRawdata+9),
-                                       mng_get_int32 (pRawdata+13),
-                                       mng_get_int32 (pRawdata+17));
+        if (!iRetcode)                     /* process the clipping */
+            iRetcode = process_display_clip(pData,
+                                            mng_get_uint16(pRawdata),
+                                            mng_get_uint16(pRawdata + 2),
+                                            *(pRawdata + 4),
+                                            mng_get_int32(pRawdata + 5),
+                                            mng_get_int32(pRawdata + 9),
+                                            mng_get_int32(pRawdata + 13),
+                                            mng_get_int32(pRawdata + 17));
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4302,72 +4086,69 @@ READ_CHUNK (read_clip)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_CLIP, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_CLIP, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_show)
-{
+READ_CHUNK (read_show) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SHOW, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SHOW, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check the length */
-  if ((iRawlen != 0) && (iRawlen != 2) && (iRawlen != 4) && (iRawlen != 5))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 0) && (iRawlen != 2) && (iRawlen != 4) && (iRawlen != 5)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
-
-    if (iRawlen)                       /* determine parameters if any */
     {
-      pData->iSHOWfromid = mng_get_uint16 (pRawdata);
+        mng_retcode iRetcode;
 
-      if (iRawlen > 2)
-        pData->iSHOWtoid = mng_get_uint16 (pRawdata+2);
-      else
-        pData->iSHOWtoid = pData->iSHOWfromid;
+        if (iRawlen)                       /* determine parameters if any */
+        {
+            pData->iSHOWfromid = mng_get_uint16(pRawdata);
 
-      if (iRawlen > 4)
-        pData->iSHOWmode = *(pRawdata+4);
-      else
-        pData->iSHOWmode = 0;
+            if (iRawlen > 2)
+                pData->iSHOWtoid = mng_get_uint16(pRawdata + 2);
+            else
+                pData->iSHOWtoid = pData->iSHOWfromid;
+
+            if (iRawlen > 4)
+                pData->iSHOWmode = *(pRawdata + 4);
+            else
+                pData->iSHOWmode = 0;
+        } else                               /* use defaults then */
+        {
+            pData->iSHOWmode = 2;
+            pData->iSHOWfromid = 1;
+            pData->iSHOWtoid = 65535;
+        }
+        /* create a SHOW animation object */
+        iRetcode = create_ani_show(pData, pData->iSHOWfromid, pData->iSHOWtoid,
+                                   pData->iSHOWmode);
+
+        if (!iRetcode)                     /* go and do it! */
+            iRetcode = process_display_show(pData);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-    else                               /* use defaults then */
-    {
-      pData->iSHOWmode   = 2;
-      pData->iSHOWfromid = 1;
-      pData->iSHOWtoid   = 65535;
-    }
-                                       /* create a SHOW animation object */
-    iRetcode = create_ani_show (pData, pData->iSHOWfromid, pData->iSHOWtoid,
-                                       pData->iSHOWmode);
-
-    if (!iRetcode)                     /* go and do it! */
-      iRetcode = process_display_show (pData);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4390,77 +4171,73 @@ READ_CHUNK (read_show)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SHOW, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SHOW, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_term)
-{
-  mng_uint8   iTermaction;
-  mng_uint8   iIteraction = 0;
-  mng_uint32  iDelay      = 0;
-  mng_uint32  iItermax    = 0;
+READ_CHUNK (read_term) {
+    mng_uint8 iTermaction;
+    mng_uint8 iIteraction = 0;
+    mng_uint32 iDelay = 0;
+    mng_uint32 iItermax = 0;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TERM, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_TERM, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->bHasLOOP)                 /* no way, jose! */
+    if (pData->bHasLOOP)                 /* no way, jose! */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->bHasTERM)                 /* only 1 allowed! */
+    if (pData->bHasTERM)                 /* only 1 allowed! */
     MNG_ERROR (pData, MNG_MULTIPLEERROR)
-                                       /* check the length */
-  if ((iRawlen != 1) && (iRawlen != 10))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check the length */
+    if ((iRawlen != 1) && (iRawlen != 10)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasTERM = MNG_TRUE;
-                                       /* TODO: remove in 1.0.0 !!! */
-  if ((!pData->bHasSAVE) && (pData->iChunkseq > 2))
-    pData->bEMNGMAhack = MNG_TRUE;
+    pData->bHasTERM = MNG_TRUE;
+    /* TODO: remove in 1.0.0 !!! */
+    if ((!pData->bHasSAVE) && (pData->iChunkseq > 2))
+        pData->bEMNGMAhack = MNG_TRUE;
 
-  iTermaction = *pRawdata;             /* get the fields */
+    iTermaction = *pRawdata;             /* get the fields */
 
-  if (iRawlen > 1)
-  {
-    iIteraction = *(pRawdata+1);
-    iDelay      = mng_get_uint32 (pRawdata+2);
-    iItermax    = mng_get_uint32 (pRawdata+6);
-  }
+    if (iRawlen > 1) {
+        iIteraction = *(pRawdata + 1);
+        iDelay = mng_get_uint32(pRawdata + 2);
+        iItermax = mng_get_uint32(pRawdata + 6);
+    }
 
-  if (pData->fProcessterm)             /* inform the app ? */
-    if (!pData->fProcessterm (((mng_handle)pData), iTermaction, iIteraction,
-                                                   iDelay, iItermax))
-      MNG_ERROR (pData, MNG_APPMISCERROR)
+    if (pData->fProcessterm)             /* inform the app ? */
+        if (!pData->fProcessterm(((mng_handle) pData), iTermaction, iIteraction,
+                                 iDelay, iItermax)) MNG_ERROR (pData, MNG_APPMISCERROR)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {                                    /* create the TERM ani-object */
-    mng_retcode iRetcode = create_ani_term (pData, iTermaction, iIteraction,
-                                                   iDelay, iItermax);
+    {                                    /* create the TERM ani-object */
+        mng_retcode iRetcode = create_ani_term(pData, iTermaction, iIteraction,
+                                               iDelay, iItermax);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-                                       /* save for future reference */
-    pData->pTermaniobj = pData->pLastaniobj;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+        /* save for future reference */
+        pData->pTermaniobj = pData->pLastaniobj;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4475,62 +4252,59 @@ READ_CHUNK (read_term)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_TERM, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_TERM, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_save)
-{
+READ_CHUNK (read_save) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SAVE, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SAVE, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (pData->bHasSAVE))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (pData->bHasSAVE)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  pData->bHasSAVE = MNG_TRUE;
+    pData->bHasSAVE = MNG_TRUE;
 
-  if (pData->fProcesssave)             /* inform the application ? */
-  {
-    mng_bool bOke = pData->fProcesssave ((mng_handle)pData);
+    if (pData->fProcesssave)             /* inform the application ? */
+    {
+        mng_bool bOke = pData->fProcesssave((mng_handle) pData);
 
-    if (!bOke)
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-  }
+        if (!bOke) MNG_ERROR (pData, MNG_APPMISCERROR)
+    }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
+    {
+        mng_retcode iRetcode;
 
 
-    /* TODO: something with the parameters */
+        /* TODO: something with the parameters */
 
 
-                                       /* create a SAVE animation object */
-    iRetcode = create_ani_save (pData);
+        /* create a SAVE animation object */
+        iRetcode = create_ani_save(pData);
 
-    if (!iRetcode)                     /* process it */
-      iRetcode = process_display_save (pData);
+        if (!iRetcode)                     /* process it */
+            iRetcode = process_display_save(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-      
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4686,70 +4460,66 @@ READ_CHUNK (read_save)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SAVE, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SAVE, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_seek)
-{
+READ_CHUNK (read_seek) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SEEK, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_SEEK, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasSAVE))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasSAVE)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->fProcessseek)             /* inform the app ? */
-  {
-    mng_bool  bOke;
-    mng_pchar zName;
+    if (pData->fProcessseek)             /* inform the app ? */
+    {
+        mng_bool bOke;
+        mng_pchar zName;
 
-    MNG_ALLOC (pData, zName, iRawlen + 1)
+        MNG_ALLOC (pData, zName, iRawlen + 1)
 
-    if (iRawlen)
-      MNG_COPY (zName, pRawdata, iRawlen)
+        if (iRawlen) MNG_COPY (zName, pRawdata, iRawlen)
 
-    bOke = pData->fProcessseek ((mng_handle)pData, zName);
+        bOke = pData->fProcessseek((mng_handle) pData, zName);
 
-    MNG_FREEX (pData, zName, iRawlen + 1)
+        MNG_FREEX (pData, zName, iRawlen + 1)
 
-    if (!bOke)
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-  }
+        if (!bOke) MNG_ERROR (pData, MNG_APPMISCERROR)
+    }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
+    {
+        mng_retcode iRetcode;
 
 
-    /* TODO: something with the name ??? */
+        /* TODO: something with the name ??? */
 
 
 
-                                       /* create a SEEK animation object */
-    iRetcode = create_ani_seek (pData);
+        /* create a SEEK animation object */
+        iRetcode = create_ani_seek(pData);
 
-    if (!iRetcode)                     /* process it */
-      iRetcode = process_display_seek (pData);
+        if (!iRetcode)                     /* process it */
+            iRetcode = process_display_seek(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4767,45 +4537,44 @@ READ_CHUNK (read_seek)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_SEEK, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_SEEK, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_expi)
-{
+READ_CHUNK (read_expi) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_EXPI, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_EXPI, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 3)                     /* check the length */
+    if (iRawlen < 3)                     /* check the length */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4826,45 +4595,44 @@ READ_CHUNK (read_expi)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_EXPI, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_EXPI, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_fpri)
-{
+READ_CHUNK (read_fpri) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_FPRI, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_FPRI, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 2)                    /* must be two bytes long */
+    if (iRawlen != 2)                    /* must be two bytes long */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -4877,65 +4645,64 @@ READ_CHUNK (read_fpri)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_FPRI, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_FPRI, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-mng_bool CheckKeyword (mng_datap  pData,
-                       mng_uint8p pKeyword)
-{
-  mng_chunkid handled_chunks [] =
-  {
-    MNG_UINT_BACK,
-    MNG_UINT_BASI,
-    MNG_UINT_CLIP,
-    MNG_UINT_CLON,
+mng_bool CheckKeyword(mng_datap pData,
+                      mng_uint8p pKeyword) {
+    mng_chunkid handled_chunks[] =
+            {
+                    MNG_UINT_BACK,
+                    MNG_UINT_BASI,
+                    MNG_UINT_CLIP,
+                    MNG_UINT_CLON,
 /* TODO:    MNG_UINT_DBYK,  */
-    MNG_UINT_DEFI,
-    MNG_UINT_DHDR,
-    MNG_UINT_DISC,
+                    MNG_UINT_DEFI,
+                    MNG_UINT_DHDR,
+                    MNG_UINT_DISC,
 /* TODO:    MNG_UINT_DROP,  */
-    MNG_UINT_ENDL,
-    MNG_UINT_FRAM,
-    MNG_UINT_IDAT,
-    MNG_UINT_IEND,
-    MNG_UINT_IHDR,
-    MNG_UINT_IJNG,
-    MNG_UINT_IPNG,
+                    MNG_UINT_ENDL,
+                    MNG_UINT_FRAM,
+                    MNG_UINT_IDAT,
+                    MNG_UINT_IEND,
+                    MNG_UINT_IHDR,
+                    MNG_UINT_IJNG,
+                    MNG_UINT_IPNG,
 #ifdef MNG_INCLUDE_JNG
-    MNG_UINT_JDAA,
-    MNG_UINT_JDAT,
-    MNG_UINT_JHDR,
+                    MNG_UINT_JDAA,
+                    MNG_UINT_JDAT,
+                    MNG_UINT_JHDR,
 /* TODO:    MNG_UINT_JSEP,  */
-    MNG_UINT_JdAA,
+                    MNG_UINT_JdAA,
 #endif
-    MNG_UINT_LOOP,
-    MNG_UINT_MAGN,
-    MNG_UINT_MEND,
-    MNG_UINT_MHDR,
-    MNG_UINT_MOVE,
+                    MNG_UINT_LOOP,
+                    MNG_UINT_MAGN,
+                    MNG_UINT_MEND,
+                    MNG_UINT_MHDR,
+                    MNG_UINT_MOVE,
 /* TODO:    MNG_UINT_ORDR,  */
 /* TODO:    MNG_UINT_PAST,  */
-    MNG_UINT_PLTE,
-    MNG_UINT_PPLT,
-    MNG_UINT_PROM,
-    MNG_UINT_SAVE,
-    MNG_UINT_SEEK,
-    MNG_UINT_SHOW,
-    MNG_UINT_TERM,
-    MNG_UINT_bKGD,
-    MNG_UINT_cHRM,
+                    MNG_UINT_PLTE,
+                    MNG_UINT_PPLT,
+                    MNG_UINT_PROM,
+                    MNG_UINT_SAVE,
+                    MNG_UINT_SEEK,
+                    MNG_UINT_SHOW,
+                    MNG_UINT_TERM,
+                    MNG_UINT_bKGD,
+                    MNG_UINT_cHRM,
 /* TODO:    MNG_UINT_eXPI,  */
 /* TODO:    MNG_UINT_fPRI,  */
-    MNG_UINT_gAMA,
+                    MNG_UINT_gAMA,
 /* TODO:    MNG_UINT_hIST,  */
-    MNG_UINT_iCCP,
-    MNG_UINT_iTXt,
-    MNG_UINT_nEED,
+                    MNG_UINT_iCCP,
+                    MNG_UINT_iTXt,
+                    MNG_UINT_nEED,
 /* TODO:    MNG_UINT_oFFs,  */
 /* TODO:    MNG_UINT_pCAL,  */
 /* TODO:    MNG_UINT_pHYg,  */
@@ -4943,128 +4710,120 @@ mng_bool CheckKeyword (mng_datap  pData,
 /* TODO:    MNG_UINT_sBIT,  */
 /* TODO:    MNG_UINT_sCAL,  */
 /* TODO:    MNG_UINT_sPLT,  */
-    MNG_UINT_sRGB,
-    MNG_UINT_tEXt,
-    MNG_UINT_tIME,
-    MNG_UINT_tRNS,
-    MNG_UINT_zTXt,
-  };
+                    MNG_UINT_sRGB,
+                    MNG_UINT_tEXt,
+                    MNG_UINT_tIME,
+                    MNG_UINT_tRNS,
+                    MNG_UINT_zTXt,
+            };
 
-  mng_bool bOke = MNG_FALSE;
+    mng_bool bOke = MNG_FALSE;
 
-  if (pData->fProcessneed)             /* does the app handle it ? */
-    bOke = pData->fProcessneed ((mng_handle)pData, (mng_pchar)pKeyword);
+    if (pData->fProcessneed)             /* does the app handle it ? */
+        bOke = pData->fProcessneed((mng_handle) pData, (mng_pchar) pKeyword);
 
-  if (!bOke)
-  {                                    /* find the keyword length */
-    mng_uint8p pNull = find_null (pKeyword);
+    if (!bOke) {                                    /* find the keyword length */
+        mng_uint8p pNull = find_null(pKeyword);
 
-    if (pNull - pKeyword == 4)         /* test a chunk ? */
-    {                                  /* get the chunk-id */
-      mng_chunkid iChunkid = (*pKeyword     << 24) + (*(pKeyword+1) << 16) +
-                             (*(pKeyword+2) <<  8) + (*(pKeyword+3)      );
-                                       /* binary search variables */
-      mng_int32   iTop, iLower, iUpper, iMiddle;
-                                       /* determine max index of table */
-      iTop = (sizeof (handled_chunks) / sizeof (handled_chunks [0])) - 1;
+        if (pNull - pKeyword == 4)         /* test a chunk ? */
+        {                                  /* get the chunk-id */
+            mng_chunkid iChunkid = (*pKeyword << 24) + (*(pKeyword + 1) << 16) +
+                                   (*(pKeyword + 2) << 8) + (*(pKeyword + 3));
+            /* binary search variables */
+            mng_int32 iTop, iLower, iUpper, iMiddle;
+            /* determine max index of table */
+            iTop = (sizeof(handled_chunks) / sizeof(handled_chunks[0])) - 1;
 
-      /* binary search; with 52 chunks, worst-case is 7 comparisons */
-      iLower  = 0;
-      iMiddle = iTop >> 1;
-      iUpper  = iTop;
+            /* binary search; with 52 chunks, worst-case is 7 comparisons */
+            iLower = 0;
+            iMiddle = iTop >> 1;
+            iUpper = iTop;
 
-      do                                   /* the binary search itself */
-        {
-          if (handled_chunks [iMiddle] < iChunkid)
-            iLower = iMiddle + 1;
-          else if (handled_chunks [iMiddle] > iChunkid)
-            iUpper = iMiddle - 1;
-          else
-          {
-            bOke = MNG_TRUE;
-            break;
-          }
+            do                                   /* the binary search itself */
+            {
+                if (handled_chunks[iMiddle] < iChunkid)
+                    iLower = iMiddle + 1;
+                else if (handled_chunks[iMiddle] > iChunkid)
+                    iUpper = iMiddle - 1;
+                else {
+                    bOke = MNG_TRUE;
+                    break;
+                }
 
-          iMiddle = (iLower + iUpper) >> 1;
+                iMiddle = (iLower + iUpper) >> 1;
+            } while (iLower <= iUpper);
         }
-      while (iLower <= iUpper);
+        /* test draft ? */
+        if ((!bOke) && (pNull - pKeyword == 8) &&
+            (*pKeyword == 'd') && (*(pKeyword + 1) == 'r') &&
+            (*(pKeyword + 2) == 'a') && (*(pKeyword + 3) == 'f') &&
+            (*(pKeyword + 4) == 't') && (*(pKeyword + 5) == ' ')) {
+            mng_uint32 iDraft;
+
+            iDraft = (*(pKeyword + 6) - '0') * 10 + (*(pKeyword + 7) - '0');
+            bOke = (mng_bool) (iDraft <= MNG_MNG_DRAFT);
+        }
+        /* test MNG 1.0 ? */
+        if ((!bOke) && (pNull - pKeyword == 7) &&
+            (*pKeyword == 'M') && (*(pKeyword + 1) == 'N') &&
+            (*(pKeyword + 2) == 'G') && (*(pKeyword + 3) == '-') &&
+            (*(pKeyword + 4) == '1') && (*(pKeyword + 5) == '.') &&
+            (*(pKeyword + 6) == '0'))
+            bOke = MNG_TRUE;
+
     }
-                                       /* test draft ? */
-    if ((!bOke) && (pNull - pKeyword == 8) &&
-        (*pKeyword     == 'd') && (*(pKeyword+1) == 'r') &&
-        (*(pKeyword+2) == 'a') && (*(pKeyword+3) == 'f') &&
-        (*(pKeyword+4) == 't') && (*(pKeyword+5) == ' '))
-    {
-      mng_uint32 iDraft;
 
-      iDraft = (*(pKeyword+6) - '0') * 10 + (*(pKeyword+7) - '0');
-      bOke   = (mng_bool)(iDraft <= MNG_MNG_DRAFT);
-    }
-                                       /* test MNG 1.0 ? */
-    if ((!bOke) && (pNull - pKeyword == 7) &&
-        (*pKeyword     == 'M') && (*(pKeyword+1) == 'N') &&
-        (*(pKeyword+2) == 'G') && (*(pKeyword+3) == '-') &&
-        (*(pKeyword+4) == '1') && (*(pKeyword+5) == '.') &&
-        (*(pKeyword+6) == '0'))
-      bOke   = MNG_TRUE;
-
-  }
-
-  return bOke;
+    return bOke;
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_need)
-{
+READ_CHUNK (read_need) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_NEED, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_NEED, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 1)                     /* check the length */
+    if (iRawlen < 1)                     /* check the length */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  {                                    /* let's check it */
-    mng_bool   bOke = MNG_TRUE;
-    mng_pchar  zKeywords;
-    mng_uint8p pNull, pTemp;
+    {                                    /* let's check it */
+        mng_bool bOke = MNG_TRUE;
+        mng_pchar zKeywords;
+        mng_uint8p pNull, pTemp;
 
-    MNG_ALLOC (pData, zKeywords, iRawlen + 1)
+        MNG_ALLOC (pData, zKeywords, iRawlen + 1)
 
-    if (iRawlen)
-      MNG_COPY (zKeywords, pRawdata, iRawlen)
+        if (iRawlen) MNG_COPY (zKeywords, pRawdata, iRawlen)
 
-    pTemp = (mng_uint8p)zKeywords;
-    pNull = find_null (pTemp);
+        pTemp = (mng_uint8p) zKeywords;
+        pNull = find_null(pTemp);
 
-    while ((bOke) && (pNull < (mng_uint8p)zKeywords + iRawlen))
-    {
-      bOke  = CheckKeyword (pData, pTemp);
-      pTemp = pNull + 1;
-      pNull = find_null (pTemp);
+        while ((bOke) && (pNull < (mng_uint8p) zKeywords + iRawlen)) {
+            bOke = CheckKeyword(pData, pTemp);
+            pTemp = pNull + 1;
+            pNull = find_null(pTemp);
+        }
+
+        if (bOke)
+            bOke = CheckKeyword(pData, pTemp);
+
+        MNG_FREEX (pData, zKeywords, iRawlen + 1)
+
+        if (!bOke) MNG_ERROR (pData, MNG_UNSUPPORTEDNEED)
     }
 
-    if (bOke)
-      bOke = CheckKeyword (pData, pTemp);
-
-    MNG_FREEX (pData, zKeywords, iRawlen + 1)
-
-    if (!bOke)
-      MNG_ERROR (pData, MNG_UNSUPPORTEDNEED)
-  }
-
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5082,45 +4841,43 @@ READ_CHUNK (read_need)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_NEED, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_NEED, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_phyg)
-{
+READ_CHUNK (read_phyg) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PHYG, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PHYG, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* it's 9 bytes or empty; no more, no less! */
-  if ((iRawlen != 9) && (iRawlen != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* it's 9 bytes or empty; no more, no less! */
+    if ((iRawlen != 9) && (iRawlen != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5139,142 +4896,124 @@ READ_CHUNK (read_phyg)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PHYG, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PHYG, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
 #ifdef MNG_INCLUDE_JNG
-READ_CHUNK (read_jhdr)
-{
+
+READ_CHUNK (read_jhdr) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JHDR, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_JHDR, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((pData->eSigtype != mng_it_jng) && (pData->eSigtype != mng_it_mng))
-    MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
+    /* sequence checks */
+    if ((pData->eSigtype != mng_it_jng) && (pData->eSigtype != mng_it_mng)) MNG_ERROR (pData, MNG_CHUNKNOTALLOWED)
 
-  if ((pData->eSigtype == mng_it_jng) && (pData->iChunkseq > 1))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if ((pData->eSigtype == mng_it_jng) && (pData->iChunkseq > 1)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR)) MNG_ERROR (pData,
+                                                                                                     MNG_SEQUENCEERROR)
 
-  if (iRawlen != 16)                   /* length oke ? */
+    if (iRawlen != 16)                   /* length oke ? */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
-                                       /* inside a JHDR-IEND block now */
-  pData->bHasJHDR              = MNG_TRUE;
-                                       /* and store interesting fields */
-  pData->iDatawidth            = mng_get_uint32 (pRawdata);
-  pData->iDataheight           = mng_get_uint32 (pRawdata+4);
-  pData->iJHDRcolortype        = *(pRawdata+8);
-  pData->iJHDRimgbitdepth      = *(pRawdata+9);
-  pData->iJHDRimgcompression   = *(pRawdata+10);
-  pData->iJHDRimginterlace     = *(pRawdata+11);
-  pData->iJHDRalphabitdepth    = *(pRawdata+12);
-  pData->iJHDRalphacompression = *(pRawdata+13);
-  pData->iJHDRalphafilter      = *(pRawdata+14);
-  pData->iJHDRalphainterlace   = *(pRawdata+15);
-                                       /* parameter validity checks */
-  if ((pData->iJHDRcolortype != MNG_COLORTYPE_JPEGGRAY  ) &&
-      (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGCOLOR ) &&
-      (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGGRAYA ) &&
-      (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGCOLORA)    )
-    MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+    /* inside a JHDR-IEND block now */
+    pData->bHasJHDR = MNG_TRUE;
+    /* and store interesting fields */
+    pData->iDatawidth = mng_get_uint32(pRawdata);
+    pData->iDataheight = mng_get_uint32(pRawdata + 4);
+    pData->iJHDRcolortype = *(pRawdata + 8);
+    pData->iJHDRimgbitdepth = *(pRawdata + 9);
+    pData->iJHDRimgcompression = *(pRawdata + 10);
+    pData->iJHDRimginterlace = *(pRawdata + 11);
+    pData->iJHDRalphabitdepth = *(pRawdata + 12);
+    pData->iJHDRalphacompression = *(pRawdata + 13);
+    pData->iJHDRalphafilter = *(pRawdata + 14);
+    pData->iJHDRalphainterlace = *(pRawdata + 15);
+    /* parameter validity checks */
+    if ((pData->iJHDRcolortype != MNG_COLORTYPE_JPEGGRAY) &&
+        (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGCOLOR) &&
+        (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGGRAYA) &&
+        (pData->iJHDRcolortype != MNG_COLORTYPE_JPEGCOLORA)) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
 
-  if ((pData->iJHDRimgbitdepth !=  8) &&
-      (pData->iJHDRimgbitdepth != 12) &&
-      (pData->iJHDRimgbitdepth != 20)    )
-    MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    if ((pData->iJHDRimgbitdepth != 8) &&
+        (pData->iJHDRimgbitdepth != 12) &&
+        (pData->iJHDRimgbitdepth != 20)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-  if (pData->iJHDRimgcompression != MNG_COMPRESSION_BASELINEJPEG)
-    MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+    if (pData->iJHDRimgcompression != MNG_COMPRESSION_BASELINEJPEG) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-  if ((pData->iJHDRimginterlace != MNG_INTERLACE_SEQUENTIAL ) &&
-      (pData->iJHDRimginterlace != MNG_INTERLACE_PROGRESSIVE)    )
-    MNG_ERROR (pData, MNG_INVALIDINTERLACE)
+    if ((pData->iJHDRimginterlace != MNG_INTERLACE_SEQUENTIAL) &&
+        (pData->iJHDRimginterlace != MNG_INTERLACE_PROGRESSIVE)) MNG_ERROR (pData, MNG_INVALIDINTERLACE)
 
-  if ((pData->iJHDRcolortype == MNG_COLORTYPE_JPEGGRAYA ) ||
-      (pData->iJHDRcolortype == MNG_COLORTYPE_JPEGCOLORA)    )
-  {
-    if ((pData->iJHDRalphabitdepth !=  1) &&
-        (pData->iJHDRalphabitdepth !=  2) &&
-        (pData->iJHDRalphabitdepth !=  4) &&
-        (pData->iJHDRalphabitdepth !=  8) &&
-        (pData->iJHDRalphabitdepth != 16)    )
-      MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    if ((pData->iJHDRcolortype == MNG_COLORTYPE_JPEGGRAYA) ||
+        (pData->iJHDRcolortype == MNG_COLORTYPE_JPEGCOLORA)) {
+        if ((pData->iJHDRalphabitdepth != 1) &&
+            (pData->iJHDRalphabitdepth != 2) &&
+            (pData->iJHDRalphabitdepth != 4) &&
+            (pData->iJHDRalphabitdepth != 8) &&
+            (pData->iJHDRalphabitdepth != 16)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-    if ((pData->iJHDRalphacompression != MNG_COMPRESSION_DEFLATE     ) &&
-        (pData->iJHDRalphacompression != MNG_COMPRESSION_BASELINEJPEG)    )
-      MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+        if ((pData->iJHDRalphacompression != MNG_COMPRESSION_DEFLATE) &&
+            (pData->iJHDRalphacompression != MNG_COMPRESSION_BASELINEJPEG)) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-    if ((pData->iJHDRalphacompression == MNG_COMPRESSION_BASELINEJPEG) &&
-        (pData->iJHDRalphabitdepth    !=  8                          )    )
-      MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+        if ((pData->iJHDRalphacompression == MNG_COMPRESSION_BASELINEJPEG) &&
+            (pData->iJHDRalphabitdepth != 8)) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-    if (pData->iJHDRalphafilter & (~MNG_FILTER_DIFFERING))
-      MNG_ERROR (pData, MNG_INVALIDFILTER)
+        if (pData->iJHDRalphafilter & (~MNG_FILTER_DIFFERING)) MNG_ERROR (pData, MNG_INVALIDFILTER)
 
-    if ((pData->iJHDRalphainterlace != MNG_INTERLACE_NONE ) &&
-        (pData->iJHDRalphainterlace != MNG_INTERLACE_ADAM7)    )
-      MNG_ERROR (pData, MNG_INVALIDINTERLACE)
+        if ((pData->iJHDRalphainterlace != MNG_INTERLACE_NONE) &&
+            (pData->iJHDRalphainterlace != MNG_INTERLACE_ADAM7)) MNG_ERROR (pData, MNG_INVALIDINTERLACE)
 
-  }
-  else
-  {
-    if (pData->iJHDRalphabitdepth    != 0)
-      MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
+    } else {
+        if (pData->iJHDRalphabitdepth != 0) MNG_ERROR (pData, MNG_INVALIDBITDEPTH)
 
-    if (pData->iJHDRalphacompression != 0)
-      MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
+        if (pData->iJHDRalphacompression != 0) MNG_ERROR (pData, MNG_INVALIDCOMPRESS)
 
-    if (pData->iJHDRalphafilter      != 0)
-      MNG_ERROR (pData, MNG_INVALIDFILTER)
+        if (pData->iJHDRalphafilter != 0) MNG_ERROR (pData, MNG_INVALIDFILTER)
 
-    if (pData->iJHDRalphainterlace   != 0)
-      MNG_ERROR (pData, MNG_INVALIDINTERLACE)
+        if (pData->iJHDRalphainterlace != 0) MNG_ERROR (pData, MNG_INVALIDINTERLACE)
 
-  }
+    }
 
-  if (!pData->bHasheader)              /* first chunk ? */
-  {
-    pData->bHasheader = MNG_TRUE;      /* we've got a header */
-    pData->eImagetype = mng_it_jng;    /* then this must be a JNG */
-    pData->iWidth     = mng_get_uint32 (pRawdata);
-    pData->iHeight    = mng_get_uint32 (pRawdata+4);
-                                       /* predict alpha-depth ! */
-  if ((pData->iJHDRcolortype == MNG_COLORTYPE_JPEGGRAYA ) ||
-      (pData->iJHDRcolortype == MNG_COLORTYPE_JPEGCOLORA)    )
-      pData->iAlphadepth = pData->iJHDRalphabitdepth;
-    else
-      pData->iAlphadepth = 0;
-                                       /* fits on maximum canvas ? */
-    if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight))
-      MNG_WARNING (pData, MNG_IMAGETOOLARGE)
+    if (!pData->bHasheader)              /* first chunk ? */
+    {
+        pData->bHasheader = MNG_TRUE;      /* we've got a header */
+        pData->eImagetype = mng_it_jng;    /* then this must be a JNG */
+        pData->iWidth = mng_get_uint32(pRawdata);
+        pData->iHeight = mng_get_uint32(pRawdata + 4);
+        /* predict alpha-depth ! */
+        if ((pData->iJHDRcolortype == MNG_COLORTYPE_JPEGGRAYA) ||
+            (pData->iJHDRcolortype == MNG_COLORTYPE_JPEGCOLORA))
+            pData->iAlphadepth = pData->iJHDRalphabitdepth;
+        else
+            pData->iAlphadepth = 0;
+        /* fits on maximum canvas ? */
+        if ((pData->iWidth > pData->iMaxwidth) || (pData->iHeight > pData->iMaxheight)) MNG_WARNING (pData,
+                                                                                                     MNG_IMAGETOOLARGE)
 
-    if (pData->fProcessheader)         /* inform the app ? */
-      if (!pData->fProcessheader (((mng_handle)pData), pData->iWidth, pData->iHeight))
-      MNG_ERROR (pData, MNG_APPMISCERROR)
+        if (pData->fProcessheader)         /* inform the app ? */
+            if (!pData->fProcessheader(((mng_handle) pData), pData->iWidth, pData->iHeight)) MNG_ERROR (pData,
+                                                                                                        MNG_APPMISCERROR)
 
-  }
+    }
 
-  pData->iColortype = 0;               /* fake grayscale for other routines */
-  pData->iImagelevel++;                /* one level deeper */
+    pData->iColortype = 0;               /* fake grayscale for other routines */
+    pData->iImagelevel++;                /* one level deeper */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode = process_display_jhdr (pData);
+    {
+        mng_retcode iRetcode = process_display_jhdr(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5295,11 +5034,12 @@ READ_CHUNK (read_jhdr)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JHDR, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_JHDR, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
+
 #else
 #define read_jhdr 0
 #endif /* MNG_INCLUDE_JNG */
@@ -5307,38 +5047,34 @@ READ_CHUNK (read_jhdr)
 /* ************************************************************************** */
 
 #ifdef MNG_INCLUDE_JNG
-READ_CHUNK (read_jdaa)
-{
+
+READ_CHUNK (read_jdaa) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JDAA, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_JDAA, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasJHDR) && (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasJHDR) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (pData->bHasJSEP)
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
-    
-  if (pData->iJHDRalphacompression != MNG_COMPRESSION_BASELINEJPEG)
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    if (pData->bHasJSEP) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen == 0)                    /* can never be empty */
+    if (pData->iJHDRalphacompression != MNG_COMPRESSION_BASELINEJPEG) MNG_ERROR (pData, MNG_SEQUENCEERROR)
+
+    if (iRawlen == 0)                    /* can never be empty */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasJDAA = MNG_TRUE;          /* got some JDAA now, don't we */
+    pData->bHasJDAA = MNG_TRUE;          /* got some JDAA now, don't we */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if (iRawlen)
-  {                                    /* display processing for non-empty chunks */
-    mng_retcode iRetcode = process_display_jdaa (pData, iRawlen, pRawdata);
+    if (iRawlen) {                                    /* display processing for non-empty chunks */
+        mng_retcode iRetcode = process_display_jdaa(pData, iRawlen, pRawdata);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5357,11 +5093,12 @@ READ_CHUNK (read_jdaa)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JDAA, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_JDAA, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
+
 #else
 #define read_jdaa 0
 #endif /* MNG_INCLUDE_JNG */
@@ -5369,32 +5106,30 @@ READ_CHUNK (read_jdaa)
 /* ************************************************************************** */
 
 #ifdef MNG_INCLUDE_JNG
-READ_CHUNK (read_jdat)
-{
-#ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JDAT, MNG_LC_START)
-#endif
-                                       /* sequence checks */
-  if ((!pData->bHasJHDR) && (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen == 0)                    /* can never be empty */
+READ_CHUNK (read_jdat) {
+#ifdef MNG_SUPPORT_TRACE
+    MNG_TRACE (pData, MNG_FN_READ_JDAT, MNG_LC_START)
+#endif
+    /* sequence checks */
+    if ((!pData->bHasJHDR) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
+
+    if (iRawlen == 0)                    /* can never be empty */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasJDAT = MNG_TRUE;          /* got some JDAT now, don't we */
+    pData->bHasJDAT = MNG_TRUE;          /* got some JDAT now, don't we */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  if (iRawlen)
-  {                                    /* display processing for non-empty chunks */
-    mng_retcode iRetcode = process_display_jdat (pData, iRawlen, pRawdata);
+    if (iRawlen) {                                    /* display processing for non-empty chunks */
+        mng_retcode iRetcode = process_display_jdat(pData, iRawlen, pRawdata);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5413,11 +5148,12 @@ READ_CHUNK (read_jdat)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JDAT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_JDAT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
+
 #else
 #define read_jdat 0
 #endif /* MNG_INCLUDE_JNG */
@@ -5425,22 +5161,22 @@ READ_CHUNK (read_jdat)
 /* ************************************************************************** */
 
 #ifdef MNG_INCLUDE_JNG
-READ_CHUNK (read_jsep)
-{
+
+READ_CHUNK (read_jsep) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JSEP, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_JSEP, MNG_LC_START)
 #endif
 
-  if (!pData->bHasJHDR)                /* sequence checks */
+    if (!pData->bHasJHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 0)                    /* must be empty ! */
+    if (iRawlen != 0)                    /* must be empty ! */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasJSEP = MNG_TRUE;          /* indicate we've had the 8-/12-bit separator */
+    pData->bHasJSEP = MNG_TRUE;          /* indicate we've had the 8-/12-bit separator */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5451,92 +5187,85 @@ READ_CHUNK (read_jsep)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_JSEP, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_JSEP, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
+
 #else
 #define read_jsep 0
 #endif /* MNG_INCLUDE_JNG */
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_dhdr)
-{
-  mng_uint8 iImagetype, iDeltatype;
+READ_CHUNK (read_dhdr) {
+    mng_uint8 iImagetype, iDeltatype;
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DHDR, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_DHDR, MNG_LC_START)
 #endif
 
-  if (!pData->bHasMHDR)                /* sequence checks */
+    if (!pData->bHasMHDR)                /* sequence checks */
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
 #ifdef MNG_INCLUDE_JNG
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
+        if ((pData->bHasIHDR) || (pData->bHasBASI) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check for valid length */
-  if ((iRawlen != 4) && (iRawlen != 12) && (iRawlen != 20))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check for valid length */
+    if ((iRawlen != 4) && (iRawlen != 12) && (iRawlen != 20)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  iImagetype = *(pRawdata+2);          /* check fields for validity */
-  iDeltatype = *(pRawdata+3);
+    iImagetype = *(pRawdata + 2);          /* check fields for validity */
+    iDeltatype = *(pRawdata + 3);
 
-  if (iImagetype > MNG_IMAGETYPE_JNG)
-    MNG_ERROR (pData, MNG_INVIMAGETYPE)
+    if (iImagetype > MNG_IMAGETYPE_JNG) MNG_ERROR (pData, MNG_INVIMAGETYPE)
 
-  if (iDeltatype > MNG_DELTATYPE_NOCHANGE)
-    MNG_ERROR (pData, MNG_INVDELTATYPE)
+    if (iDeltatype > MNG_DELTATYPE_NOCHANGE) MNG_ERROR (pData, MNG_INVDELTATYPE)
 
-  if ((iDeltatype == MNG_DELTATYPE_REPLACE) && (iRawlen > 12))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if ((iDeltatype == MNG_DELTATYPE_REPLACE) && (iRawlen > 12)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  if ((iDeltatype == MNG_DELTATYPE_NOCHANGE) && (iRawlen > 4))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    if ((iDeltatype == MNG_DELTATYPE_NOCHANGE) && (iRawlen > 4)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  pData->bHasDHDR = MNG_TRUE;          /* inside a DHDR-IEND block now */
+    pData->bHasDHDR = MNG_TRUE;          /* inside a DHDR-IEND block now */
 
-  pData->iImagelevel++;                /* one level deeper */
+    pData->iImagelevel++;                /* one level deeper */
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_uint16  iObjectid    = mng_get_uint16 (pRawdata);
-    mng_uint32  iBlockwidth  = 0;
-    mng_uint32  iBlockheight = 0;
-    mng_uint32  iBlockx      = 0;
-    mng_uint32  iBlocky      = 0;
-    mng_retcode iRetcode;
-
-    if (iRawlen > 4)
     {
-      iBlockwidth  = mng_get_uint32 (pRawdata+4);
-      iBlockheight = mng_get_uint32 (pRawdata+8);
+        mng_uint16 iObjectid = mng_get_uint16(pRawdata);
+        mng_uint32 iBlockwidth = 0;
+        mng_uint32 iBlockheight = 0;
+        mng_uint32 iBlockx = 0;
+        mng_uint32 iBlocky = 0;
+        mng_retcode iRetcode;
+
+        if (iRawlen > 4) {
+            iBlockwidth = mng_get_uint32(pRawdata + 4);
+            iBlockheight = mng_get_uint32(pRawdata + 8);
+        }
+
+        if (iRawlen > 12) {
+            iBlockx = mng_get_uint32(pRawdata + 12);
+            iBlocky = mng_get_uint32(pRawdata + 16);
+        }
+
+        iRetcode = create_ani_dhdr(pData, iObjectid, iImagetype, iDeltatype,
+                                   iBlockwidth, iBlockheight, iBlockx, iBlocky);
+
+        if (!iRetcode)                     /* display processing ? */
+            iRetcode = process_display_dhdr(pData, iObjectid, iImagetype, iDeltatype,
+                                            iBlockwidth, iBlockheight, iBlockx, iBlocky);
+
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
     }
-
-    if (iRawlen > 12)
-    {
-      iBlockx      = mng_get_uint32 (pRawdata+12);
-      iBlocky      = mng_get_uint32 (pRawdata+16);
-    }
-
-    iRetcode = create_ani_dhdr (pData, iObjectid, iImagetype, iDeltatype,
-                                iBlockwidth, iBlockheight, iBlockx, iBlocky);
-
-    if (!iRetcode)                     /* display processing ? */
-      iRetcode = process_display_dhdr (pData, iObjectid, iImagetype, iDeltatype,
-                                       iBlockwidth, iBlockheight, iBlockx, iBlocky);
-
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-
-  }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5562,68 +5291,63 @@ READ_CHUNK (read_dhdr)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DHDR, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_DHDR, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_prom)
-{
-  mng_uint8 iColortype;
-  mng_uint8 iSampledepth;
-  mng_uint8 iFilltype;
+READ_CHUNK (read_prom) {
+    mng_uint8 iColortype;
+    mng_uint8 iSampledepth;
+    mng_uint8 iFilltype;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PROM, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PROM, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 3)                    /* gotta be exactly 3 bytes */
+    if (iRawlen != 3)                    /* gotta be exactly 3 bytes */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  iColortype   = *pRawdata;            /* check fields for validity */
-  iSampledepth = *(pRawdata+1);
-  iFilltype    = *(pRawdata+2);
+    iColortype = *pRawdata;            /* check fields for validity */
+    iSampledepth = *(pRawdata + 1);
+    iFilltype = *(pRawdata + 2);
 
-  if ((iColortype != MNG_COLORTYPE_GRAY   ) &&
-      (iColortype != MNG_COLORTYPE_RGB    ) &&
-      (iColortype != MNG_COLORTYPE_INDEXED) &&
-      (iColortype != MNG_COLORTYPE_GRAYA  ) &&
-      (iColortype != MNG_COLORTYPE_RGBA   )    )
-    MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+    if ((iColortype != MNG_COLORTYPE_GRAY) &&
+        (iColortype != MNG_COLORTYPE_RGB) &&
+        (iColortype != MNG_COLORTYPE_INDEXED) &&
+        (iColortype != MNG_COLORTYPE_GRAYA) &&
+        (iColortype != MNG_COLORTYPE_RGBA)) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
 
-  if ((iSampledepth != MNG_BITDEPTH_1 ) &&
-      (iSampledepth != MNG_BITDEPTH_2 ) &&
-      (iSampledepth != MNG_BITDEPTH_4 ) &&
-      (iSampledepth != MNG_BITDEPTH_8 ) &&
-      (iSampledepth != MNG_BITDEPTH_16)    )
-    MNG_ERROR (pData, MNG_INVSAMPLEDEPTH)
+    if ((iSampledepth != MNG_BITDEPTH_1) &&
+        (iSampledepth != MNG_BITDEPTH_2) &&
+        (iSampledepth != MNG_BITDEPTH_4) &&
+        (iSampledepth != MNG_BITDEPTH_8) &&
+        (iSampledepth != MNG_BITDEPTH_16)) MNG_ERROR (pData, MNG_INVSAMPLEDEPTH)
 
-  if ((iFilltype != MNG_FILLMETHOD_LEFTBITREPLICATE) &&
-      (iFilltype != MNG_FILLMETHOD_ZEROFILL        )    )
-    MNG_ERROR (pData, MNG_INVFILLMETHOD)
+    if ((iFilltype != MNG_FILLMETHOD_LEFTBITREPLICATE) &&
+        (iFilltype != MNG_FILLMETHOD_ZEROFILL)) MNG_ERROR (pData, MNG_INVFILLMETHOD)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode = create_ani_prom (pData, iSampledepth, iColortype, iFilltype);
+    {
+        mng_retcode iRetcode = create_ani_prom(pData, iSampledepth, iColortype, iFilltype);
 
-    if (!iRetcode)                     /* display processing ? */
-      iRetcode = process_display_prom (pData, iSampledepth,
-                                       iColortype, iFilltype);
+        if (!iRetcode)                     /* display processing ? */
+            iRetcode = process_display_prom(pData, iSampledepth,
+                                            iColortype, iFilltype);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5637,41 +5361,39 @@ READ_CHUNK (read_prom)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PROM, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PROM, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_ipng)
-{
+READ_CHUNK (read_ipng) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IPNG, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_IPNG, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 0)                    /* gotta be empty */
+    if (iRawlen != 0)                    /* gotta be empty */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode = create_ani_ipng (pData);
+    {
+        mng_retcode iRetcode = create_ani_ipng(pData);
 
-    if (!iRetcode)                     /* process it */
-      iRetcode = process_display_ipng (pData);
+        if (!iRetcode)                     /* process it */
+            iRetcode = process_display_ipng(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5681,169 +5403,149 @@ READ_CHUNK (read_ipng)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IPNG, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_IPNG, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_pplt)
-{
-  mng_uint8     iDeltatype;
-  mng_uint8p    pTemp;
-  mng_uint32    iLen;
-  mng_uint8     iX, iM;
-  mng_uint32    iY;
-  mng_uint32    iMax;
-  mng_rgbpaltab aIndexentries;
-  mng_uint8arr  aAlphaentries;
-  mng_uint8arr  aUsedentries;
+READ_CHUNK (read_pplt) {
+    mng_uint8 iDeltatype;
+    mng_uint8p pTemp;
+    mng_uint32 iLen;
+    mng_uint8 iX, iM;
+    mng_uint32 iY;
+    mng_uint32 iMax;
+    mng_rgbpaltab aIndexentries;
+    mng_uint8arr aAlphaentries;
+    mng_uint8arr aUsedentries;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PPLT, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_PPLT, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) && (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) && (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 1)                     /* must have at least 1 byte */
+    if (iRawlen < 1)                     /* must have at least 1 byte */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  iDeltatype = *pRawdata;
-                                       /* valid ? */
-  if (iDeltatype > MNG_DELTATYPE_DELTARGBA)
-    MNG_ERROR (pData, MNG_INVDELTATYPE)
-                                       /* must be indexed color ! */
-  if (pData->iColortype != MNG_COLORTYPE_INDEXED)
-    MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
+    iDeltatype = *pRawdata;
+    /* valid ? */
+    if (iDeltatype > MNG_DELTATYPE_DELTARGBA) MNG_ERROR (pData, MNG_INVDELTATYPE)
+    /* must be indexed color ! */
+    if (pData->iColortype != MNG_COLORTYPE_INDEXED) MNG_ERROR (pData, MNG_INVALIDCOLORTYPE)
 
-  pTemp = pRawdata + 1;
-  iLen  = iRawlen - 1;
-  iMax  = 0;
+    pTemp = pRawdata + 1;
+    iLen = iRawlen - 1;
+    iMax = 0;
 
-  for (iY = 0; iY < 256; iY++)         /* reset arrays */
-  {
-    aIndexentries [iY].iRed   = 0;
-    aIndexentries [iY].iGreen = 0;
-    aIndexentries [iY].iBlue  = 0;
-    aAlphaentries [iY]        = 255;
-    aUsedentries  [iY]        = 0;
-  }
-
-  while (iLen)                         /* as long as there are entries left ... */
-  {
-    mng_uint32 iDiff;
-
-    if (iLen < 2)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-
-    iX = *pTemp;                       /* get start and end index */
-    iM = *(pTemp+1);
-
-    if (iM < iX)
-      MNG_ERROR (pData, MNG_INVALIDINDEX)
-
-    if ((mng_uint32)iM >= iMax)        /* determine highest used index */
-      iMax = (mng_uint32)iM + 1;
-
-    pTemp += 2;
-    iLen  -= 2;
-
-    if ((iDeltatype == MNG_DELTATYPE_REPLACERGB  ) ||
-        (iDeltatype == MNG_DELTATYPE_DELTARGB    )    )
-      iDiff = (iM - iX + 1) * 3;
-    else
-    if ((iDeltatype == MNG_DELTATYPE_REPLACEALPHA) ||
-        (iDeltatype == MNG_DELTATYPE_DELTAALPHA  )    )
-      iDiff = (iM - iX + 1);
-    else
-      iDiff = (iM - iX + 1) * 4;
-
-    if (iLen < iDiff)
-      MNG_ERROR (pData, MNG_INVALIDLENGTH)
-
-    if ((iDeltatype == MNG_DELTATYPE_REPLACERGB  ) ||
-        (iDeltatype == MNG_DELTATYPE_DELTARGB    )    )
+    for (iY = 0; iY < 256; iY++)         /* reset arrays */
     {
-      for (iY = (mng_uint32)iX; iY <= (mng_uint32)iM; iY++)
-      {
-        aIndexentries [iY].iRed   = *pTemp;
-        aIndexentries [iY].iGreen = *(pTemp+1);
-        aIndexentries [iY].iBlue  = *(pTemp+2);
-        aUsedentries  [iY]        = 1;
-
-        pTemp += 3;
-        iLen  -= 3;
-      }
+        aIndexentries[iY].iRed = 0;
+        aIndexentries[iY].iGreen = 0;
+        aIndexentries[iY].iBlue = 0;
+        aAlphaentries[iY] = 255;
+        aUsedentries[iY] = 0;
     }
-    else
-    if ((iDeltatype == MNG_DELTATYPE_REPLACEALPHA) ||
-        (iDeltatype == MNG_DELTATYPE_DELTAALPHA  )    )
+
+    while (iLen)                         /* as long as there are entries left ... */
     {
-      for (iY = (mng_uint32)iX; iY <= (mng_uint32)iM; iY++)
-      {
-        aAlphaentries [iY]        = *pTemp;
-        aUsedentries  [iY]        = 1;
+        mng_uint32 iDiff;
 
-        pTemp++;
-        iLen--;
-      }
+        if (iLen < 2) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+
+        iX = *pTemp;                       /* get start and end index */
+        iM = *(pTemp + 1);
+
+        if (iM < iX) MNG_ERROR (pData, MNG_INVALIDINDEX)
+
+        if ((mng_uint32) iM >= iMax)        /* determine highest used index */
+            iMax = (mng_uint32) iM + 1;
+
+        pTemp += 2;
+        iLen -= 2;
+
+        if ((iDeltatype == MNG_DELTATYPE_REPLACERGB) ||
+            (iDeltatype == MNG_DELTATYPE_DELTARGB))
+            iDiff = (iM - iX + 1) * 3;
+        else if ((iDeltatype == MNG_DELTATYPE_REPLACEALPHA) ||
+                 (iDeltatype == MNG_DELTATYPE_DELTAALPHA))
+            iDiff = (iM - iX + 1);
+        else
+            iDiff = (iM - iX + 1) * 4;
+
+        if (iLen < iDiff) MNG_ERROR (pData, MNG_INVALIDLENGTH)
+
+        if ((iDeltatype == MNG_DELTATYPE_REPLACERGB) ||
+            (iDeltatype == MNG_DELTATYPE_DELTARGB)) {
+            for (iY = (mng_uint32) iX; iY <= (mng_uint32) iM; iY++) {
+                aIndexentries[iY].iRed = *pTemp;
+                aIndexentries[iY].iGreen = *(pTemp + 1);
+                aIndexentries[iY].iBlue = *(pTemp + 2);
+                aUsedentries[iY] = 1;
+
+                pTemp += 3;
+                iLen -= 3;
+            }
+        } else if ((iDeltatype == MNG_DELTATYPE_REPLACEALPHA) ||
+                   (iDeltatype == MNG_DELTATYPE_DELTAALPHA)) {
+            for (iY = (mng_uint32) iX; iY <= (mng_uint32) iM; iY++) {
+                aAlphaentries[iY] = *pTemp;
+                aUsedentries[iY] = 1;
+
+                pTemp++;
+                iLen--;
+            }
+        } else {
+            for (iY = (mng_uint32) iX; iY <= (mng_uint32) iM; iY++) {
+                aIndexentries[iY].iRed = *pTemp;
+                aIndexentries[iY].iGreen = *(pTemp + 1);
+                aIndexentries[iY].iBlue = *(pTemp + 2);
+                aAlphaentries[iY] = *(pTemp + 3);
+                aUsedentries[iY] = 1;
+
+                pTemp += 4;
+                iLen -= 4;
+            }
+        }
     }
-    else
+
+    switch (pData->iBitdepth)            /* check maximum allowed entries for bitdepth */
     {
-      for (iY = (mng_uint32)iX; iY <= (mng_uint32)iM; iY++)
-      {
-        aIndexentries [iY].iRed   = *pTemp;
-        aIndexentries [iY].iGreen = *(pTemp+1);
-        aIndexentries [iY].iBlue  = *(pTemp+2);
-        aAlphaentries [iY]        = *(pTemp+3);
-        aUsedentries  [iY]        = 1;
-
-        pTemp += 4;
-        iLen  -= 4;
-      }
+        case MNG_BITDEPTH_1 : {
+            if (iMax > 2) MNG_ERROR (pData, MNG_INVALIDINDEX)
+            break;
+        }
+        case MNG_BITDEPTH_2 : {
+            if (iMax > 4) MNG_ERROR (pData, MNG_INVALIDINDEX)
+            break;
+        }
+        case MNG_BITDEPTH_4 : {
+            if (iMax > 16) MNG_ERROR (pData, MNG_INVALIDINDEX)
+            break;
+        }
     }
-  }
-
-  switch (pData->iBitdepth)            /* check maximum allowed entries for bitdepth */
-  {
-    case MNG_BITDEPTH_1 : {
-                            if (iMax > 2)
-                              MNG_ERROR (pData, MNG_INVALIDINDEX)
-                            break;
-                          }
-    case MNG_BITDEPTH_2 : {
-                            if (iMax > 4)
-                              MNG_ERROR (pData, MNG_INVALIDINDEX)
-                            break;
-                          }
-    case MNG_BITDEPTH_4 : {
-                            if (iMax > 16)
-                              MNG_ERROR (pData, MNG_INVALIDINDEX)
-                            break;
-                          }
-  }
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {                                    /* create animation object */
-    mng_retcode iRetcode = create_ani_pplt (pData, iDeltatype, iMax,
-                                            aIndexentries, aAlphaentries,
-                                            aUsedentries);
+    {                                    /* create animation object */
+        mng_retcode iRetcode = create_ani_pplt(pData, iDeltatype, iMax,
+                                               aIndexentries, aAlphaentries,
+                                               aUsedentries);
 
-    if (!iRetcode)                     /* execute it now ? */
-      iRetcode = process_display_pplt (pData, iDeltatype, iMax, aIndexentries,
-                                       aAlphaentries, aUsedentries);
+        if (!iRetcode)                     /* execute it now ? */
+            iRetcode = process_display_pplt(pData, iDeltatype, iMax, aIndexentries,
+                                            aAlphaentries, aUsedentries);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
-      
-  }
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
+
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5865,41 +5567,39 @@ READ_CHUNK (read_pplt)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_PPLT, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_PPLT, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_ijng)
-{
+READ_CHUNK (read_ijng) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IJNG, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_IJNG, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen != 0)                    /* gotta be empty */
+    if (iRawlen != 0)                    /* gotta be empty */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode = create_ani_ijng (pData);
+    {
+        mng_retcode iRetcode = create_ani_ijng(pData);
 
-    if (!iRetcode)                     /* process it */
-      iRetcode = process_display_ijng (pData);
+        if (!iRetcode)                     /* process it */
+            iRetcode = process_display_ijng(pData);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5909,38 +5609,35 @@ READ_CHUNK (read_ijng)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_IJNG, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_IJNG, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_drop)
-{
+READ_CHUNK (read_drop) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DROP, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_DROP, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check length */
-  if ((iRawlen < 4) || ((iRawlen % 4) != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* check length */
+    if ((iRawlen < 4) || ((iRawlen % 4) != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -5971,38 +5668,36 @@ READ_CHUNK (read_drop)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DROP, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_DROP, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_dbyk)
-{
+READ_CHUNK (read_dbyk) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DBYK, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_DBYK, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
 
-  if (iRawlen < 6)                     /* must be at least 6 long */
+    if (iRawlen < 6)                     /* must be at least 6 long */
     MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -6017,43 +5712,40 @@ READ_CHUNK (read_dbyk)
     {
       MNG_ALLOC (pData, ((mng_dbykp)*ppChunk)->zKeywords, iRawlen-4)
       MNG_COPY (((mng_dbykp)*ppChunk)->zKeywords, pRawdata+5, iRawlen-5)
-    }  
+    }
   }
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_DBYK, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_DBYK, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_ordr)
-{
+READ_CHUNK (read_ordr) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ORDR, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_ORDR, MNG_LC_START)
 #endif
-                                       /* sequence checks */
-  if ((!pData->bHasMHDR) || (!pData->bHasDHDR))
-    MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check length */
-  if ((iRawlen < 5) || ((iRawlen % 5) != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* sequence checks */
+    if ((!pData->bHasMHDR) || (!pData->bHasDHDR)) MNG_ERROR (pData, MNG_SEQUENCEERROR)
+    /* check length */
+    if ((iRawlen < 5) || ((iRawlen % 5) != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
+    {
 
 
-    /* TODO: something !!! */
+        /* TODO: something !!! */
 
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -6067,7 +5759,7 @@ READ_CHUNK (read_ordr)
       mng_uint32      iX;
       mng_ordr_entryp pEntry;
       mng_uint8p      pTemp = pRawdata;
-      
+
       MNG_ALLOC (pData, pEntry, iRawlen)
 
       ((mng_ordrp)*ppChunk)->pEntries = pEntry;
@@ -6085,106 +5777,103 @@ READ_CHUNK (read_ordr)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_ORDR, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_ORDR, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_magn)
-{
-  mng_uint16 iFirstid, iLastid;
-  mng_uint16 iMethodX, iMethodY;
-  mng_uint16 iMX, iMY, iML, iMR, iMT, iMB;
+READ_CHUNK (read_magn) {
+    mng_uint16 iFirstid, iLastid;
+    mng_uint16 iMethodX, iMethodY;
+    mng_uint16 iMX, iMY, iML, iMR, iMT, iMB;
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MAGN, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_MAGN, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_SUPPORT_JNG
-  if ((!pData->bHasMHDR) || (pData->bHasIHDR) || (pData->bHasDHDR) || (pData->bHasJHDR))
+    if ((!pData->bHasMHDR) || (pData->bHasIHDR) || (pData->bHasDHDR) || (pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) || (pData->bHasIHDR) || (pData->bHasDHDR))
+    if ((!pData->bHasMHDR) || (pData->bHasIHDR) || (pData->bHasDHDR))
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* check length */
-  if ((iRawlen > 20) || ((iRawlen & 0x01) != 0))
-    MNG_ERROR (pData, MNG_INVALIDLENGTH)
+    /* check length */
+    if ((iRawlen > 20) || ((iRawlen & 0x01) != 0)) MNG_ERROR (pData, MNG_INVALIDLENGTH)
 
-  if (iRawlen > 0)                     /* get the fields */
-    iFirstid = mng_get_uint16 (pRawdata);
-  else
-    iFirstid = 0;
+    if (iRawlen > 0)                     /* get the fields */
+        iFirstid = mng_get_uint16(pRawdata);
+    else
+        iFirstid = 0;
 
-  if (iRawlen > 2)
-    iLastid  = mng_get_uint16 (pRawdata+2);
-  else
-    iLastid  = iFirstid;
+    if (iRawlen > 2)
+        iLastid = mng_get_uint16(pRawdata + 2);
+    else
+        iLastid = iFirstid;
 
-  if (iRawlen > 4)
-    iMethodX = mng_get_uint16 (pRawdata+4);
-  else
-    iMethodX = 0;
+    if (iRawlen > 4)
+        iMethodX = mng_get_uint16(pRawdata + 4);
+    else
+        iMethodX = 0;
 
-  if (iRawlen > 6)
-    iMX      = mng_get_uint16 (pRawdata+6);
-  else
-    iMX      = 1;
+    if (iRawlen > 6)
+        iMX = mng_get_uint16(pRawdata + 6);
+    else
+        iMX = 1;
 
-  if (iRawlen > 8)
-    iMY      = mng_get_uint16 (pRawdata+8);
-  else
-    iMY      = iMX;
+    if (iRawlen > 8)
+        iMY = mng_get_uint16(pRawdata + 8);
+    else
+        iMY = iMX;
 
-  if (iRawlen > 10)
-    iML      = mng_get_uint16 (pRawdata+10);
-  else
-    iML      = iMX;
+    if (iRawlen > 10)
+        iML = mng_get_uint16(pRawdata + 10);
+    else
+        iML = iMX;
 
-  if (iRawlen > 12)
-    iMR      = mng_get_uint16 (pRawdata+12);
-  else
-    iMR      = iMX;
+    if (iRawlen > 12)
+        iMR = mng_get_uint16(pRawdata + 12);
+    else
+        iMR = iMX;
 
-  if (iRawlen > 14)
-    iMT      = mng_get_uint16 (pRawdata+14);
-  else
-    iMT      = iMY;
+    if (iRawlen > 14)
+        iMT = mng_get_uint16(pRawdata + 14);
+    else
+        iMT = iMY;
 
-  if (iRawlen > 16)
-    iMB      = mng_get_uint16 (pRawdata+16);
-  else
-    iMB      = iMY;
+    if (iRawlen > 16)
+        iMB = mng_get_uint16(pRawdata + 16);
+    else
+        iMB = iMY;
 
-  if (iRawlen > 18)
-    iMethodY = mng_get_uint16 (pRawdata+18);
-  else
-    iMethodY = iMethodX;
-                                       /* check field validity */
-  if ((iMethodX > 5) || (iMethodY > 5))
-    MNG_ERROR (pData, MNG_INVALIDMETHOD)
+    if (iRawlen > 18)
+        iMethodY = mng_get_uint16(pRawdata + 18);
+    else
+        iMethodY = iMethodX;
+    /* check field validity */
+    if ((iMethodX > 5) || (iMethodY > 5)) MNG_ERROR (pData, MNG_INVALIDMETHOD)
 
 #ifdef MNG_SUPPORT_DISPLAY
-  {
-    mng_retcode iRetcode;
+    {
+        mng_retcode iRetcode;
 
-    iRetcode = create_ani_magn (pData, iFirstid, iLastid, iMethodX,
-                                iMX, iMY, iML, iMR, iMT, iMB, iMethodY);
+        iRetcode = create_ani_magn(pData, iFirstid, iLastid, iMethodX,
+                                   iMX, iMY, iML, iMR, iMT, iMB, iMethodY);
 
-    if (!iRetcode)                     /* display processing ? */
-      iRetcode = process_display_magn (pData, iFirstid, iLastid, iMethodX,
-                                       iMX, iMY, iML, iMR, iMT, iMB, iMethodY);
+        if (!iRetcode)                     /* display processing ? */
+            iRetcode = process_display_magn(pData, iFirstid, iLastid, iMethodX,
+                                            iMX, iMY, iML, iMR, iMT, iMB, iMethodY);
 
-    if (iRetcode)                      /* on error bail out */
-      return iRetcode;
+        if (iRetcode)                      /* on error bail out */
+            return iRetcode;
 
-  }
+    }
 #endif /* MNG_SUPPORT_DISPLAY */
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -6205,43 +5894,40 @@ READ_CHUNK (read_magn)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_MAGN, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_MAGN, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
 
-READ_CHUNK (read_unknown)
-{
+READ_CHUNK (read_unknown) {
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_UNKNOWN, MNG_LC_START)
+    MNG_TRACE (pData, MNG_FN_READ_UNKNOWN, MNG_LC_START)
 #endif
-                                       /* sequence checks */
+    /* sequence checks */
 #ifdef MNG_INCLUDE_JNG
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
-      (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
+    if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+        (!pData->bHasBASI) && (!pData->bHasDHDR) && (!pData->bHasJHDR))
 #else
-  if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
+                                                                                                                                if ((!pData->bHasMHDR) && (!pData->bHasIHDR) &&
       (!pData->bHasBASI) && (!pData->bHasDHDR)    )
 #endif
     MNG_ERROR (pData, MNG_SEQUENCEERROR)
-                                       /* critical chunk ? */
-  if (((mng_uint32)pData->iChunkname & 0x20000000) == 0)
-    MNG_ERROR (pData, MNG_UNKNOWNCRITICAL)
+    /* critical chunk ? */
+    if (((mng_uint32) pData->iChunkname & 0x20000000) == 0) MNG_ERROR (pData, MNG_UNKNOWNCRITICAL)
 
-  if (pData->fProcessunknown)          /* let the app handle it ? */
-  {
-    mng_bool bOke = pData->fProcessunknown ((mng_handle)pData, pData->iChunkname,
-                                            iRawlen, (mng_ptr)pRawdata);
+    if (pData->fProcessunknown)          /* let the app handle it ? */
+    {
+        mng_bool bOke = pData->fProcessunknown((mng_handle) pData, pData->iChunkname,
+                                               iRawlen, (mng_ptr) pRawdata);
 
-    if (!bOke)
-      MNG_ERROR (pData, MNG_APPMISCERROR)
-  }
+        if (!bOke) MNG_ERROR (pData, MNG_APPMISCERROR)
+    }
 
 #ifdef MNG_STORE_CHUNKS
-  if (pData->bStorechunks)
+                                                                                                                            if (pData->bStorechunks)
   {                                    /* initialize storage */
     mng_retcode iRetcode = ((mng_chunk_headerp)pHeader)->fCreate (pData, pHeader, ppChunk);
 
@@ -6262,10 +5948,10 @@ READ_CHUNK (read_unknown)
 #endif /* MNG_STORE_CHUNKS */
 
 #ifdef MNG_SUPPORT_TRACE
-  MNG_TRACE (pData, MNG_FN_READ_UNKNOWN, MNG_LC_END)
+    MNG_TRACE (pData, MNG_FN_READ_UNKNOWN, MNG_LC_END)
 #endif
 
-  return MNG_NOERROR;                  /* done */
+    return MNG_NOERROR;                  /* done */
 }
 
 /* ************************************************************************** */
@@ -6280,7 +5966,7 @@ READ_CHUNK (read_unknown)
 
 #ifdef MNG_INCLUDE_WRITE_PROCS
 
-/* ************************************************************************** */
+                                                                                                                        /* ************************************************************************** */
 
 WRITE_CHUNK (write_ihdr)
 {
@@ -7779,7 +7465,7 @@ WRITE_CHUNK (write_fram)
 
             pTemp2++;
             pTemp += 4;
-          }  
+          }
         }
       }
     }
@@ -8030,7 +7716,7 @@ WRITE_CHUNK (write_save)
         pTemp += pEntry->iNamesize;
       }
 
-      pEntry++;  
+      pEntry++;
     }
                                        /* and write it */
     iRetcode = write_raw_chunk (pData, pSAVE->sHeader.iChunkname,
@@ -8480,7 +8166,7 @@ WRITE_CHUNK (write_pplt)
   for (iX = 0; iX < pPPLT->iCount; iX++)
   {
     pEntry = &pPPLT->aEntries[iX];
-    
+
     if (pEntry->bUsed)                 /* valid entry ? */
     {
       if (!bHasgroup)                  /* start a new group ? */
