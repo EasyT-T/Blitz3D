@@ -7,10 +7,10 @@
 extern bool debug;
 extern gxRuntime *gx_runtime;
 
-struct bbEx {
+struct bbEx : std::exception {
     const char *err;
 
-    bbEx(const char *e) : err(e) {
+    explicit bbEx(const char *e) : err(e) {
         if (e) gx_runtime->debugError(e);
     }
 };
