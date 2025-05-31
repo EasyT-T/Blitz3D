@@ -7,7 +7,7 @@ IMPLEMENT_DYNAMIC(Tabber, CTabCtrl)
 BEGIN_MESSAGE_MAP(Tabber, CTabCtrl)
                     ON_WM_SIZE()
                     ON_WM_ERASEBKGND()
-                    ON_NOTIFY_REFLECT(TCN_SELCHANGE, tcn_selChange)
+                    ON_NOTIFY_REFLECT(TCN_SELCHANGE, &Tabber::tcn_selChange)
 END_MESSAGE_MAP()
 
 static CRect tabsRect(CTabCtrl &t) {

@@ -7,19 +7,19 @@ struct Tri {
     int verts[3];
 };
 
-struct Surf {
+struct MLSurf {
     vector<Tri> tris;
 };
 
 struct MLMesh {
-    map<Brush, Surf *> brush_map;
+    map<Brush, MLSurf *> brush_map;
     vector<Surface::Vertex> verts;
 
     MLMesh() {
     }
 
     ~MLMesh() {
-        map<Brush, Surf *>::const_iterator it;
+        map<Brush, MLSurf *>::const_iterator it;
         for (it = brush_map.begin(); it != brush_map.end(); ++it) {
             delete it->second;
         }
@@ -67,11 +67,11 @@ Surface::Vertex &MeshLoader::refVertex(int n) {
 
 void MeshLoader::addTriangle(int v0, int v1, int v2, const Brush &b) {
     //find surface
-    Surf *surf;
-    map<Brush, Surf *>::const_iterator it = ml_mesh->brush_map.find(b);
+    MLSurf *surf;
+    map<Brush, MLSurf *>::const_iterator it = ml_mesh->brush_map.find(b);
     if (it != ml_mesh->brush_map.end()) surf = it->second;
     else {
-        surf = d_new Surf;
+        surf = d_new MLSurf;
         ml_mesh->brush_map.insert(make_pair(b, surf));
     }
 
@@ -102,11 +102,11 @@ void MeshLoader::endMesh(MeshModel *mesh) {
             }
         }
         map<int, int> vert_map;
-        map<Brush, Surf *>::iterator it;
+        map<Brush, MLSurf *>::iterator it;
         for (it = ml_mesh->brush_map.begin(); it != ml_mesh->brush_map.end(); ++it) {
             vert_map.clear();
             Brush b = it->first;
-            Surf *t = it->second;
+            MLSurf *t = it->second;
             Surface *surf = mesh->findSurface(b);
             if (!surf) surf = mesh->createSurface(b);
             for (int k = 0; k < t->tris.size(); ++k) {

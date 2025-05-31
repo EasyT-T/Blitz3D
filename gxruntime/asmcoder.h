@@ -1,4 +1,4 @@
-// asmcoder.h 
+// asmcoder.h
 // by simon@acid.co.nz
 
 // v0.5
@@ -6,7 +6,7 @@
 
 // v0.4
 // direct pixel address now expected
-// x,y args removed span removed 
+// x,y args removed span removed
 
 // v0.3
 // span changed to bytes
@@ -32,8 +32,8 @@ CodeSpan(codebase,depth,amask,rmask,gmask,bmask)
 	bmask=32bit blue pixel mask
 
 	returns number of bytes of code generated (max 64 bytes)
-	
-	call resulting code by typecasting codebase with 
+
+	call resulting code by typecasting codebase with
 
 	void (__fastcall *plot)(void *pix,int argb)
 	int (__fastcall *point)(void *pix)
@@ -98,7 +98,7 @@ public:
         Code((0xc0) | (dest << 3) | (src));
     }
 
-    void or(Reg32 dest, Reg32 src)
+    void Or(Reg32 dest, Reg32 src)
     {
         Code(0x0b);
         Code((0xc0) | (dest << 3) | (src));
@@ -244,7 +244,7 @@ public:
         }
     }
 
-    void and(Reg32 reg, int imm)
+    void And(Reg32 reg, int imm)
     {
         if (imm == 0xffffffff) return;
         if (imm >= -128 && imm < 128)
@@ -265,7 +265,7 @@ public:
         }
     }
 
-    void or(Reg32 reg, int imm)
+    void Or(Reg32 reg, int imm)
     {
         if (imm == 0) return;
         if (imm >= -128 && imm < 128)
@@ -366,24 +366,24 @@ public:
         mov(ebp, ecx);
         if (rmask == 0xff0000 && gmask == 0xff00 && bmask == 0xff)
         {
-            if (amask == 0 && depth > 24) and(eax, 0xffffff);
+            if (amask == 0 && depth > 24) And(eax, 0xffffff);
         }
         else
         {
-            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a			
-            shift(eax, bmsb - 7); //3-0);			
+            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a
+            shift(eax, bmsb - 7); //3-0);
             mov(ecx, ebx);
             shift(ebx, gmsb - 15);
             if (amask) mov(edx, ecx); //alph
             if (amask) shift(edx, amsb - 31); //alph
-            and(eax, bmask);
+            And(eax, bmask);
             shift(ecx, rmsb - 23);
-            if (amask) and(edx, amask); //alph
-            and(ebx, gmask);
-            if (amask) or(eax, edx); //alph
-            and(ecx, rmask);
-            or(eax, ebx);
-            or(eax, ecx);
+            if (amask) And(edx, amask); //alph
+            And(ebx, gmask);
+            if (amask) Or(eax, edx); //alph
+            And(ecx, rmask);
+            Or(eax, ebx);
+            Or(eax, ecx);
         }
         switch (depth)
         {
@@ -431,20 +431,20 @@ public:
         }
         else
         {
-            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a			
+            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a
             mov(ecx, eax);
             if (amask) mov(edx, eax);
-            and(eax, bmask);
+            And(eax, bmask);
             shift(eax, 7 - bmsb);
-            and(ebx, gmask);
+            And(ebx, gmask);
             shift(ebx, 15 - gmsb);
-            and(ecx, rmask);
+            And(ecx, rmask);
             shift(ecx, 23 - rmsb);
-            if (amask) and(edx, amask);
-            or(eax, ebx);
+            if (amask) And(edx, amask);
+            Or(eax, ebx);
             if (amask) shift(edx, 31 - amsb);
-            or(eax, ecx);
-            if (amask) or(eax, edx);
+            Or(eax, ecx);
+            if (amask) Or(eax, edx);
         }
         pop(ebx);
         int oor = 0;
@@ -452,7 +452,7 @@ public:
         if (!rmask) oor |= 0x00ff0000;
         if (!gmask) oor |= 0x0000ff00;
         if (!bmask) oor |= 0x000000ff;
-        if (oor) or(eax, oor);
+        if (oor) Or(eax, oor);
         ret();
         return off;
     }
@@ -480,30 +480,30 @@ public:
         neg(edi);
 
         loop = off;
-        // loop		
+        // loop
         load32(eax, esi);
         add(esi, 4);
 
         if (rmask == 0xff0000 && gmask == 0xff00 && bmask == 0xff)
         {
-            if (amask == 0 && depth > 24) and(eax, 0xffffff);
+            if (amask == 0 && depth > 24) And(eax, 0xffffff);
         }
         else
         {
-            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a			
-            shift(eax, bmsb - 7); //3-0);			
+            mov(ebx, eax); //eax=b ebx=g ecx=r edx=a
+            shift(eax, bmsb - 7); //3-0);
             mov(ecx, ebx);
             shift(ebx, gmsb - 15);
             if (amask) mov(edx, ecx); //alph
             if (amask) shift(edx, amsb - 31); //alph
-            and(eax, bmask);
+            And(eax, bmask);
             shift(ecx, rmsb - 23);
-            if (amask) and(edx, amask); //alph
-            and(ebx, gmask);
-            if (amask) or(eax, edx); //alph
-            and(ecx, rmask);
-            or(eax, ebx);
-            or(eax, ecx);
+            if (amask) And(edx, amask); //alph
+            And(ebx, gmask);
+            if (amask) Or(eax, edx); //alph
+            And(ecx, rmask);
+            Or(eax, ebx);
+            Or(eax, ecx);
         }
         switch (depth)
         {

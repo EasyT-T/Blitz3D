@@ -6,7 +6,7 @@ IMPLEMENT_DYNAMIC(FuncList, CListCtrl)
 
 BEGIN_MESSAGE_MAP(FuncList, CListCtrl)
                     ON_WM_CREATE()
-                    ON_NOTIFY_REFLECT(NM_CLICK, nm_click)
+                    ON_NOTIFY_REFLECT(NM_CLICK, &FuncList::nm_click)
 END_MESSAGE_MAP()
 
 FuncList::FuncList() :

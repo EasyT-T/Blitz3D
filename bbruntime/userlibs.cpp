@@ -40,7 +40,7 @@ void _bbLoadLibs(char *p) {
                 p += strlen(p) + 1;
                 void *ptr = *(void **) p;
                 p += 4;
-                *(void **) ptr = proc ? proc : procNotFound;
+                *(void **) ptr = proc ? proc : reinterpret_cast<void*>(procNotFound);
             }
         } else {
             while (*p) {
