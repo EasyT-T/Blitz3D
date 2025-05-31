@@ -359,7 +359,6 @@ static MeshModel *parseFile(const string &file) {
         xfile->Release();
         return 0;
     }
-
     anim_len = 0;
     MeshModel *e = d_new MeshModel();
     for (; enumObj->GetNextDataObject(&fileData) >= 0; fileData->Release()) {

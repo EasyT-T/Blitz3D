@@ -4,11 +4,21 @@
 #include "meshmodel.h"
 
 struct Tri {
-    int verts[3];
+    int verts[3] = {0, 0, 0};
 };
 
 struct Surf {
     vector<Tri> tris;
+
+    Surf()
+    {
+        MessageBox(nullptr, "Op", "Shuo de dao li 1", MB_OK);
+    }
+
+    Surf(int)
+    {
+        MessageBox(nullptr, "Op", "Shuo de dao li 1", MB_OK);
+    }
 };
 
 struct MLMesh {
@@ -67,19 +77,23 @@ Surface::Vertex &MeshLoader::refVertex(int n) {
 
 void MeshLoader::addTriangle(int v0, int v1, int v2, const Brush &b) {
     //find surface
-    Surf *surf;
+    auto surf = new Surf();
+    MessageBox(nullptr, "1", "Shuo de dao li 1", MB_OK);
     map<Brush, Surf *>::const_iterator it = ml_mesh->brush_map.find(b);
-    if (it != ml_mesh->brush_map.end()) surf = it->second;
+    if (it != ml_mesh->brush_map.end())
+    {
+        //surf = it->second;
+    }
     else {
-        surf = d_new Surf;
-        ml_mesh->brush_map.insert(make_pair(b, surf));
+        //surf = d_new Surf;
+        //ml_mesh->brush_map.insert(make_pair(b, surf));
     }
 
     Tri tri;
     tri.verts[0] = v0;
     tri.verts[1] = v1;
     tri.verts[2] = v2;
-    surf->tris.push_back(tri);
+    //surf->tris.push_back(tri);
 }
 
 void MeshLoader::endMesh(MeshModel *mesh) {

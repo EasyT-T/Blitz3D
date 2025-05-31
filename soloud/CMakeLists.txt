@@ -2,23 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 
 project(soloud)
 
-include(FetchContent)
-
 ##### soloud #####
 
-FetchContent_Declare(soloud
-        GIT_REPOSITORY https://github.com/blitz-research/soloud.git
-        GIT_TAG master
-        GIT_SUBMODULES ""
-        GIT_SHALLOW TRUE
-        EXCLUDE_FROM_ALL
-)
-
-FetchContent_MakeAvailable(soloud)
-
-set(CORE ${soloud_SOURCE_DIR}/src/core)
-set(BACKEND ${soloud_SOURCE_DIR}/src/backend)
-set(ASRC ${soloud_SOURCE_DIR}/src/audiosource)
+set(CORE src/core)
+set(BACKEND src/backend)
+set(ASRC src/audiosource)
 
 set(SRCS
         ${CORE}/soloud.cpp

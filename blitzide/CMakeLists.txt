@@ -28,4 +28,6 @@ add_executable(blitzide WIN32
 
 target_compile_options(blitzide PRIVATE /Gz)
 
+target_link_options(blitzide PRIVATE "/FORCE:MULTIPLE")
+
 copy_exe_to_install(blitzide bin/ide)

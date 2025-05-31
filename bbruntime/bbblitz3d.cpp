@@ -195,15 +195,20 @@ static Entity *loadEntity(string t, int hint) {
     string ext = t.substr(n + 1);
     MeshLoader *l;
 
+    gx_runtime->debugInfo("In");
+
     if (ext == "x") l = &loader_x;
     else if (ext == "3ds") l = &loader_3ds;
     else if (ext == "b3d") l = &loader_b3d;
     else return 0;
 
+    gx_runtime->debugInfo(itoa(reinterpret_cast<unsigned int>(l)).c_str());
+
     const Transform &conv = loader_mat_map[ext];
 
     CachedTexture::setPath(filenamepath(t));
     Entity *e = l->load(t, conv, hint);
+
     CachedTexture::setPath("");
     return e;
 }

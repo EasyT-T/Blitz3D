@@ -27,4 +27,6 @@ target_compile_options(debugger PRIVATE /Gz)
 # Need this for MFC based DLLs.
 target_compile_definitions(debugger PRIVATE _USRDLL)
 
+target_link_options(debugger PRIVATE "/FORCE:MULTIPLE")
+
 copy_dll_to_install(debugger bin/debugger)
