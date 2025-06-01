@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "funclist.h"
 
 IMPLEMENT_DYNAMIC(FuncList, CListCtrl)
@@ -10,21 +9,21 @@ BEGIN_MESSAGE_MAP(FuncList, CListCtrl)
 END_MESSAGE_MAP()
 
 FuncList::FuncList() :
-        listener(0) {
+        listener(nullptr) {
 }
 
 void FuncList::setListener(FuncListListener *l) {
     listener = l;
 }
 
-int FuncList::OnCreate(LPCREATESTRUCT cs) {
+int FuncList::OnCreate(const LPCREATESTRUCT cs) {
     CListCtrl::OnCreate(cs);
 
     return 0;
 }
 
 void FuncList::nm_click(NMHDR *nmhdr, LRESULT *result) {
-    NMLISTVIEW *lv = (NMLISTVIEW *) nmhdr;
+    const NMLISTVIEW *lv = (NMLISTVIEW *) nmhdr;
 
     int k = 0;
     Funcs::iterator it;
@@ -41,7 +40,7 @@ void FuncList::clear() {
     DeleteAllItems();
 }
 
-void FuncList::insert(int line, const string &func) {
+void FuncList::insert(const int line, const std::string &func) {
     int n = 0;
     Funcs::iterator it;
     for (it = funcs.begin(); it != funcs.end() && line > *it; ++n, ++it) {
@@ -54,7 +53,7 @@ void FuncList::insert(int line, const string &func) {
     InsertItem(n, func.c_str());
 }
 
-void FuncList::remove(int begin, int end) {
+void FuncList::remove(const int begin, const int end) {
     int n = 0;
     Funcs::iterator it;
     for (it = funcs.begin(); it != funcs.end() && *it < begin; ++n, ++it) {
@@ -65,9 +64,8 @@ void FuncList::remove(int begin, int end) {
     }
 }
 
-void FuncList::relocate(int begin, int offset) {
-    Funcs::iterator it;
-    for (it = funcs.begin(); it != funcs.end(); ++it) {
+void FuncList::relocate(const int begin, const int offset) {
+    for (Funcs::iterator it = funcs.begin(); it != funcs.end(); ++it) {
         if (*it >= begin) *it += offset;
     }
 }

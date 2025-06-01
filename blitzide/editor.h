@@ -2,8 +2,9 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include "tabber.h"
 #include "funclist.h"
+#include "stdafx.h"
+#include "tabber.h"
 
 #include <tom.h>
 
@@ -18,13 +19,13 @@ class Editor : public CWnd, FuncListListener, TabberListener {
 public:
     Editor(EditorListener *l);
 
-    ~Editor();
+    ~Editor() override;
 
-    void setName(const string &f);
+    void setName(const std::string &f);
 
     void setModified(bool n);
 
-    bool setText(istream &in);
+    bool setText(std::istream &in);
 
     void setCursor(int pos);
 
@@ -38,7 +39,7 @@ public:
 
     void replace();
 
-    bool canFind();
+    bool canFind() const;
 
     bool findNext(bool wrap);
 
@@ -52,23 +53,23 @@ public:
 
     static void unlock();
 
-    int getCursor();
+    int getCursor() const;
 
-    string getName() const;
+    std::string getName() const;
 
-    string getKeyword();
+    std::string getKeyword();
 
-    bool getModified();
+    bool getModified() const;
 
-    bool getText(ostream &out);
+    bool getText(std::ostream &out);
 
-    void getCursor(int *row, int *col);
+    void getCursor(int *row, int *col) const;
 
     bool canCutCopy();
 
-    bool canPaste();
+    bool canPaste() const;
 
-    static void addKeyword(const string &s);
+    static void addKeyword(const std::string &s);
 
 DECLARE_DYNAMIC(Editor)
 
@@ -105,7 +106,7 @@ DECLARE_MESSAGE_MAP()
 private:
     EditorListener *listener;
 
-    string name;
+    std::string name;
     bool findOnly, found;
     CFindReplaceDialog *finder;
     char findBuff[256], replaceBuff[256];
@@ -117,8 +118,8 @@ private:
     int lineToFmt, fmtLineCount;
 
     //streaming
-    string is_line;
-    istream *is_stream;
+    std::string is_line;
+    std::istream *is_stream;
     int is_curs, is_linenum;
 
     //sizing
@@ -132,9 +133,9 @@ private:
     CRichEditCtrl editCtrl;
     ITextDocument *tomDoc;
 
-    void funcSelected(int line);
+    void funcSelected(int line) override;
 
-    void currentSet(Tabber *tabber, int index);
+    void currentSet(Tabber *tabber, int index) override;
 
     void resized();
 
@@ -142,15 +143,15 @@ private:
 
     void setSel();
 
-    void suspendUndo();
+    void suspendUndo() const;
 
-    void resumeUndo();
+    void resumeUndo() const;
 
     void endFind();
 
     void fixFmt(bool fmt);
 
-    void setFormat(int from, int to, int color, const string &s = "");
+    void setFormat(int from, int to, int color, const std::string &s = "");
 
     void formatLine(int line);
 
@@ -158,7 +159,7 @@ private:
 
     void cursorMoved();
 
-    string getLine(int line);
+    std::string getLine(int line) const;
 
     void formatStreamLine();
 

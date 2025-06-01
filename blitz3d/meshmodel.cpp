@@ -1,7 +1,7 @@
 
-#include "std.h"
 #include "meshmodel.h"
 #include "meshcollider.h"
+#include "std.h"
 
 extern gxGraphics *gx_graphics;
 
@@ -13,10 +13,10 @@ struct MeshModel::Rep : public Surface::Monitor {
     mutable int box_valid, coll_valid, norms_valid;
 
     SurfaceList surfaces;
-    vector<Transform> bone_tforms;
+    std::vector<Transform> bone_tforms;
 
     Rep() :
-            ref_cnt(1), collider(0), box_valid(-1), coll_valid(-1), norms_valid(-1) {
+            ref_cnt(1), collider(nullptr), box_valid(-1), coll_valid(-1), norms_valid(-1) {
         geom_changes = brush_changes = 0;
     }
 
@@ -32,16 +32,18 @@ struct MeshModel::Rep : public Surface::Monitor {
         return t;
     }
 
-    Surface *findSurface(const Brush &b) {
+    Surface *findSurface(const Brush &b) const
+    {
         for (int k = 0; k < surfaces.size(); ++k) {
             Surface *s = surfaces[k];
             if (s->getBrush() < b || b < s->getBrush()) continue;
             return s;
         }
-        return 0;
+        return nullptr;
     }
 
-    void paint(const Brush &b) {
+    void paint(const Brush &b) const
+    {
         for (int k = 0; k < surfaces.size(); ++k) {
             Surface *s = surfaces[k];
             s->setBrush(b);
@@ -53,7 +55,7 @@ struct MeshModel::Rep : public Surface::Monitor {
             setCullBox(t->cullBox);
         }
         for (int k = 0; k < t->surfaces.size(); ++k) {
-            Surface *src = t->surfaces[k];
+            const Surface *src = t->surfaces[k];
             Surface *dest = findSurface(src->getBrush());
             if (!dest) dest = createSurface(src->getBrush());
             int j;
@@ -70,8 +72,9 @@ struct MeshModel::Rep : public Surface::Monitor {
         }
     }
 
-    void transform(const Transform &t) {
-        Matrix co = t.m.cofactor();
+    void transform(const Transform &t) const
+    {
+        const Matrix co = t.m.cofactor();
         for (int k = 0; k < surfaces.size(); ++k) {
             Surface *s = surfaces[k];
             for (int j = 0; j < s->numVertices(); ++j) {
@@ -83,7 +86,8 @@ struct MeshModel::Rep : public Surface::Monitor {
         }
     }
 
-    void flip() {
+    void flip() const
+    {
         for (int k = 0; k < surfaces.size(); ++k) {
             Surface *s = surfaces[k];
             int j;
@@ -98,11 +102,13 @@ struct MeshModel::Rep : public Surface::Monitor {
         }
     }
 
-    void setCullBox(const Box &t) {
+    void setCullBox(const Box &t) const
+    {
         cullBox = t;
     }
 
-    void updateNormals() {
+    void updateNormals() const
+    {
         if (norms_valid != geom_changes) {
             for (int k = 0; k < surfaces.size(); ++k) {
                 Surface *s = surfaces[k];
@@ -116,7 +122,7 @@ struct MeshModel::Rep : public Surface::Monitor {
         if (box_valid != geom_changes) {
             box.clear();
             for (int k = 0; k < surfaces.size(); ++k) {
-                Surface *s = surfaces[k];
+                const Surface *s = surfaces[k];
                 for (int j = 0; j < s->numVertices(); ++j) {
                     box.update(s->getVertex(j).coords);
                 }
@@ -133,8 +139,8 @@ struct MeshModel::Rep : public Surface::Monitor {
     MeshCollider *getCollider() const {
         if (coll_valid != geom_changes) {
             delete collider;
-            vector<MeshCollider::Vertex> verts;
-            vector<MeshCollider::Triangle> tris;
+            std::vector<MeshCollider::Vertex> verts;
+            std::vector<MeshCollider::Triangle> tris;
             for (int k = 0; k < surfaces.size(); ++k) {
                 Surface *s = surfaces[k];
                 int j;
@@ -182,11 +188,13 @@ MeshModel::~MeshModel() {
     if (!--rep->ref_cnt) delete rep;
 }
 
-void MeshModel::updateNormals() {
+void MeshModel::updateNormals() const
+{
     rep->updateNormals();
 }
 
-void MeshModel::setCullBox(const Box &box) {
+void MeshModel::setCullBox(const Box &box) const
+{
     rep->setCullBox(box);
 }
 
@@ -197,7 +205,7 @@ void MeshModel::setRenderBrush(const Brush &b) {
 
 void MeshModel::createBones() {
     setRenderSpace(RENDER_SPACE_WORLD);
-    const vector<Object *> &bones = getAnimator()->getObjects();
+    const std::vector<Object *> &bones = getAnimator()->getObjects();
 
     surf_bones.resize(bones.size());
 
@@ -220,7 +228,7 @@ bool MeshModel::render(const RenderContext &rc) {
     if (brush_changes != rep->brush_changes) {
         brushes.clear();
         for (int k = 0; k < rep->surfaces.size(); ++k) {
-            Surface *s = rep->surfaces[k];
+            const Surface *s = rep->surfaces[k];
             brushes.push_back(Brush(s->getBrush(), render_brush));
         }
         brush_changes = rep->brush_changes;
@@ -237,7 +245,7 @@ bool MeshModel::render(const RenderContext &rc) {
     }
 
     //OK, its boned!
-    const vector<Object *> &bones = getAnimator()->getObjects();
+    const std::vector<Object *> &bones = getAnimator()->getObjects();
 
     int k;
     for (k = 0; k < bones.size(); ++k) {
@@ -261,7 +269,7 @@ bool MeshModel::render(const RenderContext &rc) {
     return trans;
 }
 
-void MeshModel::renderQueue(int type) {
+void MeshModel::renderQueue(const int type) {
     if (type == QUEUE_TRANSPARENT && surf_bones.size()) {
         for (int k = 0; k < rep->surfaces.size(); ++k) {
             Surface *s = rep->surfaces[k];
@@ -280,15 +288,18 @@ Surface *MeshModel::createSurface(const Brush &b) {
     --brush_changes;
 }
 
-void MeshModel::flipTriangles() {
+void MeshModel::flipTriangles() const
+{
     rep->flip();
 }
 
-void MeshModel::transform(const Transform &t) {
+void MeshModel::transform(const Transform &t) const
+{
     rep->transform(t);
 }
 
-void MeshModel::add(const MeshModel &t) {
+void MeshModel::add(const MeshModel &t) const
+{
     rep->add(t.rep);
 }
 
@@ -296,7 +307,8 @@ const MeshModel::SurfaceList &MeshModel::getSurfaces() const {
     return rep->surfaces;
 }
 
-void MeshModel::paint(const Brush &b) {
+void MeshModel::paint(const Brush &b) const
+{
     rep->paint(b);
 }
 
@@ -312,7 +324,7 @@ Surface *MeshModel::findSurface(const Brush &b) const {
     return rep->findSurface(b);
 }
 
-bool MeshModel::collide(const Line &line, float radius, Collision *curr_coll, const Transform &t) {
+bool MeshModel::collide(const Line &line, const float radius, Collision *curr_coll, const Transform &t) {
     return getCollider()->collide(line, radius, curr_coll, t);
 }
 

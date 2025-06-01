@@ -4,9 +4,9 @@
 
 #include <vector>
 
-#include "entity.h"
 #include "animator.h"
 #include "collision.h"
+#include "entity.h"
 
 struct Sound;
 
@@ -24,12 +24,12 @@ public:
 
     Object(const Object &object);
 
-    ~Object();
+    ~Object() override;
 
     //Entity interface
-    Object *getObject() { return this; }
+    Object *getObject() override { return this; }
 
-    Entity *clone() { return d_new Object(*this); }
+    Entity *clone() override { return d_new Object(*this); }
 
     //deep object copy!
     Object *copy();
@@ -43,11 +43,11 @@ public:
 
     void setCollisionBox(const Box &box);
 
-    void setOrder(int n) { order = n; }
+    void setOrder(const int n) { order = n; }
 
-    void setPickGeometry(int n) { pick_geom = n; }
+    void setPickGeometry(const int n) { pick_geom = n; }
 
-    void setObscurer(bool t) { obscurer = t; }
+    void setObscurer(const bool t) { obscurer = t; }
 
     void setAnimation(const Animation &t) { anim = t; }
 
@@ -111,7 +111,7 @@ private:
     bool obscurer;
     float elapsed;
     Vector velocity;
-    vector<uint32_t> channels;
+    std::vector<uint32_t> channels;
     Vector capt_pos, capt_scl;
     Quat capt_rot;
     mutable Object *last_copy;

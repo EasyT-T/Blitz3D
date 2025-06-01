@@ -36,12 +36,12 @@ public:
     Model(const Model &m);
 
     //Entity interface
-    Model *getModel() { return this; }
+    Model *getModel() override { return this; }
 
     //Object interface
-    void capture();
+    void capture() override;
 
-    bool beginRender(float tween);
+    bool beginRender(float tween) override;
 
     //Model interface
     virtual void setRenderBrush(const Brush &b) {}
@@ -50,17 +50,17 @@ public:
 
     virtual void renderQueue(int type);
 
-    virtual Sprite *getSprite() { return 0; }
+    virtual Sprite *getSprite() { return nullptr; }
 
-    virtual Terrain *getTerrain() { return 0; }
+    virtual Terrain *getTerrain() { return nullptr; }
 
-    virtual PlaneModel *getPlaneModel() { return 0; }
+    virtual PlaneModel *getPlaneModel() { return nullptr; }
 
-    virtual MeshModel *getMeshModel() { return 0; }
+    virtual MeshModel *getMeshModel() { return nullptr; }
 
-    virtual MD2Model *getMD2Model() { return 0; }
+    virtual MD2Model *getMD2Model() { return nullptr; }
 
-    virtual Q3BSPModel *getBSPModel() { return 0; }
+    virtual Q3BSPModel *getBSPModel() { return nullptr; }
 
     virtual void setBrush(const Brush &b) {
         brush = b;
@@ -72,38 +72,38 @@ public:
         w_brush = true;
     }
 
-    virtual void setAlpha(float a) {
+    virtual void setAlpha(const float a) {
         brush.setAlpha(a);
         w_brush = true;
     }
 
-    virtual void setShininess(float t) {
+    virtual void setShininess(const float t) {
         brush.setShininess(t);
         w_brush = true;
     }
 
-    virtual void setTexture(int i, const Texture &t, int f) {
+    virtual void setTexture(const int i, const Texture &t, const int f) {
         brush.setTexture(i, t, f);
         w_brush = true;
     }
 
-    virtual void setBlend(int n) {
+    virtual void setBlend(const int n) {
         brush.setBlend(n);
         w_brush = true;
     }
 
-    virtual void setFX(int n) {
+    virtual void setFX(const int n) {
         brush.setFX(n);
         w_brush = true;
     }
 
     const Brush &getBrush() const { return brush; }
 
-    void setRenderSpace(int n) { space = n; }
+    void setRenderSpace(const int n) { space = n; }
 
     int getRenderSpace() const { return space; }
 
-    void setAutoFade(float nr, float fr) {
+    void setAutoFade(const float nr, const float fr) {
         auto_fade_nr = nr;
         auto_fade_fr = fr;
         auto_fade = true;
@@ -115,7 +115,7 @@ public:
 
     void enqueue(gxMesh *mesh, int first_vert, int vert_cnt, int first_tri, int tri_cnt, const Brush &b);
 
-    int queueSize(int type) const { return queues[type].size(); }
+    int queueSize(const int type) const { return queues[type].size(); }
 
 private:
     class MeshQueue;
@@ -129,7 +129,7 @@ private:
     bool auto_fade;
     float auto_fade_nr, auto_fade_fr;
 
-    vector<MeshQueue *> queues[2];
+    std::vector<MeshQueue *> queues[2];
 
     void enqueue(MeshQueue *q);
 };

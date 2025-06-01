@@ -10,15 +10,15 @@ public:
 
     Listener(const Listener &t);
 
-    ~Listener();
+    ~Listener() override;
 
     //Entity interface
-    Entity *clone() { return d_new Listener(*this); }
+    Entity *clone() override { return d_new Listener(*this); }
 
-    Listener *getListener() { return this; }
+    Listener *getListener() override { return this; }
 
     //Listener interface
-    void renderListener();
+    void renderListener() const;
 
 private:
 };

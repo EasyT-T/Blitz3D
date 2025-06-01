@@ -1,6 +1,5 @@
 
-#include "std.h"
-#include "nodes.h"
+#include "varnode.h"
 
 //////////////////////////////////
 // Common get/set for variables //
@@ -74,17 +73,17 @@ void IdentVarNode::semant(Environ *e) {
 void ArrayVarNode::semant(Environ *e) {
     exprs->semant(e);
     exprs->castTo(Type::int_type, e);
-    Type *t = e->findType(tag);
+    const Type *t = e->findType(tag);
     sem_decl = e->findDecl(ident);
     if (!sem_decl || !(sem_decl->kind & DECL_ARRAY)) ex("Array not found");
-    ArrayType *a = sem_decl->type->arrayType();
+    const ArrayType *a = sem_decl->type->arrayType();
     if (t && t != a->elementType) ex("array type mismtach");
     if (a->dims != exprs->size()) ex("incorrect number of dimensions");
     sem_type = a->elementType;
 }
 
 TNode *ArrayVarNode::translate(Codegen *g) {
-    TNode *t = 0;
+    TNode *t = nullptr;
     for (int k = 0; k < exprs->size(); ++k) {
         TNode *e = exprs->exprs[k]->translate(g);
         if (k) {
@@ -105,7 +104,7 @@ TNode *ArrayVarNode::translate(Codegen *g) {
 ///////////////
 void FieldVarNode::semant(Environ *e) {
     expr = expr->semant(e);
-    StructType *s = expr->sem_type->structType();
+    const StructType *s = expr->sem_type->structType();
     if (!s) ex("Variable must be a Type");
     sem_field = s->fields->findDecl(ident);
     if (!sem_field) ex("Type field not found");
@@ -142,7 +141,7 @@ void VectorVarNode::semant(Environ *e) {
 
 TNode *VectorVarNode::translate(Codegen *g) {
     int sz = 4;
-    TNode *t = 0;
+    TNode *t = nullptr;
     for (int k = 0; k < exprs->size(); ++k) {
         TNode *p;
         ExprNode *e = exprs->exprs[k];

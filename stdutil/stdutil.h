@@ -6,8 +6,8 @@
 
 #include "../config/config.h"
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #ifdef MEMDEBUG
 
@@ -54,7 +54,7 @@ std::string filenamefile(const std::string &t);
 template<class T>
 class a_ptr {
 public:
-    a_ptr(T *t = 0) : t(t) {}
+    a_ptr(T *t = nullptr) : t(t) {}
 
     ~a_ptr() { delete t; }
 
@@ -86,16 +86,16 @@ class qstreambuf : public std::streambuf {
 public:
     qstreambuf();
 
-    ~qstreambuf();
+    ~qstreambuf() override;
 
-    int size();        //bytes unread
-    char *data();    //start of bytes unread
+    int size() const;        //bytes unread
+    char *data() const;    //start of bytes unread
 private:
     char *buf;
 
-    int_type underflow();
+    int_type underflow() override;
 
-    int_type overflow(int_type c);
+    int_type overflow(int_type c) override;
 };
 
 template<class T>
@@ -117,10 +117,10 @@ public:
 
     const_pointer address(const_reference q) const { return &q; }
 
-    pool() : free(0) {}
+    pool() : free(nullptr) {}
 
     pointer allocate(size_type n, const void *) {
-        clog << "Allocating " << n << endl;
+        std::clog << "Allocating " << n << std::endl;
         if (n > 1) return d_new T[n];
         if (!free) {
             free = (T *) d_new char[sizeof(T) * N];
@@ -133,7 +133,7 @@ public:
     }
 
     void deallocate(pointer q, size_type n) {
-        clog << "Deallocating " << n << endl;
+        std::clog << "Deallocating " << n << std::endl;
         while (n-- > 0) {
             *(T **) q = free;
             *(T **) free = q;

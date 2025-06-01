@@ -2,8 +2,8 @@
 #ifndef Q3BSPREP_H
 #define Q3BSPREP_H
 
-#include "model.h"
 #include "meshcollider.h"
+#include "model.h"
 
 struct Q3BSPSurf;
 struct Q3BSPFace;
@@ -13,28 +13,28 @@ struct Q3BSPNode;
 class Q3BSPRep {
 public:
     //constructor
-    Q3BSPRep(const string &f, float gamma_adj);
+    Q3BSPRep(const std::string &f, float gamma_adj);
 
     ~Q3BSPRep();
 
     void render(Model *model, const RenderContext &rc);
 
-    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t);
+    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t) const;
 
     void setAmbient(const Vector &t);
 
     void setLighting(bool use_lmap);
 
-    bool isValid() const { return root_node != 0; }
+    bool isValid() const { return root_node != nullptr; }
 
 private:
     Q3BSPNode *root_node;
 
     Vector ambient;
 
-    vector<Q3BSPFace *> faces;
-    vector<Q3BSPSurf *> surfs, r_surfs;
-    vector<Texture> textures, light_maps;
+    std::vector<Q3BSPFace *> faces;
+    std::vector<Q3BSPSurf *> surfs, r_surfs;
+    std::vector<Texture> textures, light_maps;
 
     int vis_sz;
     char *vis_data;

@@ -1,7 +1,7 @@
-#include "std.h"
 #include "gxdir.h"
+#include "std.h"
 
-gxDir::gxDir(HANDLE h, const WIN32_FIND_DATA& f): handle(h), findData(f)
+gxDir::gxDir(const HANDLE h, const WIN32_FIND_DATA& f): handle(h), findData(f)
 {
 }
 
@@ -10,10 +10,10 @@ gxDir::~gxDir()
     if (handle != INVALID_HANDLE_VALUE) FindClose(handle);
 }
 
-string gxDir::getNextFile()
+std::string gxDir::getNextFile()
 {
     if (handle == INVALID_HANDLE_VALUE) return "";
-    string t = findData.cFileName;
+    std::string t = findData.cFileName;
     if (!FindNextFile(handle, &findData))
     {
         FindClose(handle);

@@ -4,38 +4,39 @@
 #include "bbruntime_dll.h"
 #include "../debugger/debugger.h"
 
-using namespace std;
-
-#include <map>
 #include <eh.h>
 #include <float.h>
+#include <map>
 
 #include "../bbruntime/bbruntime.h"
 
 class DummyDebugger : public Debugger{
 public:
-	virtual void debugRun(){}
-	virtual void debugStop(){}// bbruntime_panic(0); }
-	virtual void debugStmt( int srcpos,const char *file ){}
-	virtual void debugEnter( void *frame,void *env,const char *func ){}
-	virtual void debugLeave(){}
-	virtual void debugLog( const char *msg ){}
-	virtual void debugMsg( const char *e,bool serious ){
-		if( serious ) MessageBox( 0,e,"Error!",MB_OK|MB_TOPMOST|MB_SETFOREGROUND );
+	void debugRun() override {}
+	void debugStop() override {}// bbruntime_panic(0); }
+	void debugStmt( int srcpos,const char *file ) override {}
+	void debugEnter( void *frame,void *env,const char *func ) override {}
+	void debugLeave() override {}
+	void debugLog( const char *msg ) override {}
+
+	void debugMsg( const char *e, const bool serious ) override
+	{
+		if( serious ) MessageBox( nullptr,e,"Error!",MB_OK|MB_TOPMOST|MB_SETFOREGROUND );
 	}
-	virtual void debugSys( void *msg ){}
+
+	void debugSys( void *msg ) override {}
 };
 
 static HINSTANCE hinst;
-static map<const char*,void*> syms;
-map<const char*,void*>::iterator sym_it;
+static std::map<const char*,void*> syms;
+std::map<const char*,void*>::iterator sym_it;
 static gxRuntime *gx_runtime;
 
 static void rtSym( const char *sym,void *pc ){
 	syms[sym]=pc;
 }
 
-static void _cdecl seTranslator( unsigned int u,EXCEPTION_POINTERS* pExp ){
+static void _cdecl seTranslator(const unsigned int u,EXCEPTION_POINTERS* pExp ){
 	switch( u ){
 	case EXCEPTION_INT_DIVIDE_BY_ZERO:
 		bbruntime_panic( "Integer divide by zero" );
@@ -59,18 +60,18 @@ const char *Runtime::nextSym(){
 		sym_it=syms.begin();
 	}
 	if( sym_it==syms.end() ){
-		syms.clear();return 0;
+		syms.clear();return nullptr;
 	}
 	return (sym_it++)->first;
 }
 
 int Runtime::symValue( const char *sym ){
-	map<const char*,void*>::iterator it=syms.find( sym );
+	const std::map<const char*,void*>::iterator it=syms.find( sym );
 	if( it!=syms.end() ) return (int)it->second;
 	return -1;
 }
 
-void Runtime::startup( HINSTANCE h ){
+void Runtime::startup(const HINSTANCE h ){
 	hinst=h;
 }
 
@@ -81,7 +82,7 @@ void Runtime::shutdown(){
 
 void Runtime::execute( void (*pc)(),const char *args,Debugger *dbg ){
 
-	bool debug=!!dbg;
+	const bool debug=!!dbg;
 
 	static DummyDebugger dummydebug;
 
@@ -89,11 +90,11 @@ void Runtime::execute( void (*pc)(),const char *args,Debugger *dbg ){
 
 	trackmem( true );
 
-	_se_translator_function old_trans=_set_se_translator( seTranslator );
+	const _se_translator_function old_trans=_set_se_translator( seTranslator );
 	_control87( _RC_NEAR|_PC_24|_EM_INVALID|_EM_ZERODIVIDE|_EM_OVERFLOW|_EM_UNDERFLOW|_EM_INEXACT|_EM_DENORMAL,0xfffff );
 
 	//strip spaces from ends of args...
-	string params=args;
+	std::string params=args;
 	while( params.size() && params[0]==' ' ) params=params.substr( 1 );
 	while( params.size() && params[params.size()-1]==' ' ) params=params.substr( 0,params.size()-1 );
 
@@ -102,7 +103,7 @@ void Runtime::execute( void (*pc)(),const char *args,Debugger *dbg ){
 		bbruntime_run( gx_runtime,pc,debug );
 
 		gxRuntime *t=gx_runtime;
-		gx_runtime=0;
+		gx_runtime=nullptr;
 		gxRuntime::closeRuntime( t );
 	}
 
@@ -122,8 +123,8 @@ void Runtime::asyncEnd(){
 	if( gx_runtime ) gx_runtime->asyncEnd();
 }
 
-void Runtime::checkmem( streambuf *buf ){
-	ostream out( buf );
+void Runtime::checkmem(std::streambuf *buf ){
+	std::ostream out( buf );
 	::checkmem( out );
 }
 
@@ -135,38 +136,36 @@ Runtime *_cdecl runtimeGetRuntime(){
 /********************** BUTT UGLY DLL->EXE HOOK! *************************/
 
 static void *module_pc;
-static map<string,int> module_syms;
-static map<string,int> runtime_syms;
+static std::map<std::string,int> module_syms;
+static std::map<std::string,int> runtime_syms;
 static Runtime *runtime;
 
 static void fail(){
-	MessageBox( 0,"Unable to run Blitz Basic module",0,0 );
+	MessageBox( nullptr,"Unable to run Blitz Basic module",nullptr,0 );
 	ExitProcess(-1);
 }
 
 struct Sym{
-	string name;
+	std::string name;
 	int value;
 };
 
 static Sym getSym( void **p ){
 	Sym sym;
 	char *t=(char*)*p;
-	while( char c=*t++ ) sym.name+=c;
+	while(const char c=*t++ ) sym.name+=c;
 	sym.value=*(int*)t+(int)module_pc;
 	*p=t+4;return sym;
 }
 
-static int findSym( const string &t ){
-	map<string,int>::iterator it;
-
-	it=module_syms.find( t );
+static int findSym( const std::string &t ){
+	std::map<std::string, int>::iterator it = module_syms.find(t);
 	if( it!=module_syms.end() ) return it->second;
 	it=runtime_syms.find( t );
 	if( it!=runtime_syms.end() ) return it->second;
 
-	string err="Can't find symbol: "+t;
-	MessageBox( 0,err.c_str(),0,0 );
+	const std::string err="Can't find symbol: "+t;
+	MessageBox( nullptr,err.c_str(),nullptr,0 );
 	ExitProcess(0);
 	return 0;
 }
@@ -175,7 +174,7 @@ static void link(){
 
 	while( const char *sc=runtime->nextSym() ){
 
-		string t(sc);
+		std::string t(sc);
 
 		if( t[0]=='_' ){
 			runtime_syms["_"+t]=runtime->symValue(sc);
@@ -194,21 +193,21 @@ static void link(){
 		runtime_syms["_f"+tolower(t)]=runtime->symValue(sc);
 	}
 
-	HRSRC hres=FindResource( 0,MAKEINTRESOURCE(1111),RT_RCDATA );if( !hres ) fail();
-	HGLOBAL hglo=LoadResource( 0,hres );if( !hglo ) fail();
+	const HRSRC hres=FindResource( nullptr,MAKEINTRESOURCE(1111),RT_RCDATA );if( !hres ) fail();
+	const HGLOBAL hglo=LoadResource( nullptr,hres );if( !hglo ) fail();
 	void *p=LockResource( hglo );if( !p ) fail();
 
-	int sz=*(int*)p;p=(int*)p+1;
+	const int sz=*(int*)p;p=(int*)p+1;
 
 	//replace malloc for service pack 2 Data Execution Prevention (DEP).
-	module_pc=VirtualAlloc( 0,sz,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE );
+	module_pc=VirtualAlloc( nullptr,sz,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE );
 
 	memcpy( module_pc,p,sz );
 	p=(char*)p+sz;
 
-	int k,cnt;
+	int k;
 
-	cnt=*(int*)p;p=(int*)p+1;
+	int cnt = *(int*)p;p=(int*)p+1;
 	for( k=0;k<cnt;++k ){
 		Sym sym=getSym( &p );
 		if( sym.value<(int)module_pc || sym.value>=(int)module_pc+sz ) fail();
@@ -219,7 +218,7 @@ static void link(){
 	for( k=0;k<cnt;++k ){
 		Sym sym=getSym( &p );
 		int *pp=(int*)sym.value;
-		int dest=findSym( sym.name );
+		const int dest=findSym( sym.name );
 		*pp+=dest-(int)pp;
 	}
 
@@ -227,7 +226,7 @@ static void link(){
 	for( k=0;k<cnt;++k ){
 		Sym sym=getSym( &p );
 		int *pp=(int*)sym.value;
-		int dest=findSym( sym.name );
+		const int dest=findSym( sym.name );
 		*pp+=dest;
 	}
 
@@ -244,9 +243,9 @@ bool WINAPI DllMain( HANDLE module,DWORD reason,void *reserved ){
 
 int __stdcall bbWinMain(){
 
-	HINSTANCE inst=GetModuleHandle( 0 );
+	const HINSTANCE inst=GetModuleHandle( nullptr );
 
-	_DllMainCRTStartup( inst,DLL_PROCESS_ATTACH,0 );
+	_DllMainCRTStartup( inst,DLL_PROCESS_ATTACH,nullptr );
 
 #ifdef BETA
 	int ver=VERSION & 0x7fff;
@@ -264,26 +263,26 @@ int __stdcall bbWinMain(){
 	link();
 
 	//get cmd_line and params
-	string cmd=GetCommandLine(),params;
+	std::string cmd=GetCommandLine(),params;
 	while( cmd.size() && cmd[0]==' ' ) cmd=cmd.substr( 1 );
 	if( cmd.find( '\"' )==0 ){
-		int n=cmd.find( '\"',1 );
-		if( n!=string::npos ){
+		const int n=cmd.find( '\"',1 );
+		if( n!=std::string::npos ){
 			params=cmd.substr( n+1 );
 			cmd=cmd.substr( 1,n-1 );
 		}
 	}else{
-		int n=cmd.find( ' ' );
-		if( n!=string::npos ){
+		const int n=cmd.find( ' ' );
+		if( n!=std::string::npos ){
 			params=cmd.substr( n+1 );
 			cmd=cmd.substr( 0,n );
 		}
 	}
 
-	runtime->execute( (void(*)())module_pc,params.c_str(),0 );
+	runtime->execute( (void(*)())module_pc,params.c_str(),nullptr );
 	runtime->shutdown();
 
-	_DllMainCRTStartup( inst,DLL_PROCESS_DETACH,0 );
+	_DllMainCRTStartup( inst,DLL_PROCESS_DETACH,nullptr );
 
 	ExitProcess(0);
 	return 0;

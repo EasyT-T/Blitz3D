@@ -18,7 +18,7 @@ public:
     void restore() const;
     ddSurf* getSurface() const;
     ddSurf* getTexSurface() const;
-    void setModify(int n);
+    void setModify(int n) const;
     int getModify() const;
 
     bool attachZBuffer();
@@ -95,12 +95,12 @@ public:
     void setViewport(int x, int y, int w, int h);
 
     void cls();
-    void plot(int x, int y);
+    void plot(int x, int y) const;
     void line(int x, int y, int x2, int y2);
-    void rect(int x, int y, int w, int h, bool solid);
-    void oval(int x, int y, int w, int h, bool solid);
+    void rect(int x, int y, int w, int h, bool solid) const;
+    void oval(int x, int y, int w, int h, bool solid) const;
     void text(int x, int y, const std::string& t);
-    void blit(int x, int y, gxCanvas* src, int src_x, int src_y, int src_w, int src_h, bool solid);
+    void blit(int x, int y, gxCanvas* src, int src_x, int src_y, int src_w, int src_h, bool solid) const;
 
     bool collide(int x, int y, const gxCanvas* src, int src_x, int src_y, bool solid) const;
     bool rect_collide(int x, int y, int rect_x, int rect_y, int rect_w, int rect_h, bool solid) const;
@@ -108,17 +108,17 @@ public:
     bool lock() const;
     void setPixel(int x, int y, unsigned argb);
 
-    void setPixelFast(int x, int y, unsigned argb)
+    void setPixelFast(const int x, const int y, const unsigned argb) const
     {
         format.setPixel(locked_surf + y * locked_pitch + x * format.getPitch(), argb);
         ++mod_cnt;
     }
 
     void copyPixel(int x, int y, gxCanvas* src, int src_x, int src_y);
-    void copyPixelFast(int x, int y, gxCanvas* src, int src_x, int src_y);
+    void copyPixelFast(int x, int y, gxCanvas* src, int src_x, int src_y) const;
     unsigned getPixel(int x, int y) const;
 
-    unsigned getPixelFast(int x, int y) const
+    unsigned getPixelFast(const int x, const int y) const
     {
         return format.getPixel(locked_surf + y * locked_pitch + x * format.getPitch());
     };

@@ -1,5 +1,4 @@
 
-#include "std.h"
 #include "animator.h"
 #include "object.h"
 
@@ -16,14 +15,14 @@ Animator::Animator(Animator *t) : _seqs(t->_seqs) {
     reset();
 }
 
-Animator::Animator(Object *obj, int frames) {
+Animator::Animator(Object *obj, const int frames) {
     addObjs(obj);
     _anims.resize(_objs.size());
     addSeq(frames);
     reset();
 }
 
-Animator::Animator(const vector<Object *> &objs, int frames) : _objs(objs) {
+Animator::Animator(const std::vector<Object *> &objs, const int frames) : _objs(objs) {
     _anims.resize(_objs.size());
     addSeq(frames);
     reset();
@@ -40,7 +39,7 @@ void Animator::addObjs(Object *obj) {
     }
 }
 
-void Animator::addSeq(int frames) {
+void Animator::addSeq(const int frames) {
     Seq seq;
     seq.frames = frames;
     _seqs.push_back(seq);
@@ -68,7 +67,7 @@ void Animator::addSeqs(Animator *t) {
     }
 }
 
-void Animator::extractSeq(int first, int last, int seq) {
+void Animator::extractSeq(const int first, const int last, const int seq) {
     Seq sq;
     sq.frames = last - first;
     _seqs.push_back(sq);
@@ -79,7 +78,8 @@ void Animator::extractSeq(int first, int last, int seq) {
     }
 }
 
-void Animator::updateAnim() {
+void Animator::updateAnim() const
+{
 
     for (int k = 0; k < _objs.size(); ++k) {
 
@@ -98,7 +98,8 @@ void Animator::updateAnim() {
     }
 }
 
-void Animator::updateTrans() {
+void Animator::updateTrans() const
+{
 
     for (int k = 0; k < _objs.size(); ++k) {
 
@@ -115,7 +116,7 @@ void Animator::beginTrans() {
 
     for (int k = 0; k < _objs.size(); ++k) {
 
-        Object *obj = _objs[k];
+        const Object *obj = _objs[k];
         Anim &anim = _anims[k];
         const Animation &keys = _anims[k].keys[_seq];
 
@@ -134,7 +135,7 @@ void Animator::beginTrans() {
     }
 }
 
-void Animator::setAnimTime(float time, int seq) {
+void Animator::setAnimTime(const float time, const int seq) {
     if (seq < 0 || seq > _seqs.size()) return;
 
     _mode = 0;
@@ -153,7 +154,7 @@ void Animator::setAnimTime(float time, int seq) {
     updateAnim();
 }
 
-void Animator::animate(int mode, float speed, int seq, float trans) {
+void Animator::animate(const int mode, const float speed, const int seq, const float trans) {
     if (!mode && !speed) {
         _mode = 0;
         return;
@@ -179,7 +180,7 @@ void Animator::animate(int mode, float speed, int seq, float trans) {
     beginTrans();
 }
 
-void Animator::update(float elapsed) {
+void Animator::update(const float elapsed) {
 
     if (!_mode) return;
 

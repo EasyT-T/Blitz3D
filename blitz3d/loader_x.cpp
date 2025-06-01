@@ -1,16 +1,16 @@
 
-#include "std.h"
 #include "loader_x.h"
-#include "meshmodel.h"
 #include "animation.h"
+#include "meshmodel.h"
 #include "pivot.h"
+#include "std.h"
 
 #include "minidx9/include/dxfile.h"
 #include "minidx9/include/rmxfguid.h"
 #include "minidx9/include/rmxftmpl.h"
 
 extern gxRuntime *gx_runtime;
-static map<string, MeshModel *> frames_map;
+static std::map<std::string, MeshModel *> frames_map;
 static int anim_len;
 
 static bool conv, flip_tris;
@@ -21,14 +21,14 @@ static void parseAnimKey(IDirectXFileData *fileData, MeshModel *e) {
 
     DWORD sz;
     int *data;
-    if (fileData->GetData(0, &sz, (void **) &data) < 0) return;
+    if (fileData->GetData(nullptr, &sz, (void **) &data) < 0) return;
 
-    int type = *data++;
-    int cnt = *data++;
+    const int type = *data++;
+    const int cnt = *data++;
     Animation anim = e->getAnimation();
     for (int k = 0; k < cnt; ++k) {
-        int time = *data++;
-        int n = *data++;
+        const int time = *data++;
+        const int n = *data++;
         if (time > anim_len) anim_len = time;
         switch (type) {
             case 0:
@@ -74,7 +74,7 @@ static void parseAnim(IDirectXFileData *fileData) {
     IDirectXFileObject *childObj;
     IDirectXFileData *childData;
     IDirectXFileDataReference *childRef;
-    MeshModel *frame = 0;
+    MeshModel *frame = nullptr;
 
     //find the frame reference
     for (; fileData->GetNextObject(&childObj) >= 0; childObj->Release()) {
@@ -85,7 +85,7 @@ static void parseAnim(IDirectXFileData *fileData) {
                         char name[80];
                         DWORD len = 80;
                         if (childData->GetName(name, &len) >= 0) {
-                            map<string, MeshModel *>::iterator it = frames_map.find(name);
+                            std::map<std::string, MeshModel *>::iterator it = frames_map.find(name);
                             if (it != frames_map.end()) frame = it->second;
                         }
                     }
@@ -129,7 +129,7 @@ static Brush parseMaterial(IDirectXFileData *fileData) {
 
     DWORD sz;
     float *data;
-    if (fileData->GetData(0, &sz, (void **) &data) < 0) return brush;
+    if (fileData->GetData(nullptr, &sz, (void **) &data) < 0) return brush;
 
     brush.setColor(Vector(data[0], data[1], data[2]));
     if (data[3]) brush.setAlpha(data[3]);
@@ -140,7 +140,7 @@ static Brush parseMaterial(IDirectXFileData *fileData) {
             if (*guid == TID_D3DRMTextureFilename) {
                 DWORD sz;
                 char **data;
-                if (childData->GetData(0, &sz, (void **) &data) >= 0) {
+                if (childData->GetData(nullptr, &sz, (void **) &data) >= 0) {
                     brush.setTexture(0, Texture(*data, 0), 0);
                     brush.setColor(Vector(1, 1, 1));
                 }
@@ -152,7 +152,7 @@ static Brush parseMaterial(IDirectXFileData *fileData) {
     return brush;
 }
 
-static void parseMaterialList(IDirectXFileData *fileData, vector<Brush> &mats) {
+static void parseMaterialList(IDirectXFileData *fileData, std::vector<Brush> &mats) {
 
     const GUID *guid;
     IDirectXFileObject *childObj;
@@ -196,11 +196,11 @@ static void parseMesh(IDirectXFileData *fileData, MeshModel *mesh) {
 
     DWORD sz;
     int *data;
-    if (fileData->GetData(0, &sz, (void **) &data) < 0) return;
+    if (fileData->GetData(nullptr, &sz, (void **) &data) < 0) return;
 
     //stuff...
-    vector<FaceX> faces;
-    vector<Brush> mats;
+    std::vector<FaceX> faces;
+    std::vector<Brush> mats;
 
     MeshLoader::beginMesh();
 
@@ -231,7 +231,7 @@ static void parseMesh(IDirectXFileData *fileData, MeshModel *mesh) {
         if (childData->GetType(&guid) >= 0) {
             DWORD sz;
             int *data;
-            if (childData->GetData(0, &sz, (void **) &data) >= 0) {
+            if (childData->GetData(nullptr, &sz, (void **) &data) >= 0) {
                 if (*guid == TID_D3DRMMeshMaterialList) {
                     int num_mats = *data++;
                     int num_faces = *data++;
@@ -321,7 +321,7 @@ static MeshModel *parseFrame(IDirectXFileData *fileData) {
             if (*guid == TID_D3DRMFrameTransformMatrix) {
                 DWORD size;
                 D3DMATRIX *data;
-                if (childData->GetData(0, &size, (void **) &data) >= 0) {
+                if (childData->GetData(nullptr, &size, (void **) &data) >= 0) {
                     Transform tform = Transform(Matrix(
                                                         Vector(data->_11, data->_12, data->_13),
                                                         Vector(data->_21, data->_22, data->_23),
@@ -342,22 +342,22 @@ static MeshModel *parseFrame(IDirectXFileData *fileData) {
     return e;
 }
 
-static MeshModel *parseFile(const string &file) {
+static MeshModel *parseFile(const std::string &file) {
 
     const GUID *guid;
     IDirectXFile *xfile;
     IDirectXFileData *fileData;
     IDirectXFileEnumObject *enumObj;
 
-    if (DirectXFileCreate(&xfile) < 0) return 0;
+    if (DirectXFileCreate(&xfile) < 0) return nullptr;
 
     if (xfile->RegisterTemplates((VOID *) D3DRM_XTEMPLATES, D3DRM_XTEMPLATE_BYTES) < 0) {
         xfile->Release();
-        return 0;
+        return nullptr;
     }
     if (xfile->CreateEnumObject((void *) file.c_str(), DXFILELOAD_FROMFILE, &enumObj) < 0) {
         xfile->Release();
-        return 0;
+        return nullptr;
     }
 
     anim_len = 0;
@@ -384,7 +384,7 @@ static MeshModel *parseFile(const string &file) {
     return e;
 }
 
-MeshModel *Loader_X::load(const string &filename, const Transform &t, int hint) {
+MeshModel *Loader_X::load(const std::string &filename, const Transform &t, const int hint) {
     conv_tform = t;
     conv = flip_tris = false;
     if (conv_tform != Transform()) {

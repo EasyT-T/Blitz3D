@@ -2,6 +2,8 @@
 #ifndef TABBER_H
 #define TABBER_H
 
+#include "stdafx.h"
+
 class Tabber;
 
 class TabberListener {
@@ -13,17 +15,17 @@ class Tabber : public CTabCtrl {
 public:
     Tabber();
 
-    ~Tabber();
+    ~Tabber() override;
 
     void setListener(TabberListener *l);
 
-    void insert(int index, CWnd *wnd, const string &text);
+    void insert(int index, CWnd *wnd, const std::string &text);
 
     void remove(int index);
 
     void setCurrent(int index);
 
-    void setTabText(int index, const string &t);
+    void setTabText(int index, const std::string &t);
 
     int size() const;
 
@@ -31,7 +33,7 @@ public:
 
     CWnd *getTabWnd(int index) const;
 
-    string getTabText(int index) const;
+    std::string getTabText(int index) const;
 
 DECLARE_DYNAMIC(Tabber)
 
@@ -48,13 +50,13 @@ private:
 
     struct Tab {
         CWnd *wnd;
-        string text;
+        std::string text;
 
-        Tab(CWnd *w, const string &t) : wnd(w), text(t) {
+        Tab(CWnd *w, const std::string &t) : wnd(w), text(t) {
         }
     };
 
-    typedef list<Tab *> Tabs;
+    typedef std::list<Tab *> Tabs;
 
     Tabs tabs;
     int curr;

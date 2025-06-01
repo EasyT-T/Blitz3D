@@ -1,7 +1,7 @@
 
-#include "std.h"
 #include "md2model.h"
 #include "md2norms.h"
+#include "std.h"
 
 static Vector *normals;
 static float white[] = {1, 1, 1};
@@ -63,7 +63,7 @@ struct MD2Model::Rep {
     Box box;
 
     ModelModel::Rep(const string &file) :
-            ref_cnt(1), mesh(0) {
+            ref_cnt(1), mesh(nullptr) {
 
         filebuf in;
         Header header;
@@ -218,7 +218,7 @@ struct MD2Model::Rep {
             unsigned short index;
             unsigned char u, v;
 
-            VertInfo(unsigned short i, char u, char v) : index(i), u(u), v(v) {
+            VertInfo(const unsigned short i, const char u, const char v) : index(i), u(u), v(v) {
             }
 
             bool operator<(const VertInfo &t) const {
@@ -246,7 +246,7 @@ struct MD2Model::Rep {
     };
 
     MD2Model::Rep::Rep(const string &file) :
-            ref_cnt(1), mesh(0) {
+            ref_cnt(1), mesh(nullptr) {
 
         filebuf in;
         if (!in.open(file.c_str(), ios_base::in | ios_base::binary)) {
@@ -364,7 +364,7 @@ struct MD2Model::Rep {
         if (mesh) gx_graphics->freeMesh(mesh);
     }
 
-    void MD2Model::Rep::render(MD2Model *model, float render_t, int render_a, int render_b) {
+    void MD2Model::Rep::render(MD2Model *model, float render_t, const int render_a, const int render_b) {
 
         const Frame &frame_a = frames[render_a];
         const Vector &scale_a = frame_a.scale;
@@ -375,8 +375,7 @@ struct MD2Model::Rep {
         const Vector &trans_b = frame_b.trans;
 
         mesh->lock();
-        int k;
-        for (k = 0; k < frame_a.vertices.size(); ++k) {
+        for (int k = 0; k < frame_a.vertices.size(); ++k) {
             const Vertex &v_a = frame_a.vertices[k];
             const Vector &n_a = normals[v_a.n];
             Vector t_a(v_a.x * scale_a.x + trans_a.x, v_a.y * scale_a.y + trans_a.y, v_a.z * scale_a.z + trans_a.z);
@@ -412,7 +411,7 @@ struct MD2Model::Rep {
         if (!--rep->ref_cnt) delete rep;
     }
 
-    void MD2Model::startMD2Anim(int first, int last, int mode, float speed) {
+    void MD2Model::startMD2Anim(int first, int last, const int mode, const float speed) {
         if (!speed && !mode) {
             anim_mode = 0;
             return;
@@ -436,7 +435,7 @@ struct MD2Model::Rep {
         anim_mode = mode;
     }
 
-    void MD2Model::animate(float e) {
+    void MD2Model::animate(const float e) {
         Model::animate(e);
         if (!anim_mode) return;
         anim_time = anim_time + anim_speed * e;
@@ -488,5 +487,5 @@ struct MD2Model::Rep {
     }
 
     bool MD2Model::getValid() const {
-        return rep->mesh != 0;
+        return rep->mesh != nullptr;
     }

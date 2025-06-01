@@ -1,12 +1,12 @@
 
-#include "std.h"
 #include "md2rep.h"
 #include "md2norms.h"
+#include "std.h"
 
 extern gxRuntime *gx_runtime;
 extern gxGraphics *gx_graphics;
 
-static Vector *normals = 0;
+static Vector *normals = nullptr;
 static float tex_coords[2][2] = {{0, 0},
                                  {0, 0}};
 
@@ -58,13 +58,12 @@ struct t_tri {
     unsigned short verts[3];
 };
 
-MD2Rep::MD2Rep(const string &f) :
-        mesh(0), n_verts(0), n_tris(0), n_frames(0) {
-
-    filebuf in;
+MD2Rep::MD2Rep(const std::string &f) :
+        mesh(nullptr), n_verts(0), n_tris(0), n_frames(0) {
+    std::filebuf in;
     md2_header header;
 
-    if (!in.open(f.c_str(), ios_base::in | ios_base::binary)) return;
+    if (!in.open(f.c_str(), std::ios_base::in | std::ios_base::binary)) return;
     if (in.sgetn((char *) &header, sizeof(header)) != sizeof(header)) return;
     if (header.magic != '2PDI' || header.version != 8) return;
 
@@ -72,20 +71,20 @@ MD2Rep::MD2Rep(const string &f) :
     n_tris = header.numTriangles;
 
     //read in tex coords
-    vector<md2_uv> md2_uvs;
+    std::vector<md2_uv> md2_uvs;
     md2_uvs.resize(header.numTexCoords);
     in.pubseekpos(header.offsetTexCoords);
     in.sgetn((char *) md2_uvs.data(), header.numTexCoords * sizeof(md2_uv));
 
     //read in triangles
-    vector<md2_tri> md2_tris;
+    std::vector<md2_tri> md2_tris;
     md2_tris.resize(n_tris);
     in.pubseekpos(header.offsetTriangles);
     in.sgetn((char *) md2_tris.data(), n_tris * sizeof(md2_tri));
 
-    vector<t_tri> t_tris;
-    vector<t_vert> t_verts;
-    map<t_vert, int> t_map;
+    std::vector<t_tri> t_tris;
+    std::vector<t_vert> t_verts;
+    std::map<t_vert, int> t_map;
 
     int k;
     for (k = 0; k < n_tris; ++k) {
@@ -94,7 +93,7 @@ MD2Rep::MD2Rep(const string &f) :
             t_vert t;
             t.i = md2_tris[k].verts[j];
             t.uv = md2_tris[k].uvs[j];
-            map<t_vert, int>::iterator it = t_map.find(t);
+            std::map<t_vert, int>::iterator it = t_map.find(t);
             if (it == t_map.end()) {
                 //create new vert
                 tr.verts[j] = t_map[t] = t_verts.size();
@@ -116,7 +115,7 @@ MD2Rep::MD2Rep(const string &f) :
     frames.resize(n_frames);
     in.pubseekpos(header.offsetFrames);
 
-    vector<md2_vert> md2_verts;
+    std::vector<md2_vert> md2_verts;
     md2_verts.resize(header.numVertices);
 
     //read in frames
@@ -182,7 +181,8 @@ void MD2Rep::render( Vert *v,int frame ){
 }
 */
 
-void MD2Rep::render(Vert *v, int frame, float time) {
+void MD2Rep::render(Vert *v, const int frame, const float time) const
+{
 
     const Frame &frame_b = frames[frame];
     const Vertex *v_b = frame_b.verts.data();
@@ -199,7 +199,8 @@ void MD2Rep::render(Vert *v, int frame, float time) {
     }
 }
 
-void MD2Rep::render(Vert *v, int render_a, int render_b, float render_t) {
+void MD2Rep::render(Vert *v, const int render_a, const int render_b, const float render_t) const
+{
     const Frame &frame_a = frames[render_a];
     const Vector scale_a = frame_a.scale, trans_a = frame_a.trans;
 
@@ -232,7 +233,8 @@ void MD2Rep::render( Vert *v,const Vert *v_a,const Vert *v_b,float render_t ){
 }
 */
 
-void MD2Rep::render(Model *model, int render_a, int render_b, float render_t) {
+void MD2Rep::render(Model *model, const int render_a, const int render_b, const float render_t) const
+{
     const Frame &frame_a = frames[render_a];
     const Vector scale_a = frame_a.scale, trans_a = frame_a.trans;
 
@@ -288,7 +290,8 @@ void MD2Rep::render( Model *model,const Vert *v_a,const Vert *v_b,float render_t
 }
 */
 
-void MD2Rep::render(Model *model, const Vert *v_a, int render_b, float render_t) {
+void MD2Rep::render(Model *model, const Vert *v_a, const int render_b, const float render_t) const
+{
 
     const Frame &frame_b = frames[render_b];
     const Vector scale_b = frame_b.scale, trans_b = frame_b.trans;

@@ -7,7 +7,7 @@ add_executable(blitzide WIN32
         blitzide.cpp
         editor.cpp
         funclist.cpp
-        htmlhelp.cpp
+        helphtml.cpp
         libs.cpp
         mainframe.cpp
         prefs.cpp
@@ -18,7 +18,7 @@ add_executable(blitzide WIN32
         blitzide.h
         editor.h
         funclist.h
-        htmlhelp.h
+        helphtml.h
         libs.h
         mainframe.h
         prefs.h

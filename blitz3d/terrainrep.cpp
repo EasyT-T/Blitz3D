@@ -1,7 +1,7 @@
 
-#include "std.h"
 #include "terrainrep.h"
 #include <queue>
+#include "std.h"
 
 extern gxRuntime *gx_runtime;
 extern gxGraphics *gx_graphics;
@@ -29,7 +29,7 @@ int TerrainRep::getSize() const {
     return cell_size;
 }
 
-float TerrainRep::getHeight(int x, int z) const {
+float TerrainRep::getHeight(const int x, const int z) const {
     return cells[((z & cell_mask) << cell_shift) | (x & cell_mask)].height / 255.0f;
 }
 
@@ -41,11 +41,11 @@ struct TerrainRep::Vert {
     Vert() {
     }
 
-    Vert(int x, int z) : x(x), z(z), v(x, curr->getHeight(x, z), z) {
+    Vert(const int x, const int z) : x(x), z(z), v(x, curr->getHeight(x, z), z) {
         src_y = v.y;
     }
 
-    Vert(int x, int z, float sy) : x(x), z(z), v(x, curr->getHeight(x, z), z), src_y(sy) {
+    Vert(const int x, const int z, const float sy) : x(x), z(z), v(x, curr->getHeight(x, z), z), src_y(sy) {
     }
 };
 
@@ -61,7 +61,7 @@ struct TerrainRep::Tri {
     Tri() {
     }
 
-    Tri(int id, int clip, int v0, int v1, int v2, Tri *e0 = 0, Tri *e1 = 0, Tri *e2 = 0) :
+    Tri(const int id, const int clip, const int v0, const int v1, const int v2, Tri *e0 = nullptr, Tri *e1 = nullptr, Tri *e2 = nullptr) :
             id(id), clip(clip),
             v0(v0), v1(v1), v2(v2),
             e0(e0), e1(e1), e2(e2), proj_err(0) {
@@ -72,7 +72,7 @@ struct TerrainRep::Tri {
         if (!tri_pool) {
             tri_pool = new Tri[GROW];
             for (int k = 0; k < GROW - 1; ++k) tri_pool[k].e0 = &tri_pool[k + 1];
-            tri_pool[GROW - 1].e0 = 0;
+            tri_pool[GROW - 1].e0 = nullptr;
         }
         Tri *t = tri_pool;
         tri_pool = t->e0;
@@ -85,21 +85,22 @@ struct TerrainRep::Tri {
         tri_pool = t;
     }
 
-    void unlink() {
+    void unlink() const
+    {
         if (e0) {
-            if (e0->e0 == this) e0->e0 = 0;
-            else if (e0->e1 == this) e0->e1 = 0;
-            else e0->e2 = 0;
+            if (e0->e0 == this) e0->e0 = nullptr;
+            else if (e0->e1 == this) e0->e1 = nullptr;
+            else e0->e2 = nullptr;
         }
         if (e1) {
-            if (e1->e0 == this) e1->e0 = 0;
-            else if (e1->e1 == this) e1->e1 = 0;
-            else e1->e2 = 0;
+            if (e1->e0 == this) e1->e0 = nullptr;
+            else if (e1->e1 == this) e1->e1 = nullptr;
+            else e1->e2 = nullptr;
         }
         if (e2) {
-            if (e2->e0 == this) e2->e0 = 0;
-            else if (e2->e1 == this) e2->e1 = 0;
-            else e2->e2 = 0;
+            if (e2->e0 == this) e2->e0 = nullptr;
+            else if (e2->e1 == this) e2->e1 = nullptr;
+            else e2->e2 = nullptr;
         }
     }
 };
@@ -108,14 +109,14 @@ struct TriComp {
     bool operator()(TerrainRep::Tri *a, TerrainRep::Tri *b) const { return a->proj_err < b->proj_err; }
 };
 
-struct TriQue : public priority_queue<TerrainRep::Tri *, vector<TerrainRep::Tri *>, TriComp> {
-    vector<TerrainRep::Tri *> &getVector() { return c; }
+struct TriQue : public std::priority_queue<TerrainRep::Tri *, std::vector<TerrainRep::Tri *>, TriComp> {
+    std::vector<TerrainRep::Tri *> &getVector() { return c; }
 
-    const vector<TerrainRep::Tri *> &getVector() const { return c; }
+    const std::vector<TerrainRep::Tri *> &getVector() const { return c; }
 };
 
 static TriQue tri_que;
-static vector<TerrainRep::Tri *> tris;
+static std::vector<TerrainRep::Tri *> tris;
 
 static bool clip(const Line &l, const Box &box) {
     static const Vector normals[] = {
@@ -141,10 +142,10 @@ static bool clip(const Line &l, const Box &box) {
     return true;
 }
 
-TerrainRep::TerrainRep(int n) :
+TerrainRep::TerrainRep(const int n) :
         cell_shift(n), cell_size(1 << n), cell_mask((1 << n) - 1),
         end_tri_id((1 << n) * (1 << n) * 2),
-        shading(false), mesh(0), detail(0), morph(true) {
+        shading(false), mesh(nullptr), detail(0), morph(true) {
     cells = d_new Cell[cell_size * cell_size];
     errors = d_new Error[end_tri_id];
     setDetail(2000, false);
@@ -157,13 +158,14 @@ TerrainRep::~TerrainRep() {
     delete[] cells;
 }
 
-void TerrainRep::clear() {
+void TerrainRep::clear() const
+{
     memset(cells, 0, cell_size * cell_size * sizeof(Cell));
     memset(errors, 0, end_tri_id * sizeof(Error));
     errs_valid = true;
 }
 
-void TerrainRep::setDetail(int n, bool m) {
+void TerrainRep::setDetail(int n, const bool m) {
     morph = m;
     if (n == detail) return;
     detail = n;
@@ -179,11 +181,12 @@ void TerrainRep::setDetail(int n, bool m) {
     mesh = gx_graphics->createMesh(mesh_verts, mesh_tris, 0);
 }
 
-void TerrainRep::setShading(bool t) {
+void TerrainRep::setShading(const bool t) {
     shading = t;
 }
 
-void TerrainRep::setHeight(int x, int z, float h, bool realtime) {
+void TerrainRep::setHeight(const int x, const int z, const float h, const bool realtime) const
+{
     cells[((z & cell_mask) << cell_shift) | (x & cell_mask)].height = h * 255.0f;
     if (!errs_valid) return;
     if (realtime) {
@@ -195,7 +198,7 @@ void TerrainRep::setHeight(int x, int z, float h, bool realtime) {
     errs_valid = false;
 }
 
-Vector TerrainRep::getNormal(int x, int z) const {
+Vector TerrainRep::getNormal(const int x, const int z) const {
     Vector
             vt(x, getHeight(x, z), z),
             v0(x, getHeight(x, z - 1), z - 1),
@@ -242,10 +245,10 @@ void TerrainRep::insert(Tri *t) {
         e0.y = e1.y = e2.y = 0;
         e3.y = e4.y = e5.y = errors[t->id].bound / 255.0f;
         for (int n = 0; n < 6; ++n) {
-            int mask = 1 << n;
+            const int mask = 1 << n;
             if (!(t->clip & mask)) continue;
             const Plane &p = frustum.getPlane(n);
-            int q =
+            const int q =
                     (p.distance(e0) >= 0) + (p.distance(e1) >= 0) + (p.distance(e2) >= 0) +
                     (p.distance(e3) >= 0) + (p.distance(e4) >= 0) + (p.distance(e5) >= 0);
             if (!q) {
@@ -262,7 +265,7 @@ void TerrainRep::insert(Tri *t) {
         t->clip |= 128;
         tris.push_back(t);
     } else {
-        Vector v = Vector(verts[t->v1].v + verts[t->v2].v) / 2;
+        const Vector v = Vector(verts[t->v1].v + verts[t->v2].v) / 2;
 //		float d=eye_plane.distance( v );
         float d = eye_vec.distance(v);
         if (d < EPSILON) d = EPSILON;
@@ -281,10 +284,10 @@ void TerrainRep::split(Tri *t) {
 
     if (t->e2 && t->e2->e2 != t) split(t->e2);
 
-    int tv = vert_cnt++;
+    const int tv = vert_cnt++;
     if (tv >= max_verts) {
         max_verts += max_verts / 2 + 32;
-        Vert *t = verts;
+        const Vert *t = verts;
         verts = d_new Vert[max_verts];
         memcpy(verts, t, sizeof(Vert) * tv);
         next_vert = verts + tv;
@@ -295,13 +298,13 @@ void TerrainRep::split(Tri *t) {
     vert->src_y = (verts[t->v1].v.y + verts[t->v2].v.y) / 2;
     vert->v.y = getHeight(vert->x, vert->z);
 
-    Tri *tl = new Tri(t->id * 2, t->clip, tv, t->v2, t->v0, 0, 0, t->e0);
+    Tri *tl = new Tri(t->id * 2, t->clip, tv, t->v2, t->v0, nullptr, nullptr, t->e0);
     if (Tri *p = tl->e2) {
         if (p->e0 == t) p->e0 = tl;
         else if (p->e1 == t) p->e1 = tl;
         else p->e2 = tl;
     }
-    Tri *tr = new Tri(t->id * 2 + 1, t->clip, tv, t->v0, t->v1, 0, tl, t->e1);
+    Tri *tr = new Tri(t->id * 2 + 1, t->clip, tv, t->v0, t->v1, nullptr, tl, t->e1);
     tl->e0 = tr;
     if (Tri *p = tr->e2) {
         if (p->e0 == t) p->e0 = tr;
@@ -310,7 +313,7 @@ void TerrainRep::split(Tri *t) {
     }
 
     if (Tri *b = t->e2) {
-        Tri *br = new Tri(b->id * 2, b->clip, tv, b->v2, b->v0, 0, tr, b->e0);
+        Tri *br = new Tri(b->id * 2, b->clip, tv, b->v2, b->v0, nullptr, tr, b->e0);
         tr->e0 = br;
         if (Tri *p = br->e2) {
             if (p->e0 == b) p->e0 = br;
@@ -335,7 +338,7 @@ void TerrainRep::split(Tri *t) {
     insert(tr);
 }
 
-TerrainRep::Error TerrainRep::calcErr(int id, const Vert &v0, const Vert &v1, const Vert &v2) const {
+TerrainRep::Error TerrainRep::calcErr(const int id, const Vert &v0, const Vert &v1, const Vert &v2) const {
 
     Error et;
 
@@ -348,12 +351,12 @@ TerrainRep::Error TerrainRep::calcErr(int id, const Vert &v0, const Vert &v1, co
 
     if (id >= end_tri_id) return et;
 
-    Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
-    float e = fabs(tv.v.y - (v1.v.y + v2.v.y) / 2);
+    const Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
+    const float e = fabs(tv.v.y - (v1.v.y + v2.v.y) / 2);
     et.error = e >= 1 ? 255 : ceil((e - EPSILON) * 255.0f);
 
-    Error el = calcErr(id * 2, tv, v2, v0);
-    Error er = calcErr(id * 2 + 1, tv, v0, v1);
+    const Error el = calcErr(id * 2, tv, v2, v0);
+    const Error er = calcErr(id * 2 + 1, tv, v0, v1);
 
     if (el.error > et.error) et.error = el.error;
     if (er.error > et.error) et.error = er.error;
@@ -364,7 +367,7 @@ TerrainRep::Error TerrainRep::calcErr(int id, const Vert &v0, const Vert &v1, co
     return errors[id] = et;
 }
 
-TerrainRep::Error TerrainRep::calcErr(int id, int x, int z, const Vert &v0, const Vert &v1, const Vert &v2) const {
+TerrainRep::Error TerrainRep::calcErr(const int id, const int x, const int z, const Vert &v0, const Vert &v1, const Vert &v2) const {
 
     Error et;
 
@@ -378,9 +381,8 @@ TerrainRep::Error TerrainRep::calcErr(int id, int x, int z, const Vert &v0, cons
     if (id >= end_tri_id) return et;
 
     //is x/z inside this triangle?
-    int dx, dz;
-    dx = -(v1.z - v0.z);
-    dz = (v1.x - v0.x);
+    int dx = -(v1.z - v0.z);
+    int dz = (v1.x - v0.x);
     if ((x - v0.x) * dx + (z - v0.z) * dz < 0) return errors[id];
     dx = -(v2.z - v1.z);
     dz = (v2.x - v1.x);
@@ -389,12 +391,12 @@ TerrainRep::Error TerrainRep::calcErr(int id, int x, int z, const Vert &v0, cons
     dz = (v0.x - v2.x);
     if ((x - v2.x) * dx + (z - v2.z) * dz < 0) return errors[id];
 
-    Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
-    float e = fabs(tv.v.y - (v1.v.y + v2.v.y) / 2);
+    const Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
+    const float e = fabs(tv.v.y - (v1.v.y + v2.v.y) / 2);
     et.error = e >= 1 ? 255 : ceil((e - EPSILON) * 255.0f);
 
-    Error el = calcErr(id * 2, x, z, tv, v2, v0);
-    Error er = calcErr(id * 2 + 1, x, z, tv, v0, v1);
+    const Error el = calcErr(id * 2, x, z, tv, v2, v0);
+    const Error er = calcErr(id * 2 + 1, x, z, tv, v0, v1);
 
     if (el.error > et.error) et.error = el.error;
     if (er.error > et.error) et.error = er.error;
@@ -450,7 +452,7 @@ void TerrainRep::render(Model *model, const RenderContext &rc) {
     }
 
     int k;
-    const vector<Tri *> &q_tris = tri_que.getVector();
+    const std::vector<Tri *> &q_tris = tri_que.getVector();
 
     if (!mesh) out_cnt = 0;
 
@@ -481,12 +483,12 @@ void TerrainRep::render(Model *model, const RenderContext &rc) {
         }
     }
 
-    int tri_cnt = tris.size();
+    const int tri_cnt = tris.size();
 
     if (vert_cnt > mesh_verts || tri_cnt > mesh_tris) {
-        int vc = vert_cnt + 32;
+        const int vc = vert_cnt + 32;
         if (vc > mesh_verts) mesh_verts = vc;
-        int tc = tri_cnt + 32;
+        const int tc = tri_cnt + 32;
         if (tc > mesh_tris) mesh_tris = tc;
         if (mesh) gx_graphics->freeMesh(mesh);
         mesh = gx_graphics->createMesh(mesh_verts, mesh_tris, 0);
@@ -498,7 +500,7 @@ void TerrainRep::render(Model *model, const RenderContext &rc) {
         for (k = 0; k < vert_cnt; ++k) {
             const Vert &t = verts[k];
             const Vector &v = t.v;
-            float tex_coords[2][2] = {{v.x, cell_size - v.z},
+            const float tex_coords[2][2] = {{v.x, cell_size - v.z},
                                       {v.x, cell_size - v.z}};
             mesh->setVertex(vc++, &v.x, &up_normal.x, tex_coords);
         }
@@ -506,14 +508,14 @@ void TerrainRep::render(Model *model, const RenderContext &rc) {
         for (k = 0; k < vert_cnt; ++k) {
             const Vert &t = verts[k];
             const Vector &v = t.v;
-            float tex_coords[2][2] = {{v.x, cell_size - v.z},
+            const float tex_coords[2][2] = {{v.x, cell_size - v.z},
                                       {v.x, cell_size - v.z}};
             Vector normal = getNormal(v.x, v.z);
             mesh->setVertex(vc++, &v.x, &normal.x, tex_coords);
         }
     }
     for (k = 0; k < tri_cnt; ++k) {
-        Tri *t = tris[k];
+        const Tri *t = tris[k];
         if (t->id) mesh->setTriangle(tc++, t->v0, t->v2, t->v1);
         delete t;
     }
@@ -528,7 +530,7 @@ void TerrainRep::render(Model *model, const RenderContext &rc) {
     model->enqueue(mesh, 0, vc, 0, tc);
 }
 
-bool TerrainRep::collide(const Line &line, Collision *curr_coll, const Transform &tform, int id, const Vert &v0,
+bool TerrainRep::collide(const Line &line, Collision *curr_coll, const Transform &tform, const int id, const Vert &v0,
                          const Vert &v1, const Vert &v2, const Line &l) const {
     Box b(v0.v);
     b.update(v1.v);
@@ -544,14 +546,14 @@ bool TerrainRep::collide(const Line &line, Collision *curr_coll, const Transform
     b.b.y = errors[id].bound / 255.0f;
     if (!::clip(l, b)) return false;
 
-    Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
+    const Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
 
     return
             collide(line, curr_coll, tform, id * 2, tv, v2, v0, l) |
             collide(line, curr_coll, tform, id * 2 + 1, tv, v0, v1, l);
 }
 
-bool TerrainRep::collide(const Line &line, float radius, Collision *curr_coll, const Transform &tform, int id,
+bool TerrainRep::collide(const Line &line, const float radius, Collision *curr_coll, const Transform &tform, const int id,
                          const Vert &v0, const Vert &v1, const Vert &v2, const Box &box) const {
     Box b(v0.v);
     b.update(v1.v);
@@ -570,13 +572,13 @@ bool TerrainRep::collide(const Line &line, float radius, Collision *curr_coll, c
     b.b.y = errors[id].bound / 255.0f;
     if (!b.overlaps(box)) return false;
 
-    Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
+    const Vert tv((v1.x + v2.x) / 2, (v1.z + v2.z) / 2);
     return
             collide(line, radius, curr_coll, tform, id * 2, tv, v2, v0, box) |
             collide(line, radius, curr_coll, tform, id * 2 + 1, tv, v0, v1, box);
 }
 
-bool TerrainRep::collide(const Line &line, float radius, Collision *curr_coll, const Transform &tform) const {
+bool TerrainRep::collide(const Line &line, const float radius, Collision *curr_coll, const Transform &tform) const {
 
     curr = this;
     validateErrs();
@@ -584,7 +586,7 @@ bool TerrainRep::collide(const Line &line, float radius, Collision *curr_coll, c
     Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
 
     if (!radius) {
-        Line l = -tform * line;
+        const Line l = -tform * line;
         return
                 collide(line, curr_coll, tform, 2, v1, v2, v0, l) |
                 collide(line, curr_coll, tform, 3, v3, v0, v2, l);
@@ -593,7 +595,7 @@ bool TerrainRep::collide(const Line &line, float radius, Collision *curr_coll, c
     //create local box
     Box b(line);
     b.expand(radius);
-    Box box = -tform * b;
+    const Box box = -tform * b;
 
     return
             collide(line, radius, curr_coll, tform, 2, v1, v2, v0, box) |

@@ -1,9 +1,8 @@
 
-#include "std.h"
 #include "meshcollider.h"
 
 static const int MAX_COLL_TRIS = 16;
-static vector<Vector> tri_centres;
+static std::vector<Vector> tri_centres;
 
 extern float stats3d[10];
 
@@ -14,7 +13,7 @@ static bool triTest(const Vector a[3], const Vector b[3]) {
     Plane p(a[0], a[1], a[2]), p0, p1, p2;
     for (int k = 0; k < 3; ++k) {
         Line l(b[k], b[(k + 1) % 3] - b[k]);
-        float t = p.t_intersect(l);
+        const float t = p.t_intersect(l);
         if (t < 0 || t > 1) continue;
         Vector i = l * t;
         if (!pb0) {
@@ -41,9 +40,9 @@ static bool trisIntersect(const Vector a[3], const Vector b[3]) {
     return triTest(a, b) || triTest(b, a);
 }
 
-MeshCollider::MeshCollider(const vector<Vertex> &verts, const vector<Triangle> &tris) :
+MeshCollider::MeshCollider(const std::vector<Vertex> &verts, const std::vector<Triangle> &tris) :
         vertices(verts), triangles(tris) {
-    vector<int> ts;
+    std::vector<int> ts;
     tri_centres.clear();
     for (int k = 0; k < triangles.size(); ++k) {
         const MeshCollider::Triangle &t = triangles[k];
@@ -60,20 +59,20 @@ MeshCollider::~MeshCollider() {
     delete tree;
 }
 
-bool MeshCollider::collide(const Line &line, float radius, Collision *curr_coll, const Transform &t) {
+bool MeshCollider::collide(const Line &line, const float radius, Collision *curr_coll, const Transform &t) {
 
     if (!tree) return false;
 
     //create local box
     Box box(line);
     box.expand(radius);
-    Box local_box = -t * box;
+    const Box local_box = -t * box;
 
     return collide(local_box, line, radius, t, curr_coll, tree);
 }
 
 bool
-MeshCollider::collide(const Box &line_box, const Line &line, float radius, const Transform &tform, Collision *curr_coll,
+MeshCollider::collide(const Box &line_box, const Line &line, const float radius, const Transform &tform, Collision *curr_coll,
                       MeshCollider::Node *node) {
     if (!line_box.overlaps(node->box)) {
         return false;
@@ -111,7 +110,7 @@ MeshCollider::collide(const Box &line_box, const Line &line, float radius, const
     return hit;
 }
 
-Box MeshCollider::nodeBox(const vector<int> &tris) {
+Box MeshCollider::nodeBox(const std::vector<int> &tris) {
     Box box;
     for (int k = 0; k < tris.size(); ++k) {
         const Triangle &t = triangles[tris[k]];
@@ -120,7 +119,7 @@ Box MeshCollider::nodeBox(const vector<int> &tris) {
     return box;
 }
 
-MeshCollider::Node *MeshCollider::createLeaf(const vector<int> &tris) {
+MeshCollider::Node *MeshCollider::createLeaf(const std::vector<int> &tris) {
 
     Node *c = d_new Node;
     c->box = nodeBox(tris);
@@ -129,7 +128,7 @@ MeshCollider::Node *MeshCollider::createLeaf(const vector<int> &tris) {
     return c;
 }
 
-MeshCollider::Node *MeshCollider::createNode(const vector<int> &tris) {
+MeshCollider::Node *MeshCollider::createNode(const std::vector<int> &tris) {
 
     if (tris.size() <= MAX_COLL_TRIS) return createLeaf(tris);
 
@@ -148,16 +147,16 @@ MeshCollider::Node *MeshCollider::createNode(const vector<int> &tris) {
     //sort by axis
     //
     int k;
-    multimap<float, int> axis_map;
+    std::multimap<float, int> axis_map;
     for (k = 0; k < tris.size(); ++k) {
-        pair<float, int> p(tri_centres[tris[k]][axis], tris[k]);
+        std::pair<float, int> p(tri_centres[tris[k]][axis], tris[k]);
         axis_map.insert(p);
     }
 
     //generate left node
     //
-    vector<int> new_tris;
-    multimap<float, int>::iterator it = axis_map.begin();
+    std::vector<int> new_tris;
+    std::multimap<float, int>::iterator it = axis_map.begin();
     for (k = axis_map.size() / 2; k--; ++it) {
         new_tris.push_back(it->second);
     }
@@ -180,11 +179,11 @@ bool MeshCollider::intersects(const MeshCollider &c, const Transform &t) const {
 
     if (!(t * tree->box).overlaps(c.tree->box)) return false;
     for (int k = 0; k < leaves.size(); ++k) {
-        Node *p = leaves[k];
+        const Node *p = leaves[k];
         Box box = t * p->box;
         bool tformed = false;
         for (int j = 0; j < c.leaves.size(); ++j) {
-            Node *q = c.leaves[j];
+            const Node *q = c.leaves[j];
             if (!box.overlaps(q->box)) continue;
             if (!tformed) {
                 for (int n = 0; n < p->triangles.size(); ++n) {

@@ -2,8 +2,8 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "model.h"
 #include "brush.h"
+#include "model.h"
 #include "../gxruntime/gxmesh.h"
 
 class Sprite : public Model {
@@ -19,15 +19,15 @@ public:
 
     Sprite(const Sprite &t);
 
-    ~Sprite();
+    ~Sprite() override;
 
-    Sprite *getSprite() { return this; }
+    Sprite *getSprite() override { return this; }
 
-    Entity *clone() { return d_new Sprite(*this); }
+    Entity *clone() override { return d_new Sprite(*this); }
 
-    void capture();
+    void capture() override;
 
-    bool beginRender(float tween);
+    bool beginRender(float tween) override;
 
     void setRotation(float angle);
 
@@ -37,7 +37,7 @@ public:
 
     void setViewmode(int mode);
 
-    bool render(const RenderContext &rc);
+    bool render(const RenderContext &rc) override;
 
 private:
     float xhandle, yhandle;

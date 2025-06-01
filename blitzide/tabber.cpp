@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "tabber.h"
 
 IMPLEMENT_DYNAMIC(Tabber, CTabCtrl)
@@ -12,7 +11,7 @@ END_MESSAGE_MAP()
 
 static CRect tabsRect(CTabCtrl &t) {
     CRect r(0, 0, 0, 0);
-    int n = t.GetItemCount();
+    const int n = t.GetItemCount();
     for (int k = 0; k < n; ++k) {
         CRect c;
         t.GetItemRect(k, &c);
@@ -41,14 +40,14 @@ CRect Tabber::getInnerRect() {
 }
 
 Tabber::Tabber() :
-        listener(0), curr(-1) {
+        listener(nullptr), curr(-1) {
 }
 
 Tabber::~Tabber() {
     for (; tabs.size(); tabs.pop_back()) delete tabs.back();
 }
 
-void Tabber::OnSize(UINT type, int w, int h) {
+void Tabber::OnSize(const UINT type, const int w, const int h) {
     CTabCtrl::OnSize(type, w, h);
     refresh();
 }
@@ -57,20 +56,20 @@ BOOL Tabber::OnEraseBkgnd(CDC *dc) {
     CRect c;
     GetClientRect(&c);
 
-    HBRUSH hb = (HBRUSH) GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
+    const HBRUSH hb = (HBRUSH) GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
     CBrush br;
     br.Attach(hb);
 
     if (curr < 0) dc->FillRect(&c, &br);
     else {
-        CRect i = getInnerRect();
-        CRect t(c.left, c.top, i.right, i.top);
+        const CRect i = getInnerRect();
+        const CRect t(c.left, c.top, i.right, i.top);
         dc->FillRect(&t, &br);
-        CRect r(i.right, c.top, c.right, i.bottom);
+        const CRect r(i.right, c.top, c.right, i.bottom);
         dc->FillRect(&r, &br);
-        CRect b(i.left, i.bottom, c.right, c.bottom);
+        const CRect b(i.left, i.bottom, c.right, c.bottom);
         dc->FillRect(&b, &br);
-        CRect l(c.left, i.top, i.left, c.bottom);
+        const CRect l(c.left, i.top, i.left, c.bottom);
         dc->FillRect(&l, &br);
     }
     return true;
@@ -83,7 +82,7 @@ void Tabber::setListener(TabberListener *l) {
 void Tabber::refresh() {
     if (curr < 0) return;
 
-    CRect r = getInnerRect();
+    const CRect r = getInnerRect();
     CWnd *wnd = getTabWnd(curr);
     wnd->MoveWindow(r.left, r.top, r.Width(), r.Height());
     wnd->ShowWindow(SW_SHOW);
@@ -91,7 +90,7 @@ void Tabber::refresh() {
 }
 
 Tabber::Tab *Tabber::getTab(int index) const {
-    if (index < 0 || index >= tabs.size()) return 0;
+    if (index < 0 || index >= tabs.size()) return nullptr;
     Tabs::const_iterator it = tabs.begin();
     while (index--) ++it;
     return *it;
@@ -101,7 +100,7 @@ void Tabber::tcn_selChange(NMHDR *p, LRESULT *result) {
     setCurrent(GetCurSel());
 }
 
-void Tabber::insert(int index, CWnd *w, const string &t) {
+void Tabber::insert(const int index, CWnd *w, const std::string &t) {
     if (index < 0 || index > tabs.size()) return;
 
     Tabs::iterator it = tabs.begin();
@@ -113,7 +112,7 @@ void Tabber::insert(int index, CWnd *w, const string &t) {
     if (curr < 0) setCurrent(index);
 }
 
-void Tabber::remove(int index) {
+void Tabber::remove(const int index) {
     if (index < 0 || index >= tabs.size()) return;
 
     CWnd *w = getTabWnd(index);
@@ -132,7 +131,7 @@ void Tabber::remove(int index) {
     if (listener) listener->currentSet(this, curr);
 }
 
-void Tabber::setCurrent(int index) {
+void Tabber::setCurrent(const int index) {
     if (index < 0 || index >= tabs.size()) return;
 
     if (index != curr) {
@@ -147,10 +146,10 @@ void Tabber::setCurrent(int index) {
     if (listener) listener->currentSet(this, curr);
 }
 
-void Tabber::setTabText(int index, const string &t) {
+void Tabber::setTabText(const int index, const std::string &t) {
     if (index < 0 || index >= tabs.size()) return;
 
-    string s = t + '\0';
+    std::string s = t + '\0';
     TCITEM tc = {TCIF_TEXT};
     tc.pszText = (char *) s.data();
     SetItem(index, &tc);
@@ -164,12 +163,12 @@ int Tabber::getCurrent() const {
     return curr;
 }
 
-CWnd *Tabber::getTabWnd(int index) const {
-    Tab *t = getTab(index);
-    return t ? t->wnd : 0;
+CWnd *Tabber::getTabWnd(const int index) const {
+    const Tab *t = getTab(index);
+    return t ? t->wnd : nullptr;
 }
 
-string Tabber::getTabText(int index) const {
+std::string Tabber::getTabText(const int index) const {
     Tab *t = getTab(index);
     return t ? t->text : "";
 }

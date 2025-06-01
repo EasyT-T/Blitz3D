@@ -8,6 +8,8 @@
 #ifndef TOKER_H
 #define TOKER_H
 
+#include "std.h"
+
 enum {
     DIM = 0x8000, GOTO, GOSUB, EXIT, RETURN,
     IF, THEN, ELSE, ENDIF, ELSEIF,
@@ -34,7 +36,7 @@ enum {
 
 class Toker {
 public:
-    Toker(istream &in);
+    Toker(std::istream &in);
 
     int pos();
 
@@ -42,24 +44,24 @@ public:
 
     int next();
 
-    string text();
+    std::string text();
 
     int lookAhead(int n);
 
     static int chars_toked;
 
-    static map<string, int> &getKeywords();
+    static std::map<std::string, int> &getKeywords();
 
 private:
     struct Toke {
         int n, from, to;
 
-        Toke(int n, int f, int t) : n(n), from(f), to(t) {}
+        Toke(const int n, const int f, const int t) : n(n), from(f), to(t) {}
     };
 
-    istream &in;
-    string line;
-    vector<Toke> tokes;
+    std::istream &in;
+    std::string line;
+    std::vector<Toke> tokes;
 
     void nextline();
 

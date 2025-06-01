@@ -30,22 +30,23 @@ public:
     Vector() : x(0), y(0), z(0) {
     }
 
-    Vector(float x, float y, float z) : x(x), y(y), z(z) {
+    Vector(const float x, const float y, const float z) : x(x), y(y), z(z) {
     }
 
     operator float *() {
         return &x;
     }
 
-    operator const float *() {
+    operator const float *() const
+    {
         return &x;
     }
 
-    float &operator[](int n) {
+    float &operator[](const int n) {
         return (&x)[n];
     }
 
-    float operator[](int n) const {
+    float operator[](const int n) const {
         return (&x)[n];
     }
 
@@ -53,7 +54,7 @@ public:
         return Vector(-x, -y, -z);
     }
 
-    Vector operator*(float scale) const {
+    Vector operator*(const float scale) const {
         return Vector(x * scale, y * scale, z * scale);
     }
 
@@ -61,7 +62,7 @@ public:
         return Vector(x * q.x, y * q.y, z * q.z);
     }
 
-    Vector operator/(float scale) const {
+    Vector operator/(const float scale) const {
         return Vector(x / scale, y / scale, z / scale);
     }
 
@@ -77,7 +78,7 @@ public:
         return Vector(x - q.x, y - q.y, z - q.z);
     }
 
-    Vector &operator*=(float scale) {
+    Vector &operator*=(const float scale) {
         x *= scale;
         y *= scale;
         z *= scale;
@@ -91,7 +92,7 @@ public:
         return *this;
     }
 
-    Vector &operator/=(float scale) {
+    Vector &operator/=(const float scale) {
         x /= scale;
         y /= scale;
         z /= scale;
@@ -151,12 +152,12 @@ public:
     }
 
     Vector normalized() const {
-        float l = length();
+        const float l = length();
         return Vector(x / l, y / l, z / l);
     }
 
     void normalize() {
-        float l = length();
+        const float l = length();
         x /= l;
         y /= l;
         z /= l;
@@ -193,7 +194,7 @@ public:
         return Line(o - q, d);
     }
 
-    Vector operator*(float q) const {
+    Vector operator*(const float q) const {
         return o + d * q;
     }
 
@@ -211,7 +212,7 @@ public:
     }
 
     //normal/offset form
-    Plane(const Vector &n, float d) : n(n), d(d) {
+    Plane(const Vector &n, const float d) : n(n), d(d) {
     }
 
     //point/normal form
@@ -237,7 +238,7 @@ public:
     }
 
     Line intersect(const Plane &q) const {
-        Vector lv = n.cross(q.n).normalized();
+        const Vector lv = n.cross(q.n).normalized();
         return Line(q.intersect(Line(nearest(n * -d), n.cross(lv))), lv);
     }
 
@@ -262,7 +263,7 @@ struct Quat {
     Quat() : w(1) {
     }
 
-    Quat(float w, const Vector &v) : w(w), v(v) {
+    Quat(const float w, const Vector &v) : w(w), v(v) {
     }
 
     Quat operator-() const {
@@ -285,11 +286,11 @@ struct Quat {
         return (*this * Quat(0, q) * -*this).v;
     }
 
-    Quat operator*(float q) const {
+    Quat operator*(const float q) const {
         return Quat(w * q, v * q);
     }
 
-    Quat operator/(float q) const {
+    Quat operator/(const float q) const {
         return Quat(w / q, v / q);
     }
 
@@ -318,8 +319,8 @@ struct Quat {
             d = -d;
         }
         if (d < 1 - EPSILON) {
-            float om = acosf(d);
-            float si = sinf(om);
+            const float om = acosf(d);
+            const float si = sinf(om);
             a = sinf(a * om) / si;
             b = sinf(b * om) / si;
         }
@@ -376,7 +377,7 @@ public:
         k = Vector(2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy));
     }
 
-    Matrix(float angle, const Vector &axis) {
+    Matrix(const float angle, const Vector &axis) {
         const Vector &u = axis;
         float c = cosf(angle), s = sinf(angle);
         float x2 = axis.x * axis.x, y2 = axis.y * axis.y, z2 = axis.z * axis.z;
@@ -385,11 +386,11 @@ public:
         k = Vector(u.z * u.x * (1 - c) - u.y * s, u.y * u.z * (1 - c) + u.x * s, z2 + c * (1 - z2));
     }
 
-    Vector &operator[](int n) {
+    Vector &operator[](const int n) {
         return (&i)[n];
     }
 
-    const Vector &operator[](int n) const {
+    const Vector &operator[](const int n) const {
         return (&i)[n];
     }
 
@@ -413,7 +414,7 @@ public:
 
     Matrix &operator-() const {
         Matrix &m = alloc_tmp();
-        float t = 1.0f / determinant();
+        const float t = 1.0f / determinant();
         m.i.x = t * (j.y * k.z - j.z * k.y);
         m.i.y = -t * (i.y * k.z - i.z * k.y);
         m.i.z = t * (i.y * j.z - i.z * j.y);
@@ -511,7 +512,7 @@ public:
         return Vector((a.x + b.x) * .5f, (a.y + b.y) * .5f, (a.z + b.z) * .5f);
     }
 
-    Vector corner(int n) const {
+    Vector corner(const int n) const {
         return Vector(((n & 1) ? b : a).x, ((n & 2) ? b : a).y, ((n & 4) ? b : a).z);
     }
 
@@ -540,7 +541,7 @@ public:
                 (b.z < q.b.z ? b.z : q.b.z) >= (a.z > q.a.z ? a.z : q.a.z);
     }
 
-    void expand(float n) {
+    void expand(const float n) {
         a.x -= n;
         a.y -= n;
         a.z -= n;
@@ -561,7 +562,8 @@ public:
         return b.z - a.z;
     }
 
-    bool contains(const Vector &q) {
+    bool contains(const Vector &q) const
+    {
         return q.x >= a.x && q.x <= b.x && q.y >= a.y && q.y <= b.y && q.z >= a.z && q.z <= b.z;
     }
 };
@@ -609,7 +611,7 @@ public:
     }
 
     Line operator*(const Line &q) const {
-        Vector t = (*this) * q.o;
+        const Vector t = (*this) * q.o;
         return Line(t, (*this) * (q.o + q.d) - t);
     }
 
@@ -635,20 +637,20 @@ public:
     }
 };
 
-inline float transformRadius(float r, const Matrix &t) {
+inline float transformRadius(const float r, const Matrix &t) {
     static const float sq_3 = sqrtf(1.0f / 3.0f);
     return (t * Vector(sq_3, sq_3, sq_3)).length() * r;
 }
 
-inline Matrix pitchMatrix(float q) {
+inline Matrix pitchMatrix(const float q) {
     return Matrix(Vector(1, 0, 0), Vector(0, cosf(q), sinf(q)), Vector(0, -sinf(q), cosf(q)));
 }
 
-inline Matrix yawMatrix(float q) {
+inline Matrix yawMatrix(const float q) {
     return Matrix(Vector(cosf(q), 0, sinf(q)), Vector(0, 1, 0), Vector(-sinf(q), 0, cosf(q)));
 }
 
-inline Matrix rollMatrix(float q) {
+inline Matrix rollMatrix(const float q) {
     return Matrix(Vector(cosf(q), sinf(q), 0), Vector(-sinf(q), cosf(q), 0), Vector(0, 0, 1));
 }
 
@@ -668,7 +670,7 @@ inline float matrixRoll(const Matrix &m) {
     //return atan2f( t.i.y,t.i.x );
 }
 
-inline Matrix scaleMatrix(float x, float y, float z) {
+inline Matrix scaleMatrix(const float x, const float y, const float z) {
     return Matrix(Vector(x, 0, 0), Vector(0, y, 0), Vector(0, 0, z));
 }
 
@@ -676,15 +678,15 @@ inline Matrix scaleMatrix(const Vector &scale) {
     return Matrix(Vector(scale.x, 0, 0), Vector(0, scale.y, 0), Vector(0, 0, scale.z));
 }
 
-inline Quat pitchQuat(float p) {
+inline Quat pitchQuat(const float p) {
     return Quat(cosf(p / -2), Vector(sinf(p / -2), 0, 0));
 }
 
-inline Quat yawQuat(float y) {
+inline Quat yawQuat(const float y) {
     return Quat(cosf(y / 2), Vector(0, sinf(y / 2), 0));
 }
 
-inline Quat rollQuat(float r) {
+inline Quat rollQuat(const float r) {
     return Quat(cosf(r / -2), Vector(0, 0, sinf(r / -2)));
 }
 
@@ -694,7 +696,7 @@ inline Quat rollQuat(float r) {
 
 Quat rotationQuat(float p, float y, float r);
 
-inline Matrix rotationMatrix(float p, float y, float r) {
+inline Matrix rotationMatrix(const float p, const float y, const float r) {
     return yawMatrix(y) * pitchMatrix(p) * rollMatrix(r);
 }
 

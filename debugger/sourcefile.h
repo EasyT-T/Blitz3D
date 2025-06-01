@@ -2,15 +2,17 @@
 #ifndef SOURCEFILE_H
 #define SOURCEFILE_H
 
+#include "stdafx.h"
+
 class SourceFile : public CRichEditCtrl {
 public:
     SourceFile();
 
-    ~SourceFile();
+    ~SourceFile() override;
 
     void highLight(int row, int col);
 
-    void setText(istream &in);
+    void setText(std::istream &in);
 
 DECLARE_DYNAMIC(SourceFile)
 
@@ -19,8 +21,8 @@ DECLARE_MESSAGE_MAP()
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 
 private:
-    string is_line;
-    istream *is_stream;
+    std::string is_line;
+    std::istream *is_stream;
     int is_curs, is_linenum;
 
     void formatStreamLine();

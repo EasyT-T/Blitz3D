@@ -5,16 +5,14 @@
 #include "../config/config.h"
 #include "../stdutil/stdutil.h"
 
-#include <map>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
 
 #include <windows.h>
-
-using namespace std;
 
 #endif

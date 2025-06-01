@@ -2,7 +2,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <list>
+#include "std.h"
 
 #include "geom.h"
 
@@ -36,17 +36,17 @@ public:
     virtual Entity *clone() = 0;
 
     //ugly casts!
-    virtual Object *getObject() { return 0; }
+    virtual Object *getObject() { return nullptr; }
 
-    virtual Camera *getCamera() { return 0; }
+    virtual Camera *getCamera() { return nullptr; }
 
-    virtual Light *getLight() { return 0; }
+    virtual Light *getLight() { return nullptr; }
 
-    virtual Model *getModel() { return 0; }
+    virtual Model *getModel() { return nullptr; }
 
-    virtual Mirror *getMirror() { return 0; }
+    virtual Mirror *getMirror() { return nullptr; }
 
-    virtual Listener *getListener() { return 0; }
+    virtual Listener *getListener() { return nullptr; }
 
     void setName(const std::string &t);
 
@@ -60,9 +60,9 @@ public:
 
     bool enabled() const { return _enabled; }
 
-    void enumVisible(vector<Object *> &out);
+    void enumVisible(std::vector<Object *> &out);
 
-    void enumEnabled(vector<Object *> &out);
+    void enumEnabled(std::vector<Object *> &out);
 
     Entity *children() const { return _children; }
 
@@ -127,11 +127,11 @@ private:
 
     void insert();
 
-    void remove();
+    void remove() const;
 
     void invalidateLocal();
 
-    void invalidateWorld();
+    void invalidateWorld() const;
 };
 
 #endif

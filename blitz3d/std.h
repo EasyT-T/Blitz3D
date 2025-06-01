@@ -5,16 +5,14 @@
 #pragma warning( disable:4786 )
 
 #include "../config/config.h"
-#include "../stdutil/stdutil.h"
 #include "../gxruntime/gxruntime.h"
+#include "../stdutil/stdutil.h"
 
-#include <set>
+#include <fstream>
+#include <iostream>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
 
 #endif

@@ -1,5 +1,5 @@
-#include "std.h"
 #include "bbsys.h"
+#include "std.h"
 
 //how many strings allocated
 static int stringCnt;
@@ -29,15 +29,15 @@ static BBStr usedStrs, freeStrs;
 static int next_handle;
 
 //object<->handle maps
-static map<int, BBObj *> handle_map;
-static map<BBObj *, int> object_map;
+static std::map<int, BBObj *> handle_map;
+static std::map<BBObj *, int> object_map;
 
 static BBType _bbIntType(BBTYPE_INT);
 static BBType _bbFltType(BBTYPE_FLT);
 static BBType _bbStrType(BBTYPE_STR);
 static BBType _bbCStrType(BBTYPE_CSTR);
 
-static void *bbMalloc(int size) {
+static void *bbMalloc(const int size) {
     return malloc(size);
     /*
         char *c=d_new char[ size ];
@@ -90,34 +90,34 @@ BBStr::BBStr() {
     ++stringCnt;
 }
 
-BBStr::BBStr(const char *s) : string(s) {
+BBStr::BBStr(const char *s) : std::string(s) {
     ++stringCnt;
 }
 
-BBStr::BBStr(const char *s, int n) : string(s, n) {
+BBStr::BBStr(const char *s, const int n) : std::string(s, n) {
     ++stringCnt;
 }
 
-BBStr::BBStr(const BBStr &s) : string(s) {
+BBStr::BBStr(const BBStr &s) : std::string(s) {
     ++stringCnt;
 }
 
-BBStr::BBStr(const string &s) : string(s) {
+BBStr::BBStr(const std::string &s) : std::string(s) {
     ++stringCnt;
 }
 
 BBStr &BBStr::operator=(const char *s) {
-    string::operator=(s);
+    std::string::operator=(s);
     return *this;
 }
 
 BBStr &BBStr::operator=(const BBStr &s) {
-    string::operator=(s);
+    std::string::operator=(s);
     return *this;
 }
 
-BBStr &BBStr::operator=(const string &s) {
-    string::operator=(s);
+BBStr &BBStr::operator=(const std::string &s) {
+    std::string::operator=(s);
     return *this;
 }
 
@@ -145,29 +145,29 @@ BBStr *_bbStrConcat(BBStr *s1, BBStr *s2) {
 }
 
 int _bbStrCompare(BBStr *lhs, BBStr *rhs) {
-    int n = lhs->compare(*rhs);
+    const int n = lhs->compare(*rhs);
     delete lhs;
     delete rhs;
     return n;
 }
 
 int _bbStrToInt(BBStr *s) {
-    int n = atoi(*s);
+    const int n = atoi(*s);
     delete s;
     return n;
 }
 
-BBStr *_bbStrFromInt(int n) {
+BBStr *_bbStrFromInt(const int n) {
     return d_new BBStr(itoa(n));
 }
 
 float _bbStrToFloat(BBStr *s) {
-    float n = (float) atof(*s);
+    const float n = (float) atof(*s);
     delete s;
     return n;
 }
 
-BBStr *_bbStrFromFloat(float n) {
+BBStr *_bbStrFromFloat(const float n) {
     return d_new BBStr(ftoa(n));
 }
 
@@ -204,19 +204,19 @@ void _bbUndimArray(BBArray *array) {
     if (void *t = array->data) {
         if (array->elementType == BBTYPE_STR) {
             BBStr **p = (BBStr **) t;
-            int size = array->scales[array->dims - 1];
+            const int size = array->scales[array->dims - 1];
             for (int k = 0; k < size; ++p, ++k) {
                 if (*p) _bbStrRelease(*p);
             }
         } else if (array->elementType == BBTYPE_OBJ) {
             BBObj **p = (BBObj **) t;
-            int size = array->scales[array->dims - 1];
+            const int size = array->scales[array->dims - 1];
             for (int k = 0; k < size; ++p, ++k) {
                 if (*p) _bbObjRelease(*p);
             }
         }
         bbFree(t);
-        array->data = 0;
+        array->data = nullptr;
     }
 }
 
@@ -226,7 +226,7 @@ void _bbDimArray(BBArray *array) {
     for (k = 1; k < array->dims; ++k) {
         array->scales[k] *= array->scales[k - 1];
     }
-    int size = array->scales[array->dims - 1];
+    const int size = array->scales[array->dims - 1];
     array->data = bbMalloc(size * 4);
     memset(array->data, 0, size * 4);
 }
@@ -249,7 +249,7 @@ static void insertObj(BBObj *obj, BBObj *next) {
 
 BBObj *_bbObjNew(BBObjType *type) {
     if (type->free.next == &type->free) {
-        int obj_size = sizeof(BBObj) + type->fieldCnt * 4;
+        const int obj_size = sizeof(BBObj) + type->fieldCnt * 4;
         BBObj *o = (BBObj *) bbMalloc(obj_size * OBJ_NEW_INC);
         for (int k = 0; k < OBJ_NEW_INC; ++k) {
             insertObj(o, &type->free);
@@ -278,9 +278,9 @@ BBObj *_bbObjNew(BBObjType *type) {
 
 void _bbObjDelete(BBObj *obj) {
     if (!obj) return;
-    BBField *fields = obj->fields;
+    const BBField *fields = obj->fields;
     if (!fields) return;
-    BBObjType *type = obj->type;
+    const BBObjType *type = obj->type;
     for (int k = 0; k < type->fieldCnt; ++k) {
         switch (type->fieldTypes[k]->type) {
             case BBTYPE_STR:
@@ -294,12 +294,12 @@ void _bbObjDelete(BBObj *obj) {
                 break;
         }
     }
-    map<BBObj *, int>::iterator it = object_map.find(obj);
+    const std::map<BBObj *, int>::iterator it = object_map.find(obj);
     if (it != object_map.end()) {
         handle_map.erase(it->second);
         object_map.erase(it);
     }
-    obj->fields = 0;
+    obj->fields = nullptr;
     _bbObjRelease(obj);
     --objCnt;
 }
@@ -331,13 +331,13 @@ void _bbObjStore(BBObj **var, BBObj *obj) {
 }
 
 int _bbObjCompare(BBObj *o1, BBObj *o2) {
-    return (o1 ? o1->fields : 0) != (o2 ? o2->fields : 0);
+    return (o1 ? o1->fields : nullptr) != (o2 ? o2->fields : nullptr);
 }
 
 BBObj *_bbObjNext(BBObj *obj) {
     do {
         obj = obj->next;
-        if (!obj->type) return 0;
+        if (!obj->type) return nullptr;
     } while (!obj->fields);
     return obj;
 }
@@ -345,7 +345,7 @@ BBObj *_bbObjNext(BBObj *obj) {
 BBObj *_bbObjPrev(BBObj *obj) {
     do {
         obj = obj->prev;
-        if (!obj->type) return 0;
+        if (!obj->type) return nullptr;
     } while (!obj->fields);
     return obj;
 }
@@ -372,22 +372,22 @@ void _bbObjInsAfter(BBObj *o1, BBObj *o2) {
 
 int _bbObjEachFirst(BBObj **var, BBObjType *type) {
     _bbObjStore(var, _bbObjFirst(type));
-    return *var != 0;
+    return *var != nullptr;
 }
 
 int _bbObjEachNext(BBObj **var) {
     _bbObjStore(var, _bbObjNext(*var));
-    return *var != 0;
+    return *var != nullptr;
 }
 
 int _bbObjEachFirst2(BBObj **var, BBObjType *type) {
     *var = _bbObjFirst(type);
-    return *var != 0;
+    return *var != nullptr;
 }
 
 int _bbObjEachNext2(BBObj **var) {
     *var = _bbObjNext(*var);
-    return *var != 0;
+    return *var != nullptr;
 }
 
 BBStr *_bbObjToStr(BBObj *obj) {
@@ -403,8 +403,8 @@ BBStr *_bbObjToStr(BBObj *obj) {
     BBObj *oldRoot = root;
     if (!root) root = obj;
 
-    BBObjType *type = obj->type;
-    BBField *fields = obj->fields;
+    const BBObjType *type = obj->type;
+    const BBField *fields = obj->fields;
     BBStr *s = d_new BBStr("["), *t;
     for (int k = 0; k < type->fieldCnt; ++k) {
         if (k) *s += ',';
@@ -440,7 +440,7 @@ BBStr *_bbObjToStr(BBObj *obj) {
 
 int _bbObjToHandle(BBObj *obj) {
     if (!obj || !obj->fields) return 0;
-    map<BBObj *, int>::const_iterator it = object_map.find(obj);
+    const std::map<BBObj *, int>::const_iterator it = object_map.find(obj);
     if (it != object_map.end()) return it->second;
     ++next_handle;
     object_map[obj] = next_handle;
@@ -448,11 +448,11 @@ int _bbObjToHandle(BBObj *obj) {
     return next_handle;
 }
 
-BBObj *_bbObjFromHandle(int handle, BBObjType *type) {
-    map<int, BBObj *>::const_iterator it = handle_map.find(handle);
-    if (it == handle_map.end()) return 0;
+BBObj *_bbObjFromHandle(const int handle, BBObjType *type) {
+    const std::map<int, BBObj *>::const_iterator it = handle_map.find(handle);
+    if (it == handle_map.end()) return nullptr;
     BBObj *obj = it->second;
-    return obj->type == type ? obj : 0;
+    return obj->type == type ? obj : nullptr;
 }
 
 void _bbNullObjEx() {
@@ -501,7 +501,7 @@ BBStr *_bbReadStr() {
     switch (dataPtr->fieldType) {
         case BBTYPE_END:
             RTEX("Out of data");
-            return 0;
+            return nullptr;
         case BBTYPE_INT:
             return d_new BBStr(itoa(dataPtr++->field.INT));
         case BBTYPE_FLT:
@@ -510,35 +510,35 @@ BBStr *_bbReadStr() {
             return d_new BBStr(dataPtr++->field.CSTR);
         default:
             RTEX("Bad data type");
-            return 0;
+            return nullptr;
     }
 }
 
-int _bbAbs(int n) {
+int _bbAbs(const int n) {
     return n >= 0 ? n : -n;
 }
 
-int _bbSgn(int n) {
+int _bbSgn(const int n) {
     return n > 0 ? 1 : (n < 0 ? -1 : 0);
 }
 
-int _bbMod(int x, int y) {
+int _bbMod(const int x, const int y) {
     return x % y;
 }
 
-float _bbFAbs(float n) {
+float _bbFAbs(const float n) {
     return n >= 0 ? n : -n;
 }
 
-float _bbFSgn(float n) {
+float _bbFSgn(const float n) {
     return n > 0 ? 1 : (n < 0 ? -1 : 0);
 }
 
-float _bbFMod(float x, float y) {
+float _bbFMod(const float x, const float y) {
     return (float) fmod(x, y);
 }
 
-float _bbFPow(float x, float y) {
+float _bbFPow(const float x, const float y) {
     return (float) pow(x, y);
 }
 

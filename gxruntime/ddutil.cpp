@@ -1,4 +1,3 @@
-#include "std.h"
 #include "ddutil.h"
 #include "asmcoder.h"
 #include "gxcanvas.h"
@@ -6,7 +5,7 @@
 
 extern gxRuntime* gx_runtime;
 
-#include "..\freeimage\freeimage.h"
+#include "../freeimage/freeimage.h"
 
 static AsmCoder asm_coder;
 
@@ -39,7 +38,7 @@ void PixelFormat::setFormat(const DDPIXELFORMAT& pf)
         VirtualFree(plot_code, 0,MEM_RELEASE);
     }
 
-    plot_code = (char*)VirtualAlloc(0, 128,MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE);
+    plot_code = (char*)VirtualAlloc(nullptr, 128,MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE);
     point_code = plot_code + 64;
 
     depth = pf.dwRGBBitCount;
@@ -94,7 +93,7 @@ static void adjustTexSize(int* width, int* height, IDirect3DDevice7* dir3dDev)
     //check aspect ratio
     if (max = ddDesc.dwMaxTextureAspectRatio)
     {
-        int asp = w > h ? w / h : h / w;
+        const int asp = w > h ? w / h : h / w;
         if (asp > max)
         {
             if (w > h) h = w / max;
@@ -128,14 +127,14 @@ static ddSurf* createSurface(int width, int height, int pitch, void* bits, IDire
     desc.ddpfPixelFormat.dwBBitMask = 0x0000ff;
     desc.ddpfPixelFormat.dwRGBAlphaBitMask = 0xff000000;
     ddSurf* surf;
-    if (dirDraw->CreateSurface(&desc, &surf, 0) >= 0) return surf;
-    return 0;
+    if (dirDraw->CreateSurface(&desc, &surf, nullptr) >= 0) return surf;
+    return nullptr;
 }
 
 static void buildMask(ddSurf* surf)
 {
     DDSURFACEDESC2 desc = {sizeof(desc)};
-    surf->Lock(0, &desc,DDLOCK_WAIT, 0);
+    surf->Lock(nullptr, &desc,DDLOCK_WAIT, nullptr);
     unsigned char* surf_p = (unsigned char*)desc.lpSurface;
     PixelFormat fmt(desc.ddpfPixelFormat);
 
@@ -152,13 +151,13 @@ static void buildMask(ddSurf* surf)
         }
         surf_p += desc.lPitch;
     }
-    surf->Unlock(0);
+    surf->Unlock(nullptr);
 }
 
 static void buildAlpha(ddSurf* surf, bool whiten)
 {
     DDSURFACEDESC2 desc = {sizeof(desc)};
-    surf->Lock(0, &desc,DDLOCK_WAIT, 0);
+    surf->Lock(nullptr, &desc,DDLOCK_WAIT, nullptr);
     unsigned char* surf_p = (unsigned char*)desc.lpSurface;
     PixelFormat fmt(desc.ddpfPixelFormat);
 
@@ -176,7 +175,7 @@ static void buildAlpha(ddSurf* surf, bool whiten)
         }
         surf_p += desc.lPitch;
     }
-    surf->Unlock(0);
+    surf->Unlock(nullptr);
 }
 
 void ddUtil::buildMipMaps(ddSurf* surf)
@@ -195,12 +194,12 @@ void ddUtil::buildMipMaps(ddSurf* surf)
     while (src->GetAttachedSurface(&caps, &dest) >= 0)
     {
         DDSURFACEDESC2 src_desc = {sizeof(src_desc)};
-        if (src->Lock(0, &src_desc,DDLOCK_WAIT, 0) < 0) abort();
+        if (src->Lock(nullptr, &src_desc,DDLOCK_WAIT, nullptr) < 0) abort();
         unsigned char* src_p = (unsigned char*)src_desc.lpSurface;
         PixelFormat src_fmt(src_desc.ddpfPixelFormat);
 
         DDSURFACEDESC2 dest_desc = {sizeof(dest_desc)};
-        if (dest->Lock(0, &dest_desc,DDLOCK_WAIT, 0) < 0) abort();
+        if (dest->Lock(nullptr, &dest_desc,DDLOCK_WAIT, nullptr) < 0) abort();
         unsigned char* dest_p = (unsigned char*)dest_desc.lpSurface;
         PixelFormat dest_fmt(dest_desc.ddpfPixelFormat);
 
@@ -262,8 +261,8 @@ void ddUtil::buildMipMaps(ddSurf* surf)
                 dest_p += dest_desc.lPitch;
             }
         }
-        src->Unlock(0);
-        dest->Unlock(0);
+        src->Unlock(nullptr);
+        dest->Unlock(nullptr);
         dest->Release();
         src = dest;
     }
@@ -272,13 +271,13 @@ void ddUtil::buildMipMaps(ddSurf* surf)
 void ddUtil::copy(ddSurf* dest, int dx, int dy, int dw, int dh, ddSurf* src, int sx, int sy, int sw, int sh)
 {
     DDSURFACEDESC2 src_desc = {sizeof(src_desc)};
-    src->Lock(0, &src_desc,DDLOCK_WAIT, 0);
+    src->Lock(nullptr, &src_desc,DDLOCK_WAIT, nullptr);
     PixelFormat src_fmt(src_desc.ddpfPixelFormat);
     unsigned char* src_p = (unsigned char*)src_desc.lpSurface;
     src_p += src_desc.lPitch * sy + src_fmt.getPitch() * sx;
 
     DDSURFACEDESC2 dest_desc = {sizeof(dest_desc)};
-    dest->Lock(0, &dest_desc,DDLOCK_WAIT, 0);
+    dest->Lock(nullptr, &dest_desc,DDLOCK_WAIT, nullptr);
     PixelFormat dest_fmt(dest_desc.ddpfPixelFormat);
     unsigned char* dest_p = (unsigned char*)dest_desc.lpSurface;
     dest_p += dest_desc.lPitch * dy + dest_fmt.getPitch() * dx;
@@ -295,8 +294,8 @@ void ddUtil::copy(ddSurf* dest, int dx, int dy, int dw, int dh, ddSurf* src, int
         dest_p += dest_desc.lPitch;
     }
 
-    src->Unlock(0);
-    dest->Unlock(0);
+    src->Unlock(nullptr);
+    dest->Unlock(nullptr);
 }
 
 ddSurf* ddUtil::createSurface(int w, int h, int flags, gxGraphics* gfx)
@@ -377,17 +376,17 @@ ddSurf* ddUtil::createSurface(int w, int h, int flags, gxGraphics* gfx)
         }
     }
     ddSurf* surf;
-    if (gfx->dirDraw->CreateSurface(&desc, &surf, 0) >= 0) return surf;
+    if (gfx->dirDraw->CreateSurface(&desc, &surf, nullptr) >= 0) return surf;
     if (desc.ddsCaps.dwCaps & DDSCAPS_OFFSCREENPLAIN)
     {
         if (!(desc.ddsCaps.dwCaps & DDSCAPS_SYSTEMMEMORY))
         {
             //try again in system memory!
             desc.ddsCaps.dwCaps |= DDSCAPS_SYSTEMMEMORY;
-            if (gfx->dirDraw->CreateSurface(&desc, &surf, 0) >= 0) return surf;
+            if (gfx->dirDraw->CreateSurface(&desc, &surf, nullptr) >= 0) return surf;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 //Tom Speed's DXTC loader
@@ -402,14 +401,14 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
 
     /* try to open the file */
     fp = fopen(filename, "rb");
-    if (!fp) return NULL;
+    if (!fp) return nullptr;
 
     /* valid DDS? */
     fread(magicID, 1, 4, fp);
     if (strncmp(magicID, "DDS ", 4) != 0)
     {
         fclose(fp);
-        return NULL;
+        return nullptr;
     }
 
     /* get the DXTC file surface description */
@@ -418,7 +417,7 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
     if (fileddsd.dwSize != sizeof(DDSURFACEDESC2))
     {
         fclose(fp);
-        return NULL;
+        return nullptr;
     }
 
     /* copy the fileddsd before we manipulate it so you
@@ -443,7 +442,7 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
     if (blockSize == 0)
     {
         fclose(fp);
-        return NULL;
+        return nullptr;
     }
 
     /* add texture manage flag */
@@ -451,12 +450,12 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
 
     /* Create the new DXTC surface using the DDSURFACEDESC2
     we read in from the file */
-    IDirectDrawSurface7* newSurf = NULL;
-    hr = gfx->dirDraw->CreateSurface(&ddsd, &newSurf, NULL);
+    IDirectDrawSurface7* newSurf = nullptr;
+    hr = gfx->dirDraw->CreateSurface(&ddsd, &newSurf, nullptr);
     if (FAILED(hr))
     {
         fclose(fp);
-        return NULL;
+        return nullptr;
     }
 
     /* Define what type of child surfaces we may wish
@@ -466,8 +465,8 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
     mipmapddsd.dwCaps = DDSCAPS_TEXTURE | DDSCAPS_MIPMAP | DDSCAPS_COMPLEX;
 
     /* pointers used when iterating through mipmaps */
-    IDirectDrawSurface7* topDDS = NULL;
-    IDirectDrawSurface7* nextDDS = NULL;
+    IDirectDrawSurface7* topDDS = nullptr;
+    IDirectDrawSurface7* nextDDS = nullptr;
 
     topDDS = newSurf;
     topDDS->AddRef();
@@ -475,14 +474,14 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
     while (TRUE)
     {
         /* get a description of this surface */
-        hr = topDDS->Lock(NULL, &ddsd,DDLOCK_WAIT,NULL);
+        hr = topDDS->Lock(nullptr, &ddsd,DDLOCK_WAIT, nullptr);
         if (FAILED(hr))
         {
             fclose(fp);
             topDDS->Release();
             newSurf->Release();
             nextDDS->Release();
-            return NULL;
+            return nullptr;
         }
 
         /* how big the raw data is for this surface */
@@ -495,9 +494,9 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
             topDDS->Release();
             newSurf->Release();
             nextDDS->Release();
-            return NULL;
+            return nullptr;
         }
-        topDDS->Unlock(NULL);
+        topDDS->Unlock(nullptr);
 
 
         /* Get next mipmap in chain, or exit the loop if there's no more */
@@ -517,10 +516,10 @@ IDirectDrawSurface7* loadDXTC(const char* filename, gxGraphics* gfx)
     return newSurf;
 }
 
-ddSurf* ddUtil::loadSurface(const std::string& f, int flags, gxGraphics* gfx)
+ddSurf* ddUtil::loadSurface(const std::string& f, const int flags, gxGraphics* gfx)
 {
-    int i = f.find(".dds");
-    if (i != string::npos && i + 4 == f.size())
+    const int i = f.find(".dds");
+    if (i != std::string::npos && i + 4 == f.size())
     {
         //dds file!
         ddSurf* surf = loadDXTC(f.c_str(), gfx);
@@ -531,31 +530,31 @@ ddSurf* ddUtil::loadSurface(const std::string& f, int flags, gxGraphics* gfx)
     FREE_IMAGE_FORMAT fmt = FreeImage_GetFileType(f.c_str(), f.size());
     if (fmt == FIF_UNKNOWN)
     {
-        int n = f.find(".");
-        if (n == string::npos) return 0;
+        const int n = f.find(".");
+        if (n == std::string::npos) return nullptr;
         fmt = FreeImage_GetFileTypeFromExt(f.substr(n + 1).c_str());
-        if (fmt == FIF_UNKNOWN) return 0;
+        if (fmt == FIF_UNKNOWN) return nullptr;
     }
     FIBITMAP* t_dib = FreeImage_Load(fmt, f.c_str(), 0);
-    if (!t_dib) return 0;
+    if (!t_dib) return nullptr;
 
-    bool trans = FreeImage_GetBPP(t_dib) == 32 || FreeImage_IsTransparent(t_dib);
+    const bool trans = FreeImage_GetBPP(t_dib) == 32 || FreeImage_IsTransparent(t_dib);
 
     FIBITMAP* dib = FreeImage_ConvertTo32Bits(t_dib);
 
     if (dib) FreeImage_Unload(t_dib);
     else dib = t_dib;
 
-    int width = FreeImage_GetWidth(dib);
-    int height = FreeImage_GetHeight(dib);
-    int pitch = FreeImage_GetPitch(dib);
+    const int width = FreeImage_GetWidth(dib);
+    const int height = FreeImage_GetHeight(dib);
+    const int pitch = FreeImage_GetPitch(dib);
     void* bits = FreeImage_GetBits(dib);
 
     ddSurf* src = ::createSurface(width, height, pitch, bits, gfx->dirDraw);
     if (!src)
     {
         FreeImage_Unload(dib);
-        return 0;
+        return nullptr;
     }
 
     if (flags & gxCanvas::CANVAS_TEX_ALPHA)
@@ -589,7 +588,7 @@ ddSurf* ddUtil::loadSurface(const std::string& f, int flags, gxGraphics* gfx)
     {
         src->Release();
         FreeImage_Unload(dib);
-        return 0;
+        return nullptr;
     }
 
     int t_w = width, t_h = height;

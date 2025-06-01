@@ -2,8 +2,8 @@
 #ifndef PLANEMODEL_H
 #define PLANEMODEL_H
 
-#include "model.h"
 #include "brush.h"
+#include "model.h"
 
 class PlaneModel : public Model {
 public:
@@ -11,15 +11,15 @@ public:
 
     PlaneModel(const PlaneModel &t);
 
-    ~PlaneModel();
+    ~PlaneModel() override;
 
-    Entity *clone() { return d_new PlaneModel(*this); }
+    Entity *clone() override { return d_new PlaneModel(*this); }
 
     //model interface
-    bool render(const RenderContext &rc);
+    bool render(const RenderContext &rc) override;
 
     //object interface
-    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &tf);
+    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &tf) override;
 
     Plane getRenderPlane() const;
 
@@ -28,7 +28,7 @@ private:
 
     Rep *rep;
 
-    virtual PlaneModel *getPlaneModel() { return this; }
+    PlaneModel *getPlaneModel() override { return this; }
 };
 
 #endif

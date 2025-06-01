@@ -1,5 +1,4 @@
 
-#include "std.h"
 #include "entity.h"
 
 //#include "stats.h"
@@ -11,7 +10,8 @@ enum {
     INVALID_WORLDTFORM = 2
 };
 
-void Entity::remove() {
+void Entity::remove() const
+{
     if (_parent) {
         if (_parent->_children == this) _parent->_children = _succ;
         if (_parent->_last_child == this) _parent->_last_child = _pred;
@@ -24,7 +24,7 @@ void Entity::remove() {
 }
 
 void Entity::insert() {
-    _succ = 0;
+    _succ = nullptr;
     if (_parent) {
         if (_pred = _parent->_last_child) _pred->_succ = this;
         else _parent->_children = this;
@@ -37,7 +37,7 @@ void Entity::insert() {
 }
 
 Entity::Entity() :
-        _succ(0), _pred(0), _parent(0), _children(0), _last_child(0),
+        _succ(nullptr), _pred(nullptr), _parent(nullptr), _children(nullptr), _last_child(nullptr),
         _visible(true), _enabled(true),
         local_scl(1, 1, 1),
         invalid(0) {
@@ -45,7 +45,7 @@ Entity::Entity() :
 }
 
 Entity::Entity(const Entity &e) :
-        _succ(0), _pred(0), _parent(0), _children(0), _last_child(0),
+        _succ(nullptr), _pred(nullptr), _parent(nullptr), _children(nullptr), _last_child(nullptr),
         _name(e._name), _visible(e._visible), _enabled(e._enabled),
         local_pos(e.local_pos),
         local_scl(e.local_scl),
@@ -59,7 +59,8 @@ Entity::~Entity() {
     remove();
 }
 
-void Entity::invalidateWorld() {
+void Entity::invalidateWorld() const
+{
     if (invalid & INVALID_WORLDTFORM) return;
     invalid |= INVALID_WORLDTFORM;
     for (Entity *e = _children; e; e = e->_succ) {
@@ -104,19 +105,19 @@ void Entity::setParent(Entity *p) {
     invalidateWorld();
 }
 
-void Entity::setName(const string &t) {
+void Entity::setName(const std::string &t) {
     _name = t;
 }
 
-void Entity::setVisible(bool visible) {
+void Entity::setVisible(const bool visible) {
     _visible = visible;
 }
 
-void Entity::setEnabled(bool enabled) {
+void Entity::setEnabled(const bool enabled) {
     _enabled = enabled;
 }
 
-void Entity::enumVisible(vector<Object *> &out) {
+void Entity::enumVisible(std::vector<Object *> &out) {
     if (!_visible) return;
     if (Object *o = getObject()) out.push_back(o);
     for (Entity *e = _children; e; e = e->_succ) {
@@ -124,7 +125,7 @@ void Entity::enumVisible(vector<Object *> &out) {
     }
 }
 
-void Entity::enumEnabled(vector<Object *> &out) {
+void Entity::enumEnabled(std::vector<Object *> &out) {
     if (!_enabled) return;
     if (Object *o = getObject()) out.push_back(o);
     for (Entity *e = _children; e; e = e->_succ) {

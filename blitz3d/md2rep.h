@@ -10,23 +10,23 @@ public:
         Vector coords, normal;
     };
 
-    MD2Rep(const string &f);
+    MD2Rep(const std::string &f);
 
     virtual ~MD2Rep();
 
     void render(Vert *verts, int frame);
 
-    void render(Vert *verts, int frame, float time);
+    void render(Vert *verts, int frame, float time) const;
 
-    void render(Vert *verts, int frame_a, int frame_b, float time);
+    void render(Vert *verts, int frame_a, int frame_b, float time) const;
 
     void render(Vert *verts, const Vert *verts_a, const Vert *verts_b, float time);
 
-    void render(Model *model, int frame_a, int frame_b, float time);
+    void render(Model *model, int frame_a, int frame_b, float time) const;
 
     void render(Model *model, const Vert *verts_a, const Vert *verts_b, float time);
 
-    void render(Model *model, const Vert *verts_a, int frame_b, float time);
+    void render(Model *model, const Vert *verts_a, int frame_b, float time) const;
 
     const Box &getBox() const { return box; }
 
@@ -45,15 +45,15 @@ private:
 
     struct Frame {
         Vector scale, trans;
-        vector<Vertex> verts;
+        std::vector<Vertex> verts;
     };
 
     Box box;
     gxMesh *mesh;
     int n_frames;
     int n_verts, n_tris;
-    vector<Frame> frames;
-    vector<VertexUV> uvs;
+    std::vector<Frame> frames;
+    std::vector<VertexUV> uvs;
 };
 
 #endif

@@ -6,8 +6,6 @@
 
 #include "cachedtexture.h"
 
-#include "../gxruntime/gxcanvas.h"
-
 class Texture {
 public:
     Texture();
@@ -24,15 +22,15 @@ public:
 
     Texture &operator=(const Texture &texture);
 
-    void setScale(float u_scale, float v_scale);
+    void setScale(float u_scale, float v_scale) const;
 
-    void setRotation(float rot);
+    void setRotation(float rot) const;
 
-    void setPosition(float u_pos, float v_pos);
+    void setPosition(float u_pos, float v_pos) const;
 
-    void setBlend(int blend);
+    void setBlend(int blend) const;
 
-    void setFlags(int flags);
+    void setFlags(int flags) const;
 
     int getCanvasFlags() const;
 

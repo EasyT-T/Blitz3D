@@ -1,9 +1,8 @@
-#include "std.h"
 #include "gxfont.h"
 #include "gxcanvas.h"
 #include "gxgraphics.h"
 
-gxFont::gxFont(gxGraphics* g, gxCanvas* c, int w, int h, int b, int e, int d, int* os, int* ws):
+gxFont::gxFont(gxGraphics* g, gxCanvas* c, const int w, const int h, const int b, const int e, const int d, int* os, int* ws):
     graphics(g), canvas(c),
     width(w), height(h), begin_char(b), end_char(e), def_char(d),
     offs(os), widths(ws)
@@ -26,9 +25,9 @@ int gxFont::charWidth(int c) const
     return widths[c - begin_char];
 }
 
-void gxFont::render(gxCanvas* dest, unsigned color_argb, int x, int y, const string& t)
+void gxFont::render(gxCanvas* dest, const unsigned color_argb, const int x, const int y, const std::string& t)
 {
-    int width = getWidth(t);
+    const int width = getWidth(t);
     if (width > t_canvas->getWidth())
     {
         graphics->freeCanvas(t_canvas);
@@ -63,7 +62,7 @@ int gxFont::getHeight() const
     return height;
 }
 
-int gxFont::getWidth(const string& t) const
+int gxFont::getWidth(const std::string& t) const
 {
     int w = 0;
     for (int k = 0; k < t.size(); ++k)
@@ -75,7 +74,7 @@ int gxFont::getWidth(const string& t) const
     return w;
 }
 
-bool gxFont::isPrintable(int chr) const
+bool gxFont::isPrintable(const int chr) const
 {
     return chr >= begin_char && chr < end_char;
 }

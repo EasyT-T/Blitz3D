@@ -1,7 +1,7 @@
 
-#include "std.h"
 #include "meshloader.h"
 #include "meshmodel.h"
+#include "std.h"
 
 struct Surf {
     vector<Surface::Triangle> tris;
@@ -11,8 +11,7 @@ static map<Brush, Surf *> brush_map;
 static vector<Surface::Vertex> verts;
 
 void MeshLoader::clear() {
-    map<Brush, Surf *>::const_iterator it;
-    for (it = brush_map.begin(); it != brush_map.end(); ++it) {
+    for (map<Brush, Surf*>::const_iterator it = brush_map.begin(); it != brush_map.end(); ++it) {
         delete it->second;
     }
     brush_map.clear();
@@ -27,7 +26,7 @@ void MeshLoader::addVertex(const Surface::Vertex &v) {
     verts.push_back(v);
 }
 
-Surface::Vertex &refVertex(int n) {
+Surface::Vertex &refVertex(const int n) {
     return verts[n];
 }
 
@@ -35,10 +34,10 @@ void MeshLoader::addTriangle(const int verts[3], const Brush &b) {
     addTriangle(verts[0], verts[1], verts[2], b);
 }
 
-void MeshLoader::addTriangle(int v0, int v1, int v2, const Brush &b) {
+void MeshLoader::addTriangle(const int v0, const int v1, const int v2, const Brush &b) {
     //find surface
     Surf *surf;
-    map<Brush, Surf *>::const_iterator it = brush_map.find(b);
+    const map<Brush, Surf *>::const_iterator it = brush_map.find(b);
     if (it != brush_map.end()) surf = it->second;
     else {
         surf = d_new Surf;
@@ -54,8 +53,7 @@ void MeshLoader::addTriangle(int v0, int v1, int v2, const Brush &b) {
 
 void MeshLoader::updateMesh(MeshModel *mesh) {
     map<int, int> vert_map;
-    map<Brush, Surf *>::iterator it;
-    for (it = brush_map.begin(); it != brush_map.end(); ++it) {
+    for (map<Brush, Surf*>::iterator it = brush_map.begin(); it != brush_map.end(); ++it) {
         vert_map.clear();
         Brush b = it->first;
         Surf *t = it->second;

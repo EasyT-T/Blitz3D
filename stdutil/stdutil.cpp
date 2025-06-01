@@ -1,12 +1,10 @@
 
 #include "stdutil.h"
 
-#include <set>
 #include <math.h>
+#include <set>
 #include <stdlib.h>
 #include <windows.h>
-
-using namespace std;
 
 #ifdef MEMDEBUG
 
@@ -130,23 +128,23 @@ void _cdecl operator delete[]( void *q,const char *file,int line ){ op_delete( q
 void trackmem(bool enable) {
 }
 
-void checkmem(ostream &out) {
+void checkmem(std::ostream &out) {
 }
 
 #endif
 
-int atoi(const string &s) {
+int atoi(const std::string &s) {
     return atoi(s.c_str());
 }
 
-double atof(const string &s) {
+double atof(const std::string &s) {
     return atof(s.c_str());
 }
 
-string itoa(int n) {
+std::string itoa(const int n) {
     char buff[32];
     itoa(n, buff, 10);
-    return string(buff);
+    return std::string(buff);
 }
 
 /*
@@ -187,14 +185,13 @@ static int _isnan( double n ){		// definition: exponent 2047, nonzero fraction.
 /////////////
 //By FLOYD!//
 /////////////
-string ftoa(float n) {
+std::string ftoa(const float n) {
 
     static const int digits = 6;
 
     int eNeg = -4, ePos = 8;    // limits for e notation.
 
     char buffer[50]; // from MSDN example, 25 would probably suffice
-    string t;
     int dec, sign;
 
     if (_finite(n)) {
@@ -202,7 +199,7 @@ string ftoa(float n) {
 //		if ( digits < 1 ) digits = 1;	// less than one digit is nonsense
 //		if ( digits > 8 ) digits = 8;	// practical maximum for float
 
-        t = _ecvt(n, digits, &dec, &sign);
+        std::string t = _ecvt(n, digits, &dec, &sign);
 
         if (dec <= eNeg + 1 || dec > ePos) {
 
@@ -216,7 +213,7 @@ string ftoa(float n) {
 
         if (dec <= 0) {
 
-            t = "0." + string(-dec, '0') + t;
+            t = "0." + std::string(-dec, '0') + t;
             dec = 1;    // new location for decimal point
 
         } else if (dec < digits) {
@@ -225,7 +222,7 @@ string ftoa(float n) {
 
         } else {
 
-            t = t + string(dec - digits, '0') + ".0";
+            t = t + std::string(dec - digits, '0') + ".0";
             dec += dec - digits;
 
         }
@@ -234,7 +231,7 @@ string ftoa(float n) {
 
         int dp1 = dec + 1, p = t.length();
         while (--p > dp1 && t[p] == '0');
-        t = string(t, 0, ++p);
+        t = std::string(t, 0, ++p);
 
         return sign ? "-" + t : t;
 
@@ -284,37 +281,37 @@ string ftoa( float n ){
 }
 */
 
-string tolower(const string &s) {
-    string t = s;
+std::string tolower(const std::string &s) {
+    std::string t = s;
     for (int k = 0; k < t.size(); ++k) t[k] = tolower(t[k]);
     return t;
 }
 
-string toupper(const string &s) {
-    string t = s;
+std::string toupper(const std::string &s) {
+    std::string t = s;
     for (int k = 0; k < t.size(); ++k) t[k] = toupper(t[k]);
     return t;
 }
 
-string fullfilename(const string &t) {
+std::string fullfilename(const std::string &t) {
     char buff[MAX_PATH + 1], *p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
-    return string(buff);
+    return std::string(buff);
 }
 
-string filenamepath(const string &t) {
+std::string filenamepath(const std::string &t) {
     char buff[MAX_PATH + 1], *p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
     if (!p) return "";
     *p = 0;
-    return string(buff);
+    return std::string(buff);
 }
 
-string filenamefile(const string &t) {
+std::string filenamefile(const std::string &t) {
     char buff[MAX_PATH + 1], *p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
     if (!p) return "";
-    return string(p);
+    return std::string(p);
 }
 
 const int MIN_SIZE = 256;
@@ -329,11 +326,13 @@ qstreambuf::~qstreambuf() {
     delete buf;
 }
 
-int qstreambuf::size() {
+int qstreambuf::size() const
+{
     return pptr() - gptr();
 }
 
-char *qstreambuf::data() {
+char *qstreambuf::data() const
+{
     return gptr();
 }
 
@@ -346,11 +345,11 @@ qstreambuf::int_type qstreambuf::underflow() {
     return traits_type::to_int_type(*gptr());
 }
 
-qstreambuf::int_type qstreambuf::overflow(qstreambuf::int_type c) {
+qstreambuf::int_type qstreambuf::overflow(const qstreambuf::int_type c) {
     if (c == traits_type::eof()) return c;
 
     if (pptr() == epptr()) {
-        int sz = size();
+        const int sz = size();
         int n_sz = sz * 2;
         if (n_sz < MIN_SIZE) n_sz = MIN_SIZE;
         char *n_buf = d_new char[n_sz];

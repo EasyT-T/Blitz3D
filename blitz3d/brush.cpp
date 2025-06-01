@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "brush.h"
+#include "std.h"
 
 #include "../gxruntime/gxgraphics.h"
 
@@ -33,7 +33,7 @@ struct Brush::Rep {
         if (!pool) {
             pool = new Rep[GROW];
             for (int k = 0; k < GROW - 1; ++k) pool[k].next = &pool[k + 1];
-            pool[GROW - 1].next = 0;
+            pool[GROW - 1].next = nullptr;
         }
         Rep *p = pool;
         pool = p->next;
@@ -101,31 +101,37 @@ Brush::Rep *Brush::write() const {
     return rep;
 }
 
-void Brush::setColor(const Vector &color) {
+void Brush::setColor(const Vector &color) const
+{
     *(Vector *) write()->rs.color = color;
 }
 
-void Brush::setAlpha(float alpha) {
-    float a = rep->rs.alpha;
+void Brush::setAlpha(const float alpha) const
+{
+    const float a = rep->rs.alpha;
     write()->rs.alpha = alpha;
     if ((a < 1) != (alpha < 1)) rep->blend_valid = false;
 }
 
-void Brush::setShininess(float n) {
+void Brush::setShininess(const float n) const
+{
     write()->rs.shininess = n;
 }
 
-void Brush::setBlend(int blend) {
+void Brush::setBlend(const int blend) const
+{
     write()->blend = blend;
     rep->blend_valid = false;
 }
 
-void Brush::setFX(int fx) {
+void Brush::setFX(const int fx) const
+{
     write()->rs.fx = fx;
     rep->blend_valid = false;
 }
 
-void Brush::setTexture(int index, const Texture &t, int n) {
+void Brush::setTexture(const int index, const Texture &t, const int n) const
+{
     write();
     gxScene::RenderState &rs = rep->rs;
 
@@ -195,7 +201,7 @@ int Brush::getFX() const {
     return rep->rs.fx;
 }
 
-Texture Brush::getTexture(int index) const {
+Texture Brush::getTexture(const int index) const {
     return rep->texs[index];
 }
 

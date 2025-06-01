@@ -1,6 +1,8 @@
 #ifndef GXTIMER_H
 #define GXTIMER_H
 
+#include "std.h"
+
 class gxRuntime;
 
 class gxTimer

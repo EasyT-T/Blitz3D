@@ -10,12 +10,12 @@ public:
 
     Mirror(const Mirror &t);
 
-    ~Mirror();
+    ~Mirror() override;
 
     //Entity interface
-    Entity *clone() { return d_new Mirror(*this); }
+    Entity *clone() override { return d_new Mirror(*this); }
 
-    Mirror *getMirror() { return this; }
+    Mirror *getMirror() override { return this; }
 };
 
 #endif

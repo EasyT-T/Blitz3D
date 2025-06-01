@@ -1,5 +1,3 @@
-
-#include "std.h"
 #include "cachedtexture.h"
 
 int active_texs;
@@ -7,17 +5,17 @@ int active_texs;
 extern gxRuntime *gx_runtime;
 extern gxGraphics *gx_graphics;
 
-set<CachedTexture::Rep *> CachedTexture::rep_set;
+std::set<CachedTexture::Rep *> CachedTexture::rep_set;
 
-static string path;
+static std::string path;
 
 struct CachedTexture::Rep {
     int ref_cnt;
-    string file;
+    std::string file;
     int flags, w, h, first;
-    vector<gxCanvas *> frames;
+    std::vector<gxCanvas *> frames;
 
-    Rep(int w, int h, int flags, int cnt) :
+    Rep(const int w, const int h, const int flags, int cnt) :
             ref_cnt(1), flags(flags), w(w), h(h), first(0) {
         ++active_texs;
         while (cnt-- > 0) {
@@ -27,7 +25,7 @@ struct CachedTexture::Rep {
         }
     }
 
-    Rep(const string &f, int flags, int w, int h, int first, int cnt) :
+    Rep(const std::string &f, const int flags, int w, int h, int first, int cnt) :
             ref_cnt(1), file(f), flags(flags), w(w), h(h), first(first) {
         ++active_texs;
         if (!(flags & gxCanvas::CANVAS_TEX_CUBE)) {
@@ -40,7 +38,7 @@ struct CachedTexture::Rep {
             }
         }
 
-        int t_flags = flags & (
+        const int t_flags = flags & (
                 gxCanvas::CANVAS_TEX_RGB |
                 gxCanvas::CANVAS_TEX_ALPHA |
                 gxCanvas::CANVAS_TEX_MASK |
@@ -54,9 +52,9 @@ struct CachedTexture::Rep {
         }
 
         if (flags & gxCanvas::CANVAS_TEX_CUBE) {
-            int w = t->getWidth() / 6;
+            const int w = t->getWidth() / 6;
             if (w * 6 != t->getWidth()) return;
-            int h = t->getHeight();
+            const int h = t->getHeight();
 
             gxCanvas *tex = gx_graphics->createCanvas(w, h, flags);
             if (tex) {
@@ -69,8 +67,8 @@ struct CachedTexture::Rep {
                 tex->setCubeFace(1);
             }
         } else {
-            int x_tiles = t->getWidth() / w;
-            int y_tiles = t->getHeight() / h;
+            const int x_tiles = t->getWidth() / w;
+            const int y_tiles = t->getHeight() / h;
             if (first + cnt > x_tiles * y_tiles) {
                 gx_graphics->freeCanvas(t);
                 return;
@@ -97,9 +95,8 @@ struct CachedTexture::Rep {
     }
 };
 
-CachedTexture::Rep *CachedTexture::findRep(const string &f, int flags, int w, int h, int first, int cnt) {
-    set<Rep *>::const_iterator it;
-    for (it = rep_set.begin(); it != rep_set.end(); ++it) {
+CachedTexture::Rep *CachedTexture::findRep(const std::string &f, const int flags, const int w, const int h, const int first, const int cnt) {
+    for (std::set<Rep*>::const_iterator it = rep_set.begin(); it != rep_set.end(); ++it) {
         Rep *rep = *it;
         if (rep->file == f && rep->flags == flags && rep->w == w && rep->h == h && rep->first == first &&
             rep->frames.size() == cnt) {
@@ -107,18 +104,18 @@ CachedTexture::Rep *CachedTexture::findRep(const string &f, int flags, int w, in
             return rep;
         }
     }
-    return 0;
+    return nullptr;
 }
 
-CachedTexture::CachedTexture(int w, int h, int flags, int cnt) :
+CachedTexture::CachedTexture(const int w, const int h, const int flags, const int cnt) :
         rep(d_new Rep(w, h, flags, cnt)) {
 }
 
-CachedTexture::CachedTexture(const string &f_, int flags, int w, int h, int first, int cnt) {
-    string f = f_;
+CachedTexture::CachedTexture(const std::string &f_, const int flags, const int w, const int h, const int first, const int cnt) {
+    std::string f = f_;
     if (f.substr(0, 2) == ".\\") f = f.substr(2);
     if (path.size()) {
-        string t = path + tolower(filenamefile(f));
+        const std::string t = path + tolower(filenamefile(f));
         if (rep = findRep(t, flags, w, h, first, cnt)) return;
         rep = d_new Rep(t, flags, w, h, first, cnt);
         if (rep->frames.size()) {
@@ -127,7 +124,7 @@ CachedTexture::CachedTexture(const string &f_, int flags, int w, int h, int firs
         }
         delete rep;
     }
-    string t = tolower(fullfilename(f));
+    const std::string t = tolower(fullfilename(f));
     if (rep = findRep(t, flags, w, h, first, cnt)) return;
     rep = d_new Rep(t, flags, w, h, first, cnt);
     rep_set.insert(rep);
@@ -155,17 +152,17 @@ CachedTexture &CachedTexture::operator=(const CachedTexture &t) {
     return *this;
 }
 
-string CachedTexture::getName() const {
+std::string CachedTexture::getName() const {
     return rep->file;
 }
 
-const vector<gxCanvas *> &CachedTexture::getFrames() const {
+const std::vector<gxCanvas *> &CachedTexture::getFrames() const {
     return rep->frames;
 }
 
-void CachedTexture::setPath(const string &t) {
+void CachedTexture::setPath(const std::string &t) {
     path = tolower(t);
-    if (int sz = path.size()) {
+    if (const int sz = path.size()) {
         if (path[sz - 1] != '/' && path[sz - 1] != '\\') path += '\\';
     }
 }

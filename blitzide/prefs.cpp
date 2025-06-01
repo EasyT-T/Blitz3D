@@ -1,18 +1,16 @@
 
 #include "prefs.h"
 
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 
 #define SWAPRB(x) ( (((x)>>16)&0xff) | ((x)&0xff00) | (((x)&0xff)<<16) )
-
-using namespace std;
 
 Prefs prefs;
 
 void Prefs::open() {
 
-    char *p = getenv("blitzpath");
+    const char *p = getenv("blitzpath");
     if (!p) {
         AfxMessageBox("blitzpath environment variable not found!", MB_TOPMOST | MB_SETFOREGROUND | MB_ICONINFORMATION);
         ExitProcess(0);
@@ -26,11 +24,11 @@ void Prefs::open() {
 
     bool prg_windowed;
 
-    ifstream in((homeDir + "/cfg/blitzide.prefs").c_str());
+    std::ifstream in((homeDir + "/cfg/blitzide.prefs").c_str());
     if (!in.good()) return;
 
     while (!in.eof()) {
-        string t;
+        std::string t;
         in >> t;
         if (!t.size()) continue;
         while (in.peek() == '\t') in.ignore();
@@ -45,7 +43,7 @@ void Prefs::open() {
             in >> win_rect.right;
             in >> win_rect.bottom;
         } else if (t.substr(0, 5) == "font_") {
-            string s;
+            std::string s;
             if (in.peek() == '\"') {
                 in.ignore();
                 while (in.peek() != '\"') s += (char) in.get();
@@ -72,11 +70,11 @@ void Prefs::open() {
             }
         } else if (t.substr(0, 4) == "rgb_") {
             t = t.substr(4);
-            string s;
+            std::string s;
             in >> s;
             int rgb = 0;
             for (int k = 0; k < s.size(); ++k) {
-                int n = s[k];
+                const int n = s[k];
                 rgb = (rgb << 4) | (n <= '9' ? n - '0' : (n & 31) + 9);
             }
             rgb = SWAPRB(rgb);
@@ -99,11 +97,11 @@ void Prefs::open() {
         } else if (t == "cmd_line") {
             getline(in, cmd_line);
         } else if (t == "file_recent") {
-            string l;
+            std::string l;
             getline(in, l);
             if (recentFiles.size() < 10) recentFiles.push_back(l);
         } else {
-            string s = "Unrecognized option '" + t + "' in blitzide.prefs";
+            std::string s = "Unrecognized option '" + t + "' in blitzide.prefs";
             AfxMessageBox("Error in preferences file");
             setDefault();
             return;
@@ -112,37 +110,37 @@ void Prefs::open() {
     createFonts();
 }
 
-void Prefs::close() {
-
-    ofstream out((homeDir + "/cfg/blitzide.prefs").c_str());
+void Prefs::close() const
+{
+    std::ofstream out((homeDir + "/cfg/blitzide.prefs").c_str());
     if (!out.good()) return;
 
-    out << "prg_debug\t" << prg_debug << endl;
-    out << "prg_lastbuild\t" << prg_lastbuild << endl;
-    out << "win_maximized\t" << win_maximized << endl;
-    out << "win_notoolbar\t" << win_notoolbar << endl;
+    out << "prg_debug\t" << prg_debug << std::endl;
+    out << "prg_lastbuild\t" << prg_lastbuild << std::endl;
+    out << "win_maximized\t" << win_maximized << std::endl;
+    out << "win_notoolbar\t" << win_notoolbar << std::endl;
     out << "win_rect\t" << win_rect.left << ' ' << win_rect.top << ' ' << win_rect.right << ' ' << win_rect.bottom
-        << endl;
-    out << "font_editor\t\"" << font_editor << "\" " << font_editor_height << endl;
-    out << "font_tabs\t\"" << font_tabs << "\" " << font_tabs_height << endl;
-    out << "font_debug\t\"" << font_debug << "\" " << font_debug_height << endl;
-    out << "font_window\t\"" << font_window << "\" " << font_window_height << endl;
-    out << hex;
-    out << "rgb_bkgrnd\t" << SWAPRB(rgb_bkgrnd) << endl;
-    out << "rgb_string\t" << SWAPRB(rgb_string) << endl;
-    out << "rgb_ident\t" << SWAPRB(rgb_ident) << endl;
-    out << "rgb_keyword\t" << SWAPRB(rgb_keyword) << endl;
-    out << "rgb_comment\t" << SWAPRB(rgb_comment) << endl;
-    out << "rgb_digit\t" << SWAPRB(rgb_digit) << endl;
-    out << "rgb_default\t" << SWAPRB(rgb_default) << endl;
-    out << dec;
-    out << "edit_tabs\t" << edit_tabs << endl;
-    out << "edit_blkcursor\t" << edit_blkcursor << endl;
-    out << "edit_backup\t" << edit_backup << endl;
-    out << "img_toolbar\t" << img_toolbar << endl;
-    out << "cmd_line\t" << cmd_line << endl;
+        << std::endl;
+    out << "font_editor\t\"" << font_editor << "\" " << font_editor_height << std::endl;
+    out << "font_tabs\t\"" << font_tabs << "\" " << font_tabs_height << std::endl;
+    out << "font_debug\t\"" << font_debug << "\" " << font_debug_height << std::endl;
+    out << "font_window\t\"" << font_window << "\" " << font_window_height << std::endl;
+    out << std::hex;
+    out << "rgb_bkgrnd\t" << SWAPRB(rgb_bkgrnd) << std::endl;
+    out << "rgb_string\t" << SWAPRB(rgb_string) << std::endl;
+    out << "rgb_ident\t" << SWAPRB(rgb_ident) << std::endl;
+    out << "rgb_keyword\t" << SWAPRB(rgb_keyword) << std::endl;
+    out << "rgb_comment\t" << SWAPRB(rgb_comment) << std::endl;
+    out << "rgb_digit\t" << SWAPRB(rgb_digit) << std::endl;
+    out << "rgb_default\t" << SWAPRB(rgb_default) << std::endl;
+    out << std::dec;
+    out << "edit_tabs\t" << edit_tabs << std::endl;
+    out << "edit_blkcursor\t" << edit_blkcursor << std::endl;
+    out << "edit_backup\t" << edit_backup << std::endl;
+    out << "img_toolbar\t" << img_toolbar << std::endl;
+    out << "cmd_line\t" << cmd_line << std::endl;
     for (int k = 0; k < recentFiles.size(); ++k) {
-        out << "file_recent\t" << recentFiles[k] << endl;
+        out << "file_recent\t" << recentFiles[k] << std::endl;
     }
 
     RemoveFontResource((homeDir + "/cfg/blitz.fon").c_str());
@@ -151,10 +149,10 @@ void Prefs::close() {
 void Prefs::setDefault() {
     RECT r;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-    auto dw = r.right - r.left;
-    auto dh = r.bottom - r.top;
-    auto w = dw / 2;
-    auto h = dh * 3 / 4;
+    const auto dw = r.right - r.left;
+    const auto dh = r.bottom - r.top;
+    const auto w = dw / 2;
+    const auto h = dh * 3 / 4;
     win_rect.left = r.left + (dw - w) / 2;
     win_rect.top = r.top + (dh - h) / 2;
     win_rect.right = win_rect.left + w;

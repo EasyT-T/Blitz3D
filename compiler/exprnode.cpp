@@ -1,8 +1,6 @@
 
-#include "std.h"
-#include "nodes.h"
+#include "exprnode.h"
 
-#include <math.h>
 #include <float.h>
 
 //////////////////////////////////
@@ -42,11 +40,11 @@ TNode *CastNode::translate(Codegen *g) {
     TNode *t = expr->translate(g);
     if (expr->sem_type == Type::float_type && sem_type == Type::int_type) {
         //float->int
-        return d_new TNode(IR_CAST, t, 0);
+        return d_new TNode(IR_CAST, t, nullptr);
     }
     if (expr->sem_type == Type::int_type && sem_type == Type::float_type) {
         //int->float
-        return d_new TNode(IR_FCAST, t, 0);
+        return d_new TNode(IR_FCAST, t, nullptr);
     }
     if (expr->sem_type == Type::string_type && sem_type == Type::int_type) {
         //str->int
@@ -80,8 +78,8 @@ void ExprSeqNode::semant(Environ *e) {
     }
 }
 
-TNode *ExprSeqNode::translate(Codegen *g, bool cfunc) {
-    TNode *t = 0, *l = 0;
+TNode *ExprSeqNode::translate(Codegen *g, const bool cfunc) {
+    TNode *t = nullptr, *l = nullptr;
     for (int k = 0; k < exprs.size(); ++k) {
 
         TNode *q = exprs[k]->translate(g);
@@ -97,11 +95,10 @@ TNode *ExprSeqNode::translate(Codegen *g, bool cfunc) {
             }
         }
 
-        TNode *p;
-        p = d_new TNode(IR_ARG, 0, 0, k * 4);
-        p = d_new TNode(IR_MEM, p, 0);
+        TNode* p = d_new TNode(IR_ARG, nullptr, nullptr, k * 4);
+        p = d_new TNode(IR_MEM, p, nullptr);
         p = d_new TNode(IR_MOVE, q, p);
-        p = d_new TNode(IR_SEQ, p, 0);
+        p = d_new TNode(IR_SEQ, p, nullptr);
         if (l) l->r = p;
         else t = p;
         l = p;
@@ -109,10 +106,10 @@ TNode *ExprSeqNode::translate(Codegen *g, bool cfunc) {
     return t;
 }
 
-void ExprSeqNode::castTo(DeclSeq *decls, Environ *e, bool cfunc) {
+void ExprSeqNode::castTo(DeclSeq *decls, Environ *e, const bool cfunc) {
     if (exprs.size() > decls->size()) ex("Too many parameters");
     for (int k = 0; k < decls->size(); ++k) {
-        Decl *d = decls->decls[k];
+        const Decl *d = decls->decls[k];
         if (k < exprs.size() && exprs[k]) {
 
             if (cfunc && d->type->structType()) {
@@ -146,10 +143,10 @@ void ExprSeqNode::castTo(Type *t, Environ *e) {
 // Function call //
 ///////////////////
 ExprNode *CallNode::semant(Environ *e) {
-    Type *t = e->findType(tag);
+    const Type *t = e->findType(tag);
     sem_decl = e->findFunc(ident);
     if (!sem_decl || !(sem_decl->kind & DECL_FUNC)) ex("Function '" + ident + "' not found");
-    FuncType *f = sem_decl->type->funcType();
+    const FuncType *f = sem_decl->type->funcType();
     if (t && f->returnType != t) ex("incorrect function return type");
     exprs->semant(e);
     exprs->castTo(f->params, e, f->cfunc);
@@ -159,7 +156,7 @@ ExprNode *CallNode::semant(Environ *e) {
 
 TNode *CallNode::translate(Codegen *g) {
 
-    FuncType *f = sem_decl->type->funcType();
+    const FuncType *f = sem_decl->type->funcType();
 
     TNode *t;
     TNode *l = global("_f" + ident);
@@ -204,12 +201,12 @@ TNode *VarExprNode::translate(Codegen *g) {
 //////////////////////
 // Integer constant //
 //////////////////////
-IntConstNode::IntConstNode(int n) : value(n) {
+IntConstNode::IntConstNode(const int n) : value(n) {
     sem_type = Type::int_type;
 }
 
 TNode *IntConstNode::translate(Codegen *g) {
-    return d_new TNode(IR_CONST, 0, 0, value);
+    return d_new TNode(IR_CONST, nullptr, nullptr, value);
 }
 
 int IntConstNode::intValue() {
@@ -220,19 +217,19 @@ float IntConstNode::floatValue() {
     return value;
 }
 
-string IntConstNode::stringValue() {
+std::string IntConstNode::stringValue() {
     return itoa(value);
 }
 
 ////////////////////
 // Float constant //
 ////////////////////
-FloatConstNode::FloatConstNode(float f) : value(f) {
+FloatConstNode::FloatConstNode(const float f) : value(f) {
     sem_type = Type::float_type;
 }
 
 TNode *FloatConstNode::translate(Codegen *g) {
-    return d_new TNode(IR_CONST, 0, 0, *(int *) &value);
+    return d_new TNode(IR_CONST, nullptr, nullptr, *(int *) &value);
 }
 
 int FloatConstNode::intValue() {
@@ -252,19 +249,19 @@ float FloatConstNode::floatValue() {
     return value;
 }
 
-string FloatConstNode::stringValue() {
+std::string FloatConstNode::stringValue() {
     return ftoa(value);
 }
 
 /////////////////////
 // String constant //
 /////////////////////
-StringConstNode::StringConstNode(const string &s) : value(s) {
+StringConstNode::StringConstNode(const std::string &s) : value(s) {
     sem_type = Type::string_type;
 }
 
 TNode *StringConstNode::translate(Codegen *g) {
-    string lab = genLabel();
+    const std::string lab = genLabel();
     g->s_data(value, lab);
     return call("__bbStrConst", global(lab));
 }
@@ -277,7 +274,7 @@ float StringConstNode::floatValue() {
     return (float) atof(value);
 }
 
-string StringConstNode::stringValue() {
+std::string StringConstNode::stringValue() {
     return value;
 }
 
@@ -355,7 +352,7 @@ TNode *UniExprNode::translate(Codegen *g) {
                 return fcall("__bbFSgn", l);
         }
     }
-    return d_new TNode(n, l, 0);
+    return d_new TNode(n, l, nullptr);
 }
 
 /////////////////////////////////////////////////////
@@ -652,7 +649,7 @@ TNode *RelExprNode::translate(Codegen *g) {
 ExprNode *NewNode::semant(Environ *e) {
     sem_type = e->findType(ident);
     if (!sem_type) ex("custom type name not found");
-    if (sem_type->structType() == 0) ex("type is not a custom type");
+    if (sem_type->structType() == nullptr) ex("type is not a custom type");
     return this;
 }
 
@@ -692,7 +689,7 @@ TNode *LastNode::translate(Codegen *g) {
 ExprNode *AfterNode::semant(Environ *e) {
     expr = expr->semant(e);
     if (expr->sem_type == Type::null_type) ex("'After' cannot be used on 'Null'");
-    if (expr->sem_type->structType() == 0) ex("'After' must be used with a custom type object");
+    if (expr->sem_type->structType() == nullptr) ex("'After' must be used with a custom type object");
     sem_type = expr->sem_type;
     return this;
 }
@@ -709,7 +706,7 @@ TNode *AfterNode::translate(Codegen *g) {
 ExprNode *BeforeNode::semant(Environ *e) {
     expr = expr->semant(e);
     if (expr->sem_type == Type::null_type) ex("'Before' cannot be used with 'Null'");
-    if (expr->sem_type->structType() == 0) ex("'Before' must be used with a custom type object");
+    if (expr->sem_type->structType() == nullptr) ex("'Before' must be used with a custom type object");
     sem_type = expr->sem_type;
     return this;
 }
@@ -729,7 +726,7 @@ ExprNode *NullNode::semant(Environ *e) {
 }
 
 TNode *NullNode::translate(Codegen *g) {
-    return d_new TNode(IR_CONST, 0, 0, 0);
+    return d_new TNode(IR_CONST, nullptr, nullptr, 0);
 }
 
 /////////////////

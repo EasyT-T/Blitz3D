@@ -1,4 +1,3 @@
-#include "std.h"
 #include "gxscene.h"
 #include "gxgraphics.h"
 #include "gxruntime.h"
@@ -10,14 +9,14 @@ static float WHITE[] = {1, 1, 1};
 static float GRAY[] = {.5f, .5f, .5f};
 static D3DMATRIX sphere_mat, nullmatrix;
 
-void gxScene::setRS(int n, int t)
+void gxScene::setRS(int n, const int t)
 {
     if (d3d_rs[n] == t) return;
     dir3dDev->SetRenderState((D3DRENDERSTATETYPE)n, t);
     d3d_rs[n] = t;
 }
 
-void gxScene::setTSS(int n, int s, int t)
+void gxScene::setTSS(const int n, int s, const int t)
 {
     if (d3d_tss[n][s] == t) return;
     dir3dDev->SetTextureStageState(n, (D3DTEXTURESTAGESTATETYPE)s, t);
@@ -56,7 +55,7 @@ gxScene::gxScene(gxGraphics* g, gxCanvas* t):
     D3DDEVICEDESC7 devDesc = {0};
     if (dir3dDev->GetCaps(&devDesc) >= 0)
     {
-        DWORD caps = devDesc.dpcTriCaps.dwRasterCaps;
+        const DWORD caps = devDesc.dpcTriCaps.dwRasterCaps;
         //texture stages
         hw_tex_stages = devDesc.wMaxSimultaneousTextures;
         //depth buffer mode
@@ -143,9 +142,9 @@ gxScene::gxScene(gxGraphics* g, gxCanvas* t):
     viewport.dvMaxZ = 1;
     setViewport(0, 0, target->getWidth(), target->getHeight());
     viewmatrix = nullmatrix;
-    setViewMatrix(0);
+    setViewMatrix(nullptr);
     worldmatrix = nullmatrix;
-    setWorldMatrix(0);
+    setWorldMatrix(nullptr);
 
     //set default renderstate
     blend = fx = ~0;
@@ -162,10 +161,10 @@ gxScene::~gxScene()
     while (_allLights.size()) freeLight(*_allLights.begin());
 }
 
-void gxScene::setTexState(int n, const TexState& state, bool tex_blend)
+void gxScene::setTexState(const int n, const TexState& state, const bool tex_blend)
 {
-    int flags = state.canvas->getFlags();
-    int tc_index = state.flags & TEX_COORDS2 ? 1 : 0;
+    const int flags = state.canvas->getFlags();
+    const int tc_index = state.flags & TEX_COORDS2 ? 1 : 0;
 
     //set canvas
     dir3dDev->SetTexture(n, state.canvas->getTexSurface());
@@ -252,7 +251,7 @@ int gxScene::hwTexUnits()
     return tex_stages;
 }
 
-int gxScene::gfxDriverCaps3D()
+int gxScene::gfxDriverCaps3D() const
 {
     return caps_level;
 }
@@ -276,7 +275,7 @@ void gxScene::setZMode()
     }
 }
 
-void gxScene::setLights()
+void gxScene::setLights() const
 {
     if (fx & FX_FULLBRIGHT)
     {
@@ -288,8 +287,8 @@ void gxScene::setLights()
         //some lights on
         for (int n = 0; n < _curLights.size(); ++n)
         {
-            gxLight* light = _curLights[n];
-            bool enable = light->d3d_light.dltType != D3DLIGHT_DIRECTIONAL;
+            const gxLight* light = _curLights[n];
+            const bool enable = light->d3d_light.dltType != D3DLIGHT_DIRECTIONAL;
             dir3dDev->LightEnable(n, enable);
         }
     }
@@ -302,13 +301,13 @@ void gxScene::setLights()
 
 void gxScene::setAmbient()
 {
-    int n = (fx & FX_FULLBRIGHT) ? 0xffffff : ((fx & FX_CONDLIGHT) ? ambient2 : ambient);
+    const int n = (fx & FX_FULLBRIGHT) ? 0xffffff : ((fx & FX_CONDLIGHT) ? ambient2 : ambient);
     setRS(D3DRENDERSTATE_AMBIENT, n);
 }
 
 void gxScene::setFogMode()
 {
-    bool fog = fogmode == FOG_LINEAR && !(fx & FX_NOFOG);
+    const bool fog = fogmode == FOG_LINEAR && !(fx & FX_NOFOG);
     setRS(D3DRENDERSTATE_FOGENABLE, fog);
 }
 
@@ -328,13 +327,13 @@ void gxScene::setTriCull()
     }
 }
 
-void gxScene::setHWMultiTex(bool e)
+void gxScene::setHWMultiTex(const bool e)
 {
     for (int n = 0; n < 8; ++n)
     {
         setTSS(n, D3DTSS_COLOROP, D3DTOP_DISABLE);
         setTSS(n, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-        dir3dDev->SetTexture(n, 0);
+        dir3dDev->SetTexture(n, nullptr);
     }
     for (int k = 0; k < MAX_TEXTURES; ++k)
     {
@@ -344,35 +343,35 @@ void gxScene::setHWMultiTex(bool e)
     n_texs = 0;
 }
 
-void gxScene::setWBuffer(bool n)
+void gxScene::setWBuffer(const bool n)
 {
     if (n == wbuffer || !can_wb) return;
     wbuffer = n;
     setZMode();
 }
 
-void gxScene::setDither(bool n)
+void gxScene::setDither(const bool n)
 {
     if (n == dither) return;
     dither = n;
     setRS(D3DRENDERSTATE_DITHERENABLE, dither ? true : false);
 }
 
-void gxScene::setAntialias(bool n)
+void gxScene::setAntialias(const bool n)
 {
     if (n == antialias) return;
     antialias = n;
     setRS(D3DRENDERSTATE_ANTIALIAS, antialias ? D3DANTIALIAS_SORTINDEPENDENT : D3DANTIALIAS_NONE);
 }
 
-void gxScene::setWireframe(bool n)
+void gxScene::setWireframe(const bool n)
 {
     if (n == wireframe) return;
     wireframe = n;
     setRS(D3DRENDERSTATE_FILLMODE, wireframe ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
 }
 
-void gxScene::setFlippedTris(bool n)
+void gxScene::setFlippedTris(const bool n)
 {
     if (n == flipped) return;
     flipped = n;
@@ -381,19 +380,19 @@ void gxScene::setFlippedTris(bool n)
 
 void gxScene::setAmbient(const float rgb[])
 {
-    int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
     ambient = n;
     setAmbient();
 }
 
 void gxScene::setAmbient2(const float rgb[])
 {
-    int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
     ambient2 = n;
     setAmbient();
 }
 
-void gxScene::setViewport(int x, int y, int w, int h)
+void gxScene::setViewport(const int x, const int y, const int w, const int h)
 {
     if (x == viewport.dwX && y == viewport.dwY && w == viewport.dwWidth && h == viewport.dwHeight) return;
     viewport.dwX = x;
@@ -403,7 +402,7 @@ void gxScene::setViewport(int x, int y, int w, int h)
     dir3dDev->SetViewport(&viewport);
 }
 
-void gxScene::setOrthoProj(float nr, float fr, float w, float h)
+void gxScene::setOrthoProj(const float nr, const float fr, const float w, const float h)
 {
     if (ortho_proj && nr == frustum_nr && fr == frustum_fr && w == frustum_w && h == frustum_h) return;
     frustum_nr = nr;
@@ -411,9 +410,9 @@ void gxScene::setOrthoProj(float nr, float fr, float w, float h)
     frustum_w = w;
     frustum_h = h;
     ortho_proj = true;
-    float W = 2 / w;
-    float H = 2 / h;
-    float Q = 1 / (fr - nr);
+    const float W = 2 / w;
+    const float H = 2 / h;
+    const float Q = 1 / (fr - nr);
     projmatrix._11 = W;
     projmatrix._22 = H;
     projmatrix._33 = Q;
@@ -423,7 +422,7 @@ void gxScene::setOrthoProj(float nr, float fr, float w, float h)
     dir3dDev->SetTransform(D3DTRANSFORMSTATE_PROJECTION, &projmatrix);
 }
 
-void gxScene::setPerspProj(float nr, float fr, float w, float h)
+void gxScene::setPerspProj(const float nr, const float fr, const float w, const float h)
 {
     if (!ortho_proj && nr == frustum_nr && fr == frustum_fr && w == frustum_w && h == frustum_h) return;
     frustum_nr = nr;
@@ -431,9 +430,9 @@ void gxScene::setPerspProj(float nr, float fr, float w, float h)
     frustum_w = w;
     frustum_h = h;
     ortho_proj = false;
-    float W = 2 * nr / w;
-    float H = 2 * nr / h;
-    float Q = fr / (fr - nr);
+    const float W = 2 * nr / w;
+    const float H = 2 * nr / h;
+    const float Q = fr / (fr - nr);
     projmatrix._11 = W;
     projmatrix._22 = H;
     projmatrix._33 = Q;
@@ -445,13 +444,13 @@ void gxScene::setPerspProj(float nr, float fr, float w, float h)
 
 void gxScene::setFogColor(const float rgb[3])
 {
-    int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
     if (n == fogcolor) return;
     fogcolor = n;
     setRS(D3DRENDERSTATE_FOGCOLOR, fogcolor);
 }
 
-void gxScene::setFogRange(float nr, float fr)
+void gxScene::setFogRange(const float nr, const float fr)
 {
     if (nr == fogrange_nr && fr == fogrange_fr) return;
     fogrange_nr = nr;
@@ -460,14 +459,14 @@ void gxScene::setFogRange(float nr, float fr)
     setRS(D3DRENDERSTATE_FOGEND, *(DWORD*)&fogrange_fr);
 }
 
-void gxScene::setFogMode(int n)
+void gxScene::setFogMode(const int n)
 {
     if (n == fogmode) return;
     fogmode = n;
     setFogMode();
 }
 
-void gxScene::setZMode(int n)
+void gxScene::setZMode(const int n)
 {
     if (n == zmode) return;
     zmode = n;
@@ -528,7 +527,7 @@ void gxScene::setRenderState(const RenderState& rs)
         material.diffuse.a = rs.alpha;
         if (rs.fx & FX_ALPHATEST)
         {
-            int alpharef = (rs.fx & FX_VERTEXALPHA) ? 0 : 128 * rs.alpha;
+            const int alpharef = (rs.fx & FX_VERTEXALPHA) ? 0 : 128 * rs.alpha;
             setRS(D3DRENDERSTATE_ALPHAREF, alpharef);
         }
         setmat = true;
@@ -536,7 +535,7 @@ void gxScene::setRenderState(const RenderState& rs)
     if (rs.shininess != shininess)
     {
         shininess = rs.shininess;
-        float t = shininess > 0 ? (shininess < 1 ? shininess : 1) : 0;
+        const float t = shininess > 0 ? (shininess < 1 ? shininess : 1) : 0;
         material.specular.r = material.specular.g = material.specular.b = t;
         material.power = shininess * 128;
         setRS(D3DRENDERSTATE_SPECULARENABLE, shininess > 0 ? true : false);
@@ -569,7 +568,7 @@ void gxScene::setRenderState(const RenderState& rs)
     }
     if (rs.fx != fx)
     {
-        int t = rs.fx ^ fx;
+        const int t = rs.fx ^ fx;
         fx = rs.fx;
         if (t & (FX_FULLBRIGHT | FX_CONDLIGHT))
         {
@@ -595,7 +594,7 @@ void gxScene::setRenderState(const RenderState& rs)
         if (t & FX_EMISSIVE)
         {
             //Q3 Hack!
-            int n = fx & FX_EMISSIVE;
+            const int n = fx & FX_EMISSIVE;
             setRS(D3DRENDERSTATE_DIFFUSEMATERIALSOURCE, n ? D3DMCS_MATERIAL : D3DMCS_COLOR1);
             setRS(D3DRENDERSTATE_AMBIENTMATERIALSOURCE, n ? D3DMCS_MATERIAL : D3DMCS_COLOR1);
             setRS(D3DRENDERSTATE_EMISSIVEMATERIALSOURCE, n ? D3DMCS_COLOR1 : D3DMCS_MATERIAL);
@@ -605,7 +604,7 @@ void gxScene::setRenderState(const RenderState& rs)
         {
             if (fx & FX_ALPHATEST)
             {
-                int alpharef = (rs.fx & FX_VERTEXALPHA) ? 0 : 128 * rs.alpha;
+                const int alpharef = (rs.fx & FX_VERTEXALPHA) ? 0 : 128 * rs.alpha;
                 setRS(D3DRENDERSTATE_ALPHAREF, alpharef);
             }
             setRS(D3DRENDERSTATE_ALPHATESTENABLE, fx & FX_ALPHATEST ? true : false);
@@ -664,14 +663,14 @@ void gxScene::setRenderState(const RenderState& rs)
     }
     if (n_texs < tex_stages && hw->canvas)
     {
-        hw->canvas = 0;
+        hw->canvas = nullptr;
         setTSS(n_texs, D3DTSS_COLOROP, D3DTOP_DISABLE);
         setTSS(n_texs, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-        dir3dDev->SetTexture(n_texs, 0);
+        dir3dDev->SetTexture(n_texs, nullptr);
     }
 }
 
-bool gxScene::begin(const vector<gxLight*>& lights)
+bool gxScene::begin(const std::vector<gxLight*>& lights)
 {
     if (dir3dDev->BeginScene() != D3D_OK) return false;
 
@@ -679,10 +678,10 @@ bool gxScene::begin(const vector<gxLight*>& lights)
     int n;
     for (n = 0; n < tex_stages; ++n)
     {
-        texstate[n].canvas = 0;
+        texstate[n].canvas = nullptr;
         setTSS(n, D3DTSS_COLOROP, D3DTOP_DISABLE);
         setTSS(n, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-        dir3dDev->SetTexture(n, 0);
+        dir3dDev->SetTexture(n, nullptr);
     }
 
     //set light states
@@ -704,16 +703,16 @@ bool gxScene::begin(const vector<gxLight*>& lights)
     return true;
 }
 
-void gxScene::clear(const float rgb[3], float alpha, float z, bool clear_argb, bool clear_z)
+void gxScene::clear(const float rgb[3], const float alpha, const float z, const bool clear_argb, const bool clear_z) const
 {
     if (!clear_argb && !clear_z) return;
-    int flags = (clear_argb ? D3DCLEAR_TARGET : 0) | (clear_z ? D3DCLEAR_ZBUFFER : 0);
-    unsigned argb = (int(alpha * 255.0f) << 24) | (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(
+    const int flags = (clear_argb ? D3DCLEAR_TARGET : 0) | (clear_z ? D3DCLEAR_ZBUFFER : 0);
+    const unsigned argb = (int(alpha * 255.0f) << 24) | (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(
         rgb[2] * 255.0f);
-    dir3dDev->Clear(0, 0, flags, argb, z, 0);
+    dir3dDev->Clear(0, nullptr, flags, argb, z, 0);
 }
 
-void gxScene::render(gxMesh* m, int first_vert, int vert_cnt, int first_tri, int tri_cnt)
+void gxScene::render(gxMesh* m, const int first_vert, const int vert_cnt, const int first_tri, const int tri_cnt)
 {
     m->render(first_vert, vert_cnt, first_tri, tri_cnt);
     tris_drawn += tri_cnt;
@@ -760,17 +759,17 @@ void gxScene::render(gxMesh* m, int first_vert, int vert_cnt, int first_tri, int
     setTexState(0, texstate[0], true);
 }
 
-void gxScene::end()
+void gxScene::end() const
 {
     dir3dDev->EndScene();
-    RECT r = {
+    const RECT r = {
         (LONG)viewport.dwX, (LONG)viewport.dwY, (LONG)(viewport.dwX + viewport.dwWidth),
         (LONG)(viewport.dwY + viewport.dwHeight)
     };
     target->damage(r);
 }
 
-gxLight* gxScene::createLight(int flags)
+gxLight* gxScene::createLight(const int flags)
 {
     gxLight* l = d_new gxLight(this, flags);
     _allLights.insert(l);

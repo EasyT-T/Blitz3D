@@ -3,6 +3,7 @@
 #define STMTNODE_H
 
 #include "node.h"
+#include "std.h"
 
 struct StmtNode : public Node {
     int pos;    //offset in source stream
@@ -16,12 +17,12 @@ struct StmtNode : public Node {
 };
 
 struct StmtSeqNode : public Node {
-    string file;
-    vector<StmtNode *> stmts;
+    std::string file;
+    std::vector<StmtNode *> stmts;
 
-    StmtSeqNode(const string &f) : file(f) {}
+    StmtSeqNode(const std::string &f) : file(f) {}
 
-    ~StmtSeqNode() { for (; stmts.size(); stmts.pop_back()) delete stmts.back(); }
+    ~StmtSeqNode() override { for (; stmts.size(); stmts.pop_back()) delete stmts.back(); }
 
     void semant(Environ *e);
 
@@ -31,50 +32,51 @@ struct StmtSeqNode : public Node {
 
     int size() { return stmts.size(); }
 
-    static void reset(const string &file, const string &lab);
+    static void reset(const std::string &file, const std::string &lab);
 };
 
 #include "exprnode.h"
-#include "declnode.h"
 
 struct IncludeNode : public StmtNode {
-    string file, label;
+    std::string file, label;
     StmtSeqNode *stmts;
 
-    IncludeNode(const string &t, StmtSeqNode *ss) : file(t), stmts(ss) {}
+    IncludeNode(const std::string &t, StmtSeqNode *ss) : file(t), stmts(ss) {}
 
-    ~IncludeNode() { delete stmts; }
+    ~IncludeNode() override { delete stmts; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
+
+#include "declnode.h"
 
 struct DeclStmtNode : public StmtNode {
     DeclNode *decl;
 
     DeclStmtNode(DeclNode *d) : decl(d) { pos = d->pos; }
 
-    ~DeclStmtNode() { delete decl; }
+    ~DeclStmtNode() override { delete decl; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct DimNode : public StmtNode {
-    string ident, tag;
+    std::string ident, tag;
     ExprSeqNode *exprs;
     ArrayType *sem_type;
     Decl *sem_decl;
 
-    DimNode(const string &i, const string &t, ExprSeqNode *e) : ident(i), tag(t), exprs(e) {}
+    DimNode(const std::string &i, const std::string &t, ExprSeqNode *e) : ident(i), tag(t), exprs(e) {}
 
-    ~DimNode() { delete exprs; }
+    ~DimNode() override { delete exprs; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct AssNode : public StmtNode {
@@ -83,14 +85,15 @@ struct AssNode : public StmtNode {
 
     AssNode(VarNode *var, ExprNode *expr) : var(var), expr(expr) {}
 
-    ~AssNode() {
+    ~AssNode() override
+    {
         delete var;
         delete expr;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ExprStmtNode : public StmtNode {
@@ -98,42 +101,42 @@ struct ExprStmtNode : public StmtNode {
 
     ExprStmtNode(ExprNode *e) : expr(e) {}
 
-    ~ExprStmtNode() { delete expr; }
+    ~ExprStmtNode() override { delete expr; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct LabelNode : public StmtNode {
-    string ident;
+    std::string ident;
     int data_sz;
 
-    LabelNode(const string &s, int sz) : ident(s), data_sz(sz) {}
+    LabelNode(const std::string &s, const int sz) : ident(s), data_sz(sz) {}
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct GotoNode : public StmtNode {
-    string ident;
+    std::string ident;
 
-    GotoNode(const string &s) : ident(s) {}
+    GotoNode(const std::string &s) : ident(s) {}
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct GosubNode : public StmtNode {
-    string ident;
+    std::string ident;
 
-    GosubNode(const string &s) : ident(s) {}
+    GosubNode(const std::string &s) : ident(s) {}
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct IfNode : public StmtNode {
@@ -142,41 +145,43 @@ struct IfNode : public StmtNode {
 
     IfNode(ExprNode *e, StmtSeqNode *s, StmtSeqNode *o) : expr(e), stmts(s), elseOpt(o) {}
 
-    ~IfNode() {
+    ~IfNode() override
+    {
         delete expr;
         delete stmts;
         delete elseOpt;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ExitNode : public StmtNode {
-    string sem_brk;
+    std::string sem_brk;
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct WhileNode : public StmtNode {
     int wendPos;
     ExprNode *expr;
     StmtSeqNode *stmts;
-    string sem_brk;
+    std::string sem_brk;
 
-    WhileNode(ExprNode *e, StmtSeqNode *s, int wp) : expr(e), stmts(s), wendPos(wp) {}
+    WhileNode(ExprNode *e, StmtSeqNode *s, const int wp) : expr(e), stmts(s), wendPos(wp) {}
 
-    ~WhileNode() {
+    ~WhileNode() override
+    {
         delete expr;
         delete stmts;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ForNode : public StmtNode {
@@ -184,47 +189,48 @@ struct ForNode : public StmtNode {
     VarNode *var;
     ExprNode *fromExpr, *toExpr, *stepExpr;
     StmtSeqNode *stmts;
-    string sem_brk;
+    std::string sem_brk;
 
     ForNode(VarNode *v, ExprNode *f, ExprNode *t, ExprNode *s, StmtSeqNode *ss, int np);
 
-    ~ForNode();
+    ~ForNode() override;
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ForEachNode : public StmtNode {
     int nextPos;
     VarNode *var;
-    string typeIdent;
+    std::string typeIdent;
     StmtSeqNode *stmts;
-    string sem_brk;
+    std::string sem_brk;
 
-    ForEachNode(VarNode *v, const string &t, StmtSeqNode *s, int np) : var(v), typeIdent(t), stmts(s), nextPos(np) {}
+    ForEachNode(VarNode *v, const std::string &t, StmtSeqNode *s, const int np) : var(v), typeIdent(t), stmts(s), nextPos(np) {}
 
-    ~ForEachNode() {
+    ~ForEachNode() override
+    {
         delete var;
         delete stmts;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ReturnNode : public StmtNode {
     ExprNode *expr;
-    string returnLabel;
+    std::string returnLabel;
 
     ReturnNode(ExprNode *e) : expr(e) {}
 
-    ~ReturnNode() { delete expr; }
+    ~ReturnNode() override { delete expr; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct DeleteNode : public StmtNode {
@@ -232,37 +238,38 @@ struct DeleteNode : public StmtNode {
 
     DeleteNode(ExprNode *e) : expr(e) {}
 
-    ~DeleteNode() { delete expr; }
+    ~DeleteNode() override { delete expr; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct DeleteEachNode : public StmtNode {
-    string typeIdent;
+    std::string typeIdent;
 
-    DeleteEachNode(const string &t) : typeIdent(t) {}
+    DeleteEachNode(const std::string &t) : typeIdent(t) {}
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct InsertNode : public StmtNode {
     ExprNode *expr1, *expr2;
     bool before;
 
-    InsertNode(ExprNode *e1, ExprNode *e2, bool b) : expr1(e1), expr2(e2), before(b) {}
+    InsertNode(ExprNode *e1, ExprNode *e2, const bool b) : expr1(e1), expr2(e2), before(b) {}
 
-    ~InsertNode() {
+    ~InsertNode() override
+    {
         delete expr1;
         delete expr2;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct CaseNode : public Node {
@@ -271,7 +278,8 @@ struct CaseNode : public Node {
 
     CaseNode(ExprSeqNode *e, StmtSeqNode *s) : exprs(e), stmts(s) {}
 
-    ~CaseNode() {
+    ~CaseNode() override
+    {
         delete exprs;
         delete stmts;
     }
@@ -280,12 +288,13 @@ struct CaseNode : public Node {
 struct SelectNode : public StmtNode {
     ExprNode *expr;
     StmtSeqNode *defStmts;
-    vector<CaseNode *> cases;
+    std::vector<CaseNode *> cases;
     VarNode *sem_temp;
 
-    SelectNode(ExprNode *e) : expr(e), defStmts(0), sem_temp(0) {}
+    SelectNode(ExprNode *e) : expr(e), defStmts(nullptr), sem_temp(nullptr) {}
 
-    ~SelectNode() {
+    ~SelectNode() override
+    {
         delete expr;
         delete defStmts;
         delete sem_temp;
@@ -294,27 +303,28 @@ struct SelectNode : public StmtNode {
 
     void push_back(CaseNode *c) { cases.push_back(c); }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct RepeatNode : public StmtNode {
     int untilPos;
     StmtSeqNode *stmts;
     ExprNode *expr;
-    string sem_brk;
+    std::string sem_brk;
 
-    RepeatNode(StmtSeqNode *s, ExprNode *e, int up) : stmts(s), expr(e), untilPos(up) {}
+    RepeatNode(StmtSeqNode *s, ExprNode *e, const int up) : stmts(s), expr(e), untilPos(up) {}
 
-    ~RepeatNode() {
+    ~RepeatNode() override
+    {
         delete stmts;
         delete expr;
     }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct ReadNode : public StmtNode {
@@ -322,22 +332,22 @@ struct ReadNode : public StmtNode {
 
     ReadNode(VarNode *v) : var(v) {}
 
-    ~ReadNode() { delete var; }
+    ~ReadNode() override { delete var; }
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 struct RestoreNode : public StmtNode {
-    string ident;
+    std::string ident;
     Label *sem_label;
 
-    RestoreNode(const string &i) : ident(i) {}
+    RestoreNode(const std::string &i) : ident(i) {}
 
-    void semant(Environ *e);
+    void semant(Environ *e) override;
 
-    void translate(Codegen *g);
+    void translate(Codegen *g) override;
 };
 
 #endif

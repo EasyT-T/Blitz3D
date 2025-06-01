@@ -1,26 +1,25 @@
 
-#include "stdafx.h"
-#include "htmlhelp.h"
-#include "mainframe.h"
+#include "helphtml.h"
 #include "libs.h"
+#include "mainframe.h"
 
-IMPLEMENT_DYNAMIC(HtmlHelp, CHtmlView)
+IMPLEMENT_DYNAMIC(HelpHtml, CHtmlView)
 
-BEGIN_MESSAGE_MAP(HtmlHelp, CHtmlView)
+BEGIN_MESSAGE_MAP(HelpHtml, CHtmlView)
                     ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
-string HtmlHelp::getTitle() {
+std::string HelpHtml::getTitle() {
     return title;
 }
 
-void HtmlHelp::OnTitleChange(LPCTSTR t) {
+void HelpHtml::OnTitleChange(const LPCTSTR t) {
     listener->helpTitleChange(this, title = t);
 }
 
-void HtmlHelp::OnBeforeNavigate2(LPCTSTR url, DWORD flags, LPCTSTR target, CByteArray &posted, LPCTSTR headers,
+void HelpHtml::OnBeforeNavigate2(const LPCTSTR url, DWORD flags, LPCTSTR target, CByteArray &posted, LPCTSTR headers,
                                  BOOL *cancel) {
-    string t(url);
+    const std::string t(url);
     int attr = GetFileAttributes(url);
     if (attr == -1) attr = 0;
     if ((attr & FILE_ATTRIBUTE_DIRECTORY) ||
@@ -35,7 +34,7 @@ void HtmlHelp::OnBeforeNavigate2(LPCTSTR url, DWORD flags, LPCTSTR target, CByte
     *cancel = false;
 }
 
-BOOL HtmlHelp::OnEraseBkgnd(CDC *dc) {
+BOOL HelpHtml::OnEraseBkgnd(CDC *dc) {
     return true;
 }
 

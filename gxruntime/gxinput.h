@@ -39,7 +39,7 @@ public:
         ASC_UP = 28, ASC_DOWN = 29, ASC_RIGHT = 30, ASC_LEFT = 31
     };
 
-    void moveMouse(int x, int y);
+    void moveMouse(int x, int y) const;
 
     gxDevice* getMouse() const;
     gxDevice* getKeyboard() const;

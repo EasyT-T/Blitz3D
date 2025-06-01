@@ -1,13 +1,13 @@
 #ifndef GXRUNTIME_B3D_H
 #define GXRUNTIME_B3D_H
 
-#include <windows.h>
 #include <string>
 #include <vector>
+#include <windows.h>
 
-#include "gxinput.h"
-#include "gxgraphics.h"
 #include "gxfilesystem.h"
+#include "gxgraphics.h"
+#include "gxinput.h"
 #include "gxtimer.h"
 
 #include "../debugger/debugger.h"
@@ -24,7 +24,7 @@ public:
     gxFileSystem* fileSystem;
 
     void flip(bool vwait);
-    void moveMouse(int x, int y);
+    void moveMouse(int x, int y) const;
 
     LRESULT windowProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
 
@@ -35,13 +35,13 @@ private:
     gxRuntime(HINSTANCE hinst, const std::string& cmd_line, HWND hwnd);
     ~gxRuntime();
 
-    void paint();
+    void paint() const;
     void suspend();
     void forceSuspend();
     void resume();
     void forceResume();
     void backupWindowState();
-    void restoreWindowState();
+    void restoreWindowState() const;
 
     RECT t_rect;
     int t_style;
@@ -50,7 +50,7 @@ private:
     std::string app_title;
     std::string app_close;
 
-    bool setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dd);
+    bool setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dd) const;
     gxGraphics* openWindowedGraphics(int w, int h, int d, bool d3d);
     gxGraphics* openExclusiveGraphics(int w, int h, int d, bool d3d);
 
@@ -62,22 +62,22 @@ private:
     void enumGfx();
     void denumGfx();
 
-    void resetInput();
+    void resetInput() const;
     void pauseAudio();
     void resumeAudio();
-    void backupGraphics();
-    void restoreGraphics();
+    void backupGraphics() const;
+    void restoreGraphics() const;
     void acquireInput();
-    void unacquireInput();
+    void unacquireInput() const;
 
     /***** APP INTERFACE *****/
 public:
     static gxRuntime* openRuntime(HINSTANCE hinst, const std::string& cmd_line, Debugger* debugger);
     static void closeRuntime(gxRuntime* runtime);
 
-    void asyncStop();
-    void asyncRun();
-    void asyncEnd();
+    void asyncStop() const;
+    void asyncRun() const;
+    void asyncEnd() const;
 
     /***** GX INTERFACE *****/
 public:
@@ -108,12 +108,12 @@ public:
     void debugLog(const char* t);
 
     int numGraphicsDrivers();
-    void graphicsDriverInfo(int driver, std::string* name, int* caps);
+    void graphicsDriverInfo(int driver, std::string* name, int* caps) const;
 
-    int numGraphicsModes(int driver);
-    void graphicsModeInfo(int driver, int mode, int* w, int* h, int* d, int* caps);
+    int numGraphicsModes(int driver) const;
+    void graphicsModeInfo(int driver, int mode, int* w, int* h, int* d, int* caps) const;
 
-    void windowedModeInfo(int* caps);
+    void windowedModeInfo(int* caps) const;
 
     gxInput* openInput(int flags);
     void closeInput(gxInput* input);

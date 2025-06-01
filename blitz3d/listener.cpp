@@ -1,13 +1,13 @@
 
-#include "std.h"
 #include "listener.h"
+#include "std.h"
 
 void bbSet3dListenerConfig(float roll, float dopp, float dist);
 
 void bbSet3dListener(float x, float y, float z, float kx, float ky, float kz, float jx, float jy, float jz, float vx,
                      float vy, float vz);
 
-Listener::Listener(float roll, float dopp, float dist) {
+Listener::Listener(const float roll, const float dopp, const float dist) {
     bbSet3dListenerConfig(roll, dopp, dist);
     renderListener();
 }
@@ -20,7 +20,8 @@ Listener::~Listener() {
     bbSet3dListener(0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0);
 }
 
-void Listener::renderListener() {
+void Listener::renderListener() const
+{
 
     const Vector &pos = getWorldTform().v;
     const Vector &vel = getVelocity();

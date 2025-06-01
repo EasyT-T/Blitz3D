@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "camera.h"
+#include "std.h"
 
 extern gxScene *gx_scene;
 
@@ -16,18 +16,18 @@ Camera::Camera() {
     setFogMode(gxScene::FOG_NONE);
 }
 
-void Camera::setZoom(float z) {
+void Camera::setZoom(const float z) {
     zoom = z;
     local_valid = false;
 }
 
-void Camera::setRange(float n, float f) {
+void Camera::setRange(const float n, const float f) {
     frustum_nr = n;
     frustum_fr = f;
     local_valid = false;
 }
 
-void Camera::setViewport(int x, int y, int w, int h) {
+void Camera::setViewport(const int x, const int y, const int w, const int h) {
     vp_x = x;
     vp_y = y;
     vp_w = w;
@@ -39,12 +39,12 @@ void Camera::setClsColor(const Vector &v) {
     cls_color = v;
 }
 
-void Camera::setClsMode(bool c, bool z) {
+void Camera::setClsMode(const bool c, const bool z) {
     cls_argb = c;
     cls_z = z;
 }
 
-void Camera::setProjMode(int mode) {
+void Camera::setProjMode(const int mode) {
     proj_mode = mode;
 }
 
@@ -52,18 +52,18 @@ void Camera::setFogColor(const Vector &v) {
     fog_color = v;
 }
 
-void Camera::setFogRange(float nr, float fr) {
+void Camera::setFogRange(const float nr, const float fr) {
     fog_nr = nr;
     fog_fr = fr;
 }
 
-void Camera::setFogMode(int mode) {
+void Camera::setFogMode(const int mode) {
     fog_mode = mode;
 }
 
 const Frustum &Camera::getFrustum() const {
     if (!local_valid) {
-        float ar = (float) vp_h / vp_w;
+        const float ar = (float) vp_h / vp_w;
         frustum_w = frustum_nr * 2 / zoom;
         frustum_h = frustum_nr * 2 / zoom * ar;
         new(&local_frustum) Frustum(frustum_nr, frustum_fr, frustum_w, frustum_h);

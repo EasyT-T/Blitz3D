@@ -8,51 +8,49 @@
 #include "../config/config.h"
 #include "../stdutil/stdutil.h"
 
-#include <set>
-#include <map>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <list>
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <iomanip>
 
-using namespace std;
-
-#include "../linker/linker.h"
+#include "../bbruntime_dll/bbruntime_dll.h"
 #include "../compiler/environ.h"
 #include "../compiler/parser.h"
 #include "../compiler/assem_x86/assem_x86.h"
 #include "../compiler/codegen_x86/codegen_x86.h"
-#include "../bbruntime_dll/bbruntime_dll.h"
+#include "../linker/linker.h"
 
 #undef environ
 
 static void showInfo() {
     const int major = (VERSION & 0xffff) / 1000, minor = (VERSION & 0xffff) % 1000;
-    cout << "BlitzCC V" << major << "." << minor << endl;
-    cout << "(C)opyright 2000-2003 Blitz Research Ltd" << endl;
+    std::cout << "BlitzCC V" << major << "." << minor << std::endl;
+    std::cout << "(C)opyright 2000-2003 Blitz Research Ltd" << std::endl;
 }
 
 static void showUsage() {
-    cout << "Usage: blitzcc [-h|-q|+q|-c|-d|-k|+k|-v|-o exefile] [sourcefile.bb]" << endl;
+    std::cout << "Usage: blitzcc [-h|-q|+q|-c|-d|-k|+k|-v|-o exefile] [sourcefile.bb]" << std::endl;
 }
 
 static void showHelp() {
     showUsage();
-    cout << "-h         : show this help" << endl;
-    cout << "-q         : quiet mode" << endl;
-    cout << "+q		  : very quiet mode" << endl;
-    cout << "-c         : compile only" << endl;
-    cout << "-d         : debug compile" << endl;
-    cout << "-k         : dump keywords" << endl;
-    cout << "+k         : dump keywords and syntax" << endl;
-    cout << "-v		  : version info" << endl;
-    cout << "-o exefile : generate executable" << endl;
+    std::cout << "-h         : show this help" << std::endl;
+    std::cout << "-q         : quiet mode" << std::endl;
+    std::cout << "+q		  : very quiet mode" << std::endl;
+    std::cout << "-c         : compile only" << std::endl;
+    std::cout << "-d         : debug compile" << std::endl;
+    std::cout << "-k         : dump keywords" << std::endl;
+    std::cout << "+k         : dump keywords and syntax" << std::endl;
+    std::cout << "-v		  : version info" << std::endl;
+    std::cout << "-o exefile : generate executable" << std::endl;
 }
 
-static void err(const string &t) {
-    cout << t << endl;
+static void err(const std::string &t) {
+    std::cout << t << std::endl;
     exit(-1);
 }
 
@@ -60,13 +58,13 @@ static void usageErr() {
     err("Usage error");
 }
 
-static string quickHelp(const string &kw) {
+static std::string quickHelp(const std::string &kw) {
 
-    Environ *e = runtimeEnviron;
-    Decl *d = e->funcDecls->findDecl(tolower(kw));
-    if (!d || d->type->funcType() == 0) return "No quick help available for " + kw;
-    string t = kw;
-    FuncType *f = d->type->funcType();
+    const Environ *e = runtimeEnviron;
+    const Decl *d = e->funcDecls->findDecl(tolower(kw));
+    if (!d || d->type->funcType() == nullptr) return "No quick help available for " + kw;
+    std::string t = kw;
+    const FuncType *f = d->type->funcType();
     if (f->returnType == Type::float_type) t += '#';
     else if (f->returnType == Type::string_type) t += '$';
 
@@ -75,9 +73,9 @@ static string quickHelp(const string &kw) {
     if (f->returnType != Type::void_type) t += "( ";
 
     for (int k = 0; k < f->params->size(); ++k) {
-        string s;
+        std::string s;
         if (k) s += ',';
-        Decl *p = f->params->decls[k];
+        const Decl *p = f->params->decls[k];
         s += p->name;
         if (p->type == Type::float_type) s += '#';
         else if (p->type == Type::string_type) s += '$';
@@ -92,21 +90,20 @@ static string quickHelp(const string &kw) {
     return t;
 }
 
-static void dumpKeys(bool lang, bool mod, bool help) {
+static void dumpKeys(const bool lang, const bool mod, const bool help) {
 
     if (lang) {
-        map<string, int>::iterator it;
-        map<string, int> &keywords = Toker::getKeywords();
-        for (it = keywords.begin(); it != keywords.end(); ++it) {
-            if (it->first.find(' ') != string::npos) continue;
-            cout << it->first << endl;
+        std::map<std::string, int> &keywords = Toker::getKeywords();
+        for (std::map<std::string, int>::iterator it = keywords.begin(); it != keywords.end(); ++it) {
+            if (it->first.find(' ') != std::string::npos) continue;
+            std::cout << it->first << std::endl;
         }
     }
 
     if (!mod) return;
 
     for (int k = 0; k < keyWords.size(); ++k) {
-        string t = keyWords[k];
+        std::string t = keyWords[k];
 
         if (t[0] == '_') continue;
         if (!isalpha(t[0])) t = t.substr(1);
@@ -117,26 +114,26 @@ static void dumpKeys(bool lang, bool mod, bool help) {
             }
         }
         if (help) t = quickHelp(t);
-        cout << t << endl;
+        std::cout << t << std::endl;
     }
 }
 
-static string verstr(int ver) {
+static std::string verstr(const int ver) {
     return itoa((ver & 0xffff) / 100) + "." + itoa((ver & 0xffff) % 100);
 }
 
 static void versInfo() {
-    cout << "Compiler version:" << verstr(bcc_ver) << endl;
-    cout << "Runtime version:" << verstr(run_ver) << endl;
-    cout << "Debugger version:" << verstr(dbg_ver) << endl;
-    cout << "Linker version:" << verstr(lnk_ver) << endl;
+    std::cout << "Compiler version:" << verstr(bcc_ver) << std::endl;
+    std::cout << "Runtime version:" << verstr(run_ver) << std::endl;
+    std::cout << "Debugger version:" << verstr(dbg_ver) << std::endl;
+    std::cout << "Linker version:" << verstr(lnk_ver) << std::endl;
 }
 
 int _cdecl
 
 main(int argc, char *argv[]) {
 
-    string in_file, out_file, args;
+    std::string in_file, out_file, args;
 
     bool debug = false, quiet = false, veryquiet = false, compileonly = false;
     bool dumpkeys = false, dumphelp = false, showhelp = false, dumpasm = false;
@@ -144,7 +141,7 @@ main(int argc, char *argv[]) {
 
     for (int k = 1; k < argc; ++k) {
 
-        string t = argv[k];
+        std::string t = argv[k];
 
         t = tolower(t);
 
@@ -173,8 +170,8 @@ main(int argc, char *argv[]) {
             if (in_file.size() || t[0] == '-' || t[0] == '+') usageErr();
             in_file = argv[k];
             for (++k; k < argc; ++k) {
-                string t = argv[k];
-                if (t.find(' ') != string::npos) t = '\"' + t + '\"';
+                std::string t = argv[k];
+                if (t.find(' ') != std::string::npos) t = '\"' + t + '\"';
                 if (args.size()) args += ' ';
                 args += t;
             }
@@ -198,65 +195,65 @@ main(int argc, char *argv[]) {
         in_file = in_file.substr(1, in_file.size() - 2);
     }
 
-    ifstream in(in_file.c_str());
+    std::ifstream in(in_file.c_str());
     if (!in) err("Unable to open input file");
     if (!quiet) {
         showInfo();
-        cout << "Compiling \"" << in_file << "\"" << endl;
+        std::cout << "Compiling \"" << in_file << "\"" << std::endl;
     }
 
     int n = in_file.rfind('/');
-    if (n == string::npos) n = in_file.rfind('\\');
-    if (n != string::npos) {
+    if (n == std::string::npos) n = in_file.rfind('\\');
+    if (n != std::string::npos) {
         if (!n || in_file[n - 1] == ':') ++n;
         SetCurrentDirectory(in_file.substr(0, n).c_str());
     }
 
-    ProgNode *prog = 0;
-    Environ *environ = 0;
-    Module *module = 0;
+    ProgNode *prog = nullptr;
+    Environ *environ = nullptr;
+    Module *module = nullptr;
 
     try {
         //parse
-        if (!veryquiet) cout << "Parsing..." << endl;
+        if (!veryquiet) std::cout << "Parsing..." << std::endl;
         Toker toker(in);
         Parser parser(toker);
         prog = parser.parse(in_file);
 
         //semant
-        if (!veryquiet) cout << "Generating..." << endl;
+        if (!veryquiet) std::cout << "Generating..." << std::endl;
         environ = prog->semant(runtimeEnviron);
 
         //translate
-        if (!veryquiet) cout << "Translating..." << endl;
+        if (!veryquiet) std::cout << "Translating..." << std::endl;
         qstreambuf qbuf;
-        iostream asmcode(&qbuf);
+        std::iostream asmcode(&qbuf);
         Codegen_x86 codegen(asmcode, debug);
 
         prog->translate(&codegen, userFuncs);
 
         if (dumpasm) {
-            cout << endl << string(qbuf.data(), qbuf.size()) << endl;
+            std::cout << std::endl << std::string(qbuf.data(), qbuf.size()) << std::endl;
         }
 
         //assemble
-        if (!veryquiet) cout << "Assembling..." << endl;
+        if (!veryquiet) std::cout << "Assembling..." << std::endl;
         module = linkerLib->createModule();
         Assem_x86 assem(asmcode, module);
         assem.assemble();
 
     } catch (Ex &x) {
 
-        string file = '\"' + x.file + '\"';
+        std::string file = '\"' + x.file + '\"';
         int row = ((x.pos >> 16) & 65535) + 1, col = (x.pos & 65535) + 1;
-        cout << file << ":" << row << ":" << col << ":" << row << ":" << col << ":" << x.ex << endl;
+        std::cout << file << ":" << row << ":" << col << ":" << row << ":" << col << ":" << x.ex << std::endl;
         exit(-1);
     }
 
     delete prog;
 
     if (out_file.size()) {
-        if (!veryquiet) cout << "Creating executable \"" << out_file << "\"..." << endl;
+        if (!veryquiet) std::cout << "Creating executable \"" << out_file << "\"..." << std::endl;
         if (!module->createExe(out_file.c_str(), (home + "/bin/runtime.dll").c_str())) {
             err("Error creating executable");
         }
@@ -264,8 +261,8 @@ main(int argc, char *argv[]) {
         void *entry = module->link(runtimeModule);
         if (!entry) return 0;
 
-        HMODULE dbgHandle = 0;
-        Debugger *debugger = 0;
+        HMODULE dbgHandle = nullptr;
+        Debugger *debugger = nullptr;
 
         if (debug) {
             dbgHandle = LoadLibrary((home + "/bin/debugger.dll").c_str());
@@ -278,7 +275,7 @@ main(int argc, char *argv[]) {
             if (!debugger) err("Error launching debugger");
         }
 
-        if (!veryquiet) cout << "Executing..." << endl;
+        if (!veryquiet) std::cout << "Executing..." << std::endl;
 
         runtimeLib->execute((void (*)()) entry, args.c_str(), debugger);
 

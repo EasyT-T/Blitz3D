@@ -2,9 +2,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "model.h"
 #include "frustum.h"
 #include "mirror.h"
+#include "model.h"
 
 class Camera : public Object {
 public:
@@ -14,7 +14,7 @@ public:
 
     Camera();
 
-    Camera *getCamera() { return this; }
+    Camera *getCamera() override { return this; }
 
     //called by user
     void setZoom(float z);

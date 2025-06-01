@@ -1,7 +1,6 @@
 
-#include "stdafx.h"
-#include "blitzide.h"
 #include "editor.h"
+#include "blitzide.h"
 
 static bool locked;
 
@@ -29,22 +28,22 @@ BEGIN_MESSAGE_MAP(Editor, CWnd)
 END_MESSAGE_MAP()
 
 static int blink;
-static set<string> keyWordSet;
-static map<string, string> keyWordMap;
+static std::set<std::string> keyWordSet;
+static std::map<std::string, std::string> keyWordMap;
 
-static bool isid(int c) {
+static bool isid(const int c) {
     return isalnum(c) || c == '_';
 }
 
-static bool isfmt(int ch, int nxt) {
+static bool isfmt(const int ch, const int nxt) {
     return ch == ';' || ch == '\"' || isalpha(ch) || isdigit(ch) || (ch == '$' && isxdigit(nxt));
 }
 
-static string rtfbgr(int bgr) {
+static std::string rtfbgr(const int bgr) {
     return "\\red" + itoa(bgr & 0xff) + "\\green" + itoa((bgr >> 8) & 0xff) + "\\blue" + itoa((bgr >> 16) & 0xff) + ';';
 }
 
-DWORD Editor::streamIn(LPBYTE buff, LONG cnt, LONG *done) {
+DWORD Editor::streamIn(const LPBYTE buff, const LONG cnt, LONG *done) {
     int n = 0;
     while (n < cnt) {
         if (is_curs == is_line.size()) {
@@ -73,13 +72,13 @@ DWORD Editor::streamIn(LPBYTE buff, LONG cnt, LONG *done) {
     return 0;
 }
 
-DWORD CALLBACK Editor::streamIn(DWORD cookie, LPBYTE buff, LONG cnt, LONG *done) {
+DWORD CALLBACK Editor::streamIn(const DWORD cookie, const LPBYTE buff, const LONG cnt, LONG *done) {
     Editor *e = (Editor *) cookie;
     return e->streamIn(buff, cnt, done);
 }
 
-DWORD CALLBACK Editor::streamOut(DWORD cookie, LPBYTE buff, LONG cnt, LONG *done) {
-    ostream *out = (ostream *) cookie;
+DWORD CALLBACK Editor::streamOut(const DWORD cookie, const LPBYTE buff, const LONG cnt, LONG *done) {
+    std::ostream *out = (std::ostream *) cookie;
     out->write((char *) buff, cnt);
     *done = cnt;
     return 0;
@@ -88,7 +87,7 @@ DWORD CALLBACK Editor::streamOut(DWORD cookie, LPBYTE buff, LONG cnt, LONG *done
 Editor::Editor(EditorListener *l) :
         listener(l), sizing(false), tabber_width(170),
         fmtBusy(false), findOnly(false), found(false),
-        finder(0), selStart(0), selEnd(0),
+        finder(nullptr), selStart(0), selEnd(0),
         findFlags(0), lineToFmt(-1) {
     findBuff[0] = replaceBuff[0] = 0;
     if (!blink) blink = GetCaretBlinkTime();
@@ -108,11 +107,13 @@ void Editor::setSel() {
     editCtrl.SetSel(selStart, selEnd);
 }
 
-void Editor::suspendUndo() {
+void Editor::suspendUndo() const
+{
     tomDoc->Undo(tomSuspend, nullptr);
 }
 
-void Editor::resumeUndo() {
+void Editor::resumeUndo() const
+{
     tomDoc->Undo(tomResume, nullptr);
 }
 
@@ -139,7 +140,7 @@ void Editor::OnPaint() {
     w = 8;
 
     CBrush br(GetSysColor(COLOR_3DFACE));
-    CRect tr(x, y, x + w, y + h);
+    const CRect tr(x, y, x + w, y + h);
     dc.FillRect(&tr, &br);
 
 //	CRect ar( x,y,x+w,y+w );
@@ -150,7 +151,7 @@ void Editor::OnPaint() {
     dc.DrawEdge(&dr, EDGE_RAISED, BF_RECT);
 }
 
-void Editor::OnMouseMove(UINT flags, CPoint p) {
+void Editor::OnMouseMove(const UINT flags, const CPoint p) {
     CWnd::OnMouseMove(flags, p);
 
     CRect r;
@@ -168,13 +169,13 @@ void Editor::OnMouseMove(UINT flags, CPoint p) {
     }
 }
 
-void Editor::OnSize(UINT type, int sw, int sh) {
+void Editor::OnSize(const UINT type, const int sw, const int sh) {
     CWnd::OnSize(type, sw, sh);
 
     resized();
 }
 
-void Editor::OnLButtonDown(UINT flags, CPoint p) {
+void Editor::OnLButtonDown(UINT flags, const CPoint p) {
 
     CRect r;
     GetClientRect(&r);
@@ -196,7 +197,7 @@ void Editor::OnLButtonUp(UINT flags, CPoint p) {
     SetFocus();
 }
 
-int Editor::OnCreate(LPCREATESTRUCT cs) {
+int Editor::OnCreate(const LPCREATESTRUCT cs) {
     CWnd::OnCreate(cs);
 
     CHARFORMAT fmt;
@@ -210,17 +211,17 @@ int Editor::OnCreate(LPCREATESTRUCT cs) {
     pf.cbSize = sizeof(pf);
     pf.dwMask = PFM_TABSTOPS;
     pf.cTabCount = MAX_TAB_STOPS;
-    int tabTwips = 1440 * 8 / GetDeviceCaps(::GetDC(0), LOGPIXELSX) * prefs.edit_tabs;
+    const int tabTwips = 1440 * 8 / GetDeviceCaps(::GetDC(nullptr), LOGPIXELSX) * prefs.edit_tabs;
     for (int k = 0; k < MAX_TAB_STOPS; ++k) pf.rgxTabs[k] = k * tabTwips;
 
-    CRect r(0, 0, 0, 0);
+    const CRect r(0, 0, 0, 0);
 
     editCtrl.Create(
             WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_BORDER |
             ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_NOHIDESEL,
             r, this, 1);
 
-    auto richole = editCtrl.GetIRichEditOle();
+    const auto richole = editCtrl.GetIRichEditOle();
     richole->QueryInterface(__uuidof(ITextDocument), (void **) &tomDoc);
 
     editCtrl.SetFont(&prefs.editFont);
@@ -238,10 +239,10 @@ int Editor::OnCreate(LPCREATESTRUCT cs) {
 
     tabber.setListener(this);
 
-    int bk = prefs.rgb_bkgrnd;
-    int fg = prefs.rgb_ident;
+    const int bk = prefs.rgb_bkgrnd;
+    const int fg = prefs.rgb_ident;
 
-    int ws = WS_CHILD | WS_BORDER;
+    const int ws = WS_CHILD | WS_BORDER;
 
     funcList.Create(ws | LVS_LIST | LVS_SHOWSELALWAYS, r, &tabber, 1);
     funcList.SetFont(&prefs.debugFont);
@@ -272,11 +273,11 @@ int Editor::OnCreate(LPCREATESTRUCT cs) {
 
 /************************************************* PUBLIC ***********************************************/
 
-void Editor::setName(const string &n) {
+void Editor::setName(const std::string &n) {
     name = n;
 }
 
-bool Editor::setText(istream &in) {
+bool Editor::setText(std::istream &in) {
 //	editCtrl.HideCaret();
     fmtBusy = true;
     EDITSTREAM es;
@@ -286,7 +287,7 @@ bool Editor::setText(istream &in) {
     is_line = "{\\rtf1{\\colortbl;" + rtfbgr(prefs.rgb_string) + rtfbgr(prefs.rgb_ident) +
               rtfbgr(prefs.rgb_keyword) + rtfbgr(prefs.rgb_comment) + rtfbgr(prefs.rgb_digit) +
               rtfbgr(prefs.rgb_default) + "}";
-    int tabTwips = 1440 * 8 / GetDeviceCaps(::GetDC(0), LOGPIXELSX) * prefs.edit_tabs;
+    const int tabTwips = 1440 * 8 / GetDeviceCaps(::GetDC(nullptr), LOGPIXELSX) * prefs.edit_tabs;
     for (int k = 0; k < MAX_TAB_STOPS; ++k) is_line += "\\tx" + itoa(k * tabTwips) + ' ';
     is_stream = &in;
     is_curs = is_linenum = 0;
@@ -300,21 +301,21 @@ bool Editor::setText(istream &in) {
     return es.dwError == 0;
 }
 
-void Editor::setModified(bool n) {
+void Editor::setModified(const bool n) {
     editCtrl.SetModify(n);
 }
 
-void Editor::setCursor(int n) {
+void Editor::setCursor(const int n) {
     int row = (n >> 16) & 0xffff, col = n & 0xffff;
-    int pos = editCtrl.LineIndex(row) + col;
+    const int pos = editCtrl.LineIndex(row) + col;
     editCtrl.SetSel(pos, pos);
 }
 
-string Editor::getName() const {
+std::string Editor::getName() const {
     return name;
 }
 
-bool Editor::getText(ostream &out) {
+bool Editor::getText(std::ostream &out) {
     fixFmt(true);
     EDITSTREAM es;
     es.dwCookie = (DWORD) &out;
@@ -341,7 +342,8 @@ bool Editor::canCutCopy() {
     return selStart != selEnd;
 }
 
-bool Editor::canPaste() {
+bool Editor::canPaste() const
+{
     return editCtrl.CanPaste() ? true : false;
 }
 
@@ -364,7 +366,7 @@ void Editor::print() {
 
     SetMapMode(hdc, MM_TEXT);
 
-    FORMATRANGE fr = {0};
+    FORMATRANGE fr = {nullptr};
     fr.hdc = fr.hdcTarget = hdc;
     fr.rcPage.left = fr.rcPage.top = 0;
     fr.rcPage.right = (hr / px) * 1440;
@@ -425,11 +427,12 @@ void Editor::replace() {
     found = false;
 }
 
-bool Editor::canFind() {
-    return finder == 0;
+bool Editor::canFind() const
+{
+    return finder == nullptr;
 }
 
-bool Editor::findNext(bool wrap) {
+bool Editor::findNext(const bool wrap) {
     long start, end;
     editCtrl.GetSel(start, end);
 
@@ -449,7 +452,7 @@ bool Editor::findNext(bool wrap) {
         editCtrl.SetSel(t.chrgText.cpMin, t.chrgText.cpMax);
         return true;
     }
-    string s("Can't find \"");
+    std::string s("Can't find \"");
     s += findBuff;
     s += '\"';
     MessageBox(s.c_str(), "Text not found");
@@ -489,12 +492,12 @@ void Editor::unlock() {
     locked = false;
 }
 
-string Editor::getKeyword() {
+std::string Editor::getKeyword() {
     fixFmt(true);
     getSel();
-    int ln = editCtrl.LineFromChar(selStart);
+    const int ln = editCtrl.LineFromChar(selStart);
     int pos = selStart - editCtrl.LineIndex(ln);
-    string line = getLine(ln);
+    const std::string line = getLine(ln);
     if (pos > line.size()) return "";
 
     //ok, scan back until we have an isapha char preceded by a nonalnum/non '_' char
@@ -503,36 +506,38 @@ string Editor::getKeyword() {
         if (!isalpha(line[pos])) return "";
         int end = pos;
         while (end < line.size() && isid(line[end])) ++end;
-        string t = line.substr(pos, end - pos);
+        std::string t = line.substr(pos, end - pos);
         if (keyWordSet.find(t) != keyWordSet.end()) return t;
         if (!pos) return "";
         --pos;
     }
 }
 
-bool Editor::getModified() {
+bool Editor::getModified() const
+{
     return editCtrl.GetModify() ? true : false;
 }
 
-int Editor::getCursor() {
+int Editor::getCursor() const
+{
     long start, end;
     editCtrl.GetSel(start, end);
-    int row, col;
-    row = editCtrl.LineFromChar(start);
-    col = start - editCtrl.LineIndex(row);
+    int row = editCtrl.LineFromChar(start);
+    int col = start - editCtrl.LineIndex(row);
     return ((row) << 16) | (col);
 }
 
-void Editor::getCursor(int *row, int *col) {
+void Editor::getCursor(int *row, int *col) const
+{
     long start, end;
     editCtrl.GetSel(start, end);
     *row = editCtrl.LineFromChar(end);
     *col = end - editCtrl.LineIndex(*row);
 }
 
-void Editor::addKeyword(const string &s) {
+void Editor::addKeyword(const std::string &s) {
     keyWordSet.insert(s);
-    string t = s;
+    std::string t = s;
     for (int k = 0; k < t.size(); ++k) t[k] = tolower(t[k]);
     keyWordMap[t] = s;
 }
@@ -571,7 +576,7 @@ LRESULT Editor::onFind(WPARAM w, LPARAM l) {
         endFind();
         char buff[32];
         itoa(cnt, buff, 10);
-        string s(buff);
+        std::string s(buff);
         s += " occurances replaced";
         MessageBox(s.c_str(), "Replace All Done");
         editCtrl.HideSelection(false, false);
@@ -603,22 +608,23 @@ void Editor::OnKillFocus(CWnd *wnd) {
     fixFmt(true);
 }
 
-string Editor::getLine(int line) {
-    int idx1 = editCtrl.LineIndex(line);
+std::string Editor::getLine(const int line) const
+{
+    const int idx1 = editCtrl.LineIndex(line);
     int idx2 = editCtrl.LineIndex(line + 1);
     if (idx2 == -1) idx2 = editCtrl.GetTextLength();
-    int len = idx2 - idx1;
+    const int len = idx2 - idx1;
     char *buff = new char[len > 3 ? len + 1 : 4];
     *(int *) buff = len;
     int out = editCtrl.GetLine(line, buff);
     buff[len] = 0;
-    string t = string(buff);
+    std::string t = std::string(buff);
     delete[] buff;
     return t;
 }
 
-void Editor::funcSelected(int line) {
-    int pos = editCtrl.LineIndex(line);
+void Editor::funcSelected(const int line) {
+    const int pos = editCtrl.LineIndex(line);
     editCtrl.SetSel(editCtrl.GetTextLength() - 1, editCtrl.GetTextLength() - 1);
     editCtrl.SetSel(pos, pos);
     SetFocus();
@@ -645,31 +651,31 @@ void Editor::en_msgfilter(NMHDR *nmhdr, LRESULT *result) {
     *result = 0;
     getSel();
 
-    MSGFILTER *msg = (MSGFILTER *) nmhdr;
+    const MSGFILTER *msg = (MSGFILTER *) nmhdr;
 
     if (msg->msg == WM_RBUTTONDOWN) {
         CPoint p(LOWORD(msg->lParam), HIWORD(msg->lParam));
         ClientToScreen(&p);
-        CMenu *menu = blitzIDE.mainFrame->GetMenu();
+        const CMenu *menu = blitzIDE.mainFrame->GetMenu();
         CMenu *edit = menu->GetSubMenu(1);
         edit->TrackPopupMenu(TPM_LEFTALIGN, p.x, p.y, blitzIDE.mainFrame);
     } else if (msg->msg == WM_CHAR) {
         if (msg->wParam == '\t') {
-            int lineStart = editCtrl.LineFromChar(selStart);
-            int lineEnd = editCtrl.LineFromChar(selEnd);
+            const int lineStart = editCtrl.LineFromChar(selStart);
+            const int lineEnd = editCtrl.LineFromChar(selEnd);
             if (lineEnd <= lineStart) return;
             editCtrl.HideSelection(true, false);
             if (GetAsyncKeyState(VK_SHIFT) & 0x80000000) {
                 char buff[4];
                 for (int line = lineStart; line < lineEnd; ++line) {
-                    int n = editCtrl.LineIndex(line);
+                    const int n = editCtrl.LineIndex(line);
                     editCtrl.SetSel(n, n + 1);
                     editCtrl.GetSelText(buff);
                     if (buff[0] == '\t') editCtrl.ReplaceSel("", true);
                 }
             } else {
                 for (int line = lineStart; line < lineEnd; ++line) {
-                    int n = editCtrl.LineIndex(line);
+                    const int n = editCtrl.LineIndex(line);
                     editCtrl.SetSel(n, n);
                     editCtrl.ReplaceSel("\t", true);
                 }
@@ -684,9 +690,9 @@ void Editor::en_msgfilter(NMHDR *nmhdr, LRESULT *result) {
         if (msg->wParam == 13) {
             if (selStart != selEnd) return;
             int k;
-            int ln = editCtrl.LineFromChar(selStart);
-            int pos = selStart - editCtrl.LineIndex(ln);
-            string line = getLine(ln);
+            const int ln = editCtrl.LineFromChar(selStart);
+            const int pos = selStart - editCtrl.LineIndex(ln);
+            std::string line = getLine(ln);
             if (pos > line.size()) return;
             for (k = 0; k < pos && line[k] == '\t'; ++k) {}
             line = "\r\n" + line.substr(0, k) + '\0';
@@ -718,10 +724,10 @@ void Editor::en_change() {
     getSel();
 
     int begin = editCtrl.LineFromChar(selStart);
-    int end = begin + 1;
+    const int end = begin + 1;
 
-    int lineCount = editCtrl.GetLineCount();
-    int delta = lineCount - fmtLineCount;
+    const int lineCount = editCtrl.GetLineCount();
+    const int delta = lineCount - fmtLineCount;
 
     if (delta > 0) {
         begin -= delta;
@@ -732,7 +738,7 @@ void Editor::en_change() {
         typeList.remove(begin, end);
         labsList.remove(begin, end);
     } else if (delta < 0) {
-        int t = end - delta;
+        const int t = end - delta;
         funcList.remove(begin, t);
         typeList.remove(begin, t);
         labsList.remove(begin, t);
@@ -755,20 +761,20 @@ void Editor::en_change() {
     cursorMoved();
 }
 
-void Editor::setFormat(int from, int to, int color, const string &s) {
+void Editor::setFormat(const int from, const int to, const int color, const std::string &s) {
     editCtrl.SetSel(from, to);
     if (s.size()) {
         char buff[256];
         editCtrl.GetSelText(buff);
         buff[to - from] = 0;
-        if (string(buff) != s) {
+        if (std::string(buff) != s) {
             editCtrl.ReplaceSel(s.c_str(), true);
             editCtrl.SetSel(from, to);
         }
     }
     CHARFORMAT fmt;
     fmt.cbSize = sizeof(fmt);
-    DWORD t = editCtrl.GetSelectionCharFormat(fmt);
+    const DWORD t = editCtrl.GetSelectionCharFormat(fmt);
     if ((t & CFM_COLOR) && fmt.crTextColor == color) return;
     fmt.dwMask = CFM_COLOR | CFM_PROTECTED;
     fmt.dwEffects = CFE_PROTECTED;
@@ -777,11 +783,11 @@ void Editor::setFormat(int from, int to, int color, const string &s) {
 }
 
 void Editor::formatStreamLine() {
-    string out;
+    std::string out;
     char cf = '0';
     for (int k = 0; k < is_line.size();) {
-        int from = k;
-        char pf = cf;
+        const int from = k;
+        const char pf = cf;
         int c = is_line[k], is_sz = is_line.size();
         if (!isgraph(c)) {
             for (++k; k < is_sz && !isgraph(is_line[k]); ++k) {}
@@ -816,7 +822,7 @@ void Editor::formatStreamLine() {
     if (is_line[0] == 'F' && is_line.find("Function") == 0) {
         for (int k = 8; k < is_line.size(); ++k) {
             if (isalpha(is_line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < is_line.size() && isid(is_line[k]); ++k) {}
                 funcList.insert(is_linenum, is_line.substr(start, k - start));
                 break;
@@ -825,7 +831,7 @@ void Editor::formatStreamLine() {
     } else if (is_line[0] == 'T' && is_line.find("Type") == 0) {
         for (int k = 4; k < is_line.size(); ++k) {
             if (isalpha(is_line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < is_line.size() && isid(is_line[k]); ++k) {}
                 typeList.insert(is_linenum, is_line.substr(start, k - start));
                 break;
@@ -834,7 +840,7 @@ void Editor::formatStreamLine() {
     } else if (is_line[0] == '.') {
         for (int k = 1; k < is_line.size(); ++k) {
             if (isalpha(is_line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < is_line.size() && isid(is_line[k]); ++k) {}
                 labsList.insert(is_linenum, is_line.substr(start, k - start));
                 break;
@@ -844,12 +850,12 @@ void Editor::formatStreamLine() {
     is_line = out + "\\line ";
 }
 
-void Editor::fixFmt(bool fmt) {
+void Editor::fixFmt(const bool fmt) {
     if (lineToFmt < 0 || fmtBusy) return;
     fmtBusy = true;
     editCtrl.HideSelection(true, false);
     getSel();
-    long start = selStart;
+    const long start = selStart;
     if (fmt) selStart = -1;
 
     suspendUndo();
@@ -862,19 +868,19 @@ void Editor::fixFmt(bool fmt) {
     fmtBusy = false;
 }
 
-void Editor::formatLine(int ln) {
+void Editor::formatLine(const int ln) {
     if (ln < 0 || ln >= editCtrl.GetLineCount()) return;
 
     lineToFmt = -1;
-    int pos = editCtrl.LineIndex(ln);
-    string tline = getLine(ln);
-    string line = tolower(tline);
+    const int pos = editCtrl.LineIndex(ln);
+    const std::string tline = getLine(ln);
+    const std::string line = tolower(tline);
 
-    int *cf = 0;
-    string rep;
+    int *cf = nullptr;
+    std::string rep;
     for (int k = 0; k < line.size();) {
         rep.resize(0);
-        int *pf = cf;
+        const int *pf = cf;
         int from = k, c = line[k], sz = line.size();
         if (!isgraph(c)) {
             for (++k; k < sz && !isgraph(line[k]); ++k) {}
@@ -891,9 +897,9 @@ void Editor::formatLine(int ln) {
         } else if (isalpha(c)) {        //ident?
             for (++k; k < sz && isid(line[k]); ++k) {}
             cf = &prefs.rgb_ident;
-            pf = 0;
+            pf = nullptr;
             if (selStart <= pos + from || selStart > pos + k) {
-                map<string, string>::iterator it = keyWordMap.find(line.substr(from, k - from));
+                std::map<std::string, std::string>::iterator it = keyWordMap.find(line.substr(from, k - from));
                 if (it != keyWordMap.end()) {
                     rep = it->second;
                     cf = &prefs.rgb_keyword;
@@ -911,7 +917,7 @@ void Editor::formatLine(int ln) {
     if (line[0] == 'f' && line.find("function") == 0) {
         for (int k = 8; k < line.size(); ++k) {
             if (isalpha(line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < line.size() && isid(line[k]); ++k) {}
                 funcList.insert(ln, tline.substr(start, k - start));
                 break;
@@ -920,7 +926,7 @@ void Editor::formatLine(int ln) {
     } else if (line[0] == 't' && line.find("type") == 0) {
         for (int k = 4; k < line.size(); ++k) {
             if (isalpha(line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < line.size() && isid(line[k]); ++k) {}
                 typeList.insert(ln, tline.substr(start, k - start));
                 break;
@@ -929,7 +935,7 @@ void Editor::formatLine(int ln) {
     } else if (line[0] == '.') {
         for (int k = 1; k < line.size(); ++k) {
             if (isalpha(line[k])) {
-                int start = k;
+                const int start = k;
                 for (++k; k < line.size() && isid(line[k]); ++k) {}
                 labsList.insert(ln, tline.substr(start, k - start));
                 break;

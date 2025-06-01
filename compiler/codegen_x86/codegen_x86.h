@@ -5,30 +5,30 @@ struct Tile;
 
 class Codegen_x86 : public Codegen {
 public:
-    Codegen_x86(ostream &out, bool debug);
+    Codegen_x86(std::ostream &out, bool debug);
 
-    virtual void enter(const string &l, int frameSize);
+    void enter(const std::string &l, int frameSize) override;
 
-    virtual void code(TNode *code);
+    void code(TNode *code) override;
 
-    virtual void leave(TNode *cleanup, int pop_sz);
+    void leave(TNode *cleanup, int pop_sz) override;
 
-    virtual void label(const string &l);
+    void label(const std::string &l) override;
 
-    virtual void i_data(int i, const string &l);
+    void i_data(int i, const std::string &l) override;
 
-    virtual void s_data(const string &s, const string &l);
+    void s_data(const std::string &s, const std::string &l) override;
 
-    virtual void p_data(const string &p, const string &l);
+    void p_data(const std::string &p, const std::string &l) override;
 
-    virtual void align_data(int n);
+    void align_data(int n) override;
 
-    virtual void flush();
+    void flush() override;
 
 private:
     bool inCode;
 
-    Tile *genCompare(TNode *t, string &func, bool negate);
+    Tile *genCompare(TNode *t, std::string &func, bool negate);
 
     Tile *munch(TNode *t);        //munch and discard result
     Tile *munchReg(TNode *t);        //munch and put result in a CPU reg

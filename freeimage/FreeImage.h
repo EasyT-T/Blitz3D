@@ -427,8 +427,8 @@ DLL_API void DLL_CALLCONV FreeImage_Unload(FIBITMAP *dib);
 
 // Plugin Interface --------------------------------------------------------
 
-DLL_API FREE_IMAGE_FORMAT DLL_CALLCONV FreeImage_RegisterLocalPlugin(FI_InitProc proc_address, const char *format = 0, const char *description = 0, const char *extension = 0, const char *regexpr = 0);
-DLL_API FREE_IMAGE_FORMAT DLL_CALLCONV FreeImage_RegisterExternalPlugin(const char *path, const char *format = 0, const char *description = 0, const char *extension = 0, const char *regexpr = 0);
+DLL_API FREE_IMAGE_FORMAT DLL_CALLCONV FreeImage_RegisterLocalPlugin(FI_InitProc proc_address, const char *format = nullptr, const char *description = nullptr, const char *extension = nullptr, const char *regexpr = nullptr);
+DLL_API FREE_IMAGE_FORMAT DLL_CALLCONV FreeImage_RegisterExternalPlugin(const char *path, const char *format = nullptr, const char *description = nullptr, const char *extension = nullptr, const char *regexpr = nullptr);
 DLL_API int DLL_CALLCONV FreeImage_SetPluginEnabled(FREE_IMAGE_FORMAT fif, BOOL enable);
 DLL_API int DLL_CALLCONV FreeImage_IsPluginEnabled(FREE_IMAGE_FORMAT fif);
 DLL_API int DLL_CALLCONV FreeImage_GetFIFCount();

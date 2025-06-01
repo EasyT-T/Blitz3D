@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "pivot.h"
+#include "std.h"
 
 Pivot::Pivot() {
 }

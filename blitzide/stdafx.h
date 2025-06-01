@@ -6,21 +6,20 @@
 
 #pragma warning(disable:4786)
 
-#include <afxwin.h>         // Core
-#include <afxrich.h>        // CRich edit
+#include <afxext.h>
 #include <afxhtml.h>        // CHtmlView
+#include <afxrich.h>        // CRich edit
+#include <afxwin.h>         // Core
 
 #include "../stdutil/stdutil.h"
 
-#include <map>
-#include <set>
-#include <list>
-#include <vector>
-#include <string>
-#include <sstream>
 #include <fstream>
 #include <iostream>
-
-using namespace std;
+#include <list>
+#include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #endif

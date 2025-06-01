@@ -4,11 +4,11 @@
 
 #include <list>
 
-#include "model.h"
 #include "camera.h"
 #include "light.h"
-#include "mirror.h"
 #include "listener.h"
+#include "mirror.h"
+#include "model.h"
 
 class World {
 public:
@@ -48,8 +48,8 @@ private:
         int dst_type, method, response;
     };
 
-    vector<CollInfo> _collInfo[1000];
-    vector<Object *> _objsByType[1000];
+    std::vector<CollInfo> _collInfo[1000];
+    std::vector<Object *> _objsByType[1000];
 
     void collide(Object *src);
 

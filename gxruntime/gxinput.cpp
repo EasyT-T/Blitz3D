@@ -1,6 +1,6 @@
-#include "std.h"
 #include "gxinput.h"
 #include "gxruntime.h"
+#include "std.h"
 
 #include <dinput.h>
 
@@ -17,7 +17,7 @@ public:
     {
     }
 
-    virtual ~Device()
+    ~Device() override
     {
         if (device) device->Release();
     }
@@ -42,7 +42,7 @@ public:
     {
     }
 
-    void update()
+    void update() override
     {
         if (!device) return;
 
@@ -51,13 +51,13 @@ public:
             input->runtime->idle();
             return;
         }
-        int k, cnt = 32;
-        DIDEVICEOBJECTDATA data[32], *curr;
+        int cnt = 32;
+        DIDEVICEOBJECTDATA data[32];
         if (device->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), data, (DWORD*)&cnt, 0) < 0) return;
-        curr = data;
-        for (k = 0; k < cnt; ++curr, ++k)
+        DIDEVICEOBJECTDATA* curr = data;
+        for (int k = 0; k < cnt; ++curr, ++k)
         {
-            int n = curr->dwOfs;
+            const int n = curr->dwOfs;
             if (!n || n > 255) continue;
             if (curr->dwData & 0x80) downEvent(n);
             else upEvent(n);
@@ -72,7 +72,7 @@ public:
     {
     }
 
-    void update()
+    void update() override
     {
         if (!device) return;
 
@@ -83,7 +83,7 @@ public:
         }
         DIMOUSESTATE state;
         if (device->GetDeviceState(sizeof(state), &state) < 0) return;
-        if (gxGraphics* g = input->runtime->graphics)
+        if (const gxGraphics* g = input->runtime->graphics)
         {
             int mx = axis_states[0] + state.lX;
             int my = axis_states[1] + state.lY;
@@ -108,7 +108,7 @@ public:
     int type, poll_time;
     int mins[12], maxs[12];
 
-    Joystick(gxInput* i,IDirectInputDevice8* d, int t): Device(i, d), type(t), poll_time(0)
+    Joystick(gxInput* i,IDirectInputDevice8* d, const int t): Device(i, d), type(t), poll_time(0)
     {
         for (int k = 0; k < 12; ++k)
         {
@@ -129,9 +129,9 @@ public:
         }
     }
 
-    void update()
+    void update() override
     {
-        unsigned tm = timeGetTime();
+        const unsigned tm = timeGetTime();
         if (tm - poll_time < 3) return;
         if (device->Poll() < 0)
         {
@@ -163,14 +163,14 @@ public:
 
 static Keyboard* keyboard;
 static Mouse* mouse;
-static vector<Joystick*> joysticks;
+static std::vector<Joystick*> joysticks;
 
 static Keyboard* createKeyboard(gxInput* input)
 {
-    return d_new Keyboard(input, 0);
+    return d_new Keyboard(input, nullptr);
 
     IDirectInputDevice8* dev;
-    if (input->dirInput->CreateDevice(GUID_SysKeyboard, (IDirectInputDevice8**)&dev, 0) >= 0)
+    if (input->dirInput->CreateDevice(GUID_SysKeyboard, (IDirectInputDevice8**)&dev, nullptr) >= 0)
     {
         if (dev->SetCooperativeLevel(input->runtime->hwnd,DISCL_FOREGROUND | DISCL_EXCLUSIVE) >= 0)
         {
@@ -209,15 +209,15 @@ static Keyboard* createKeyboard(gxInput* input)
     {
         input->runtime->debugInfo("keyboard: CreateDevice failed");
     }
-    return 0;
+    return nullptr;
 }
 
 static Mouse* createMouse(gxInput* input)
 {
-    return d_new Mouse(input, 0);
+    return d_new Mouse(input, nullptr);
 
     IDirectInputDevice8* dev;
-    if (input->dirInput->CreateDevice(GUID_SysMouse, (IDirectInputDevice8**)dev, 0) >= 0)
+    if (input->dirInput->CreateDevice(GUID_SysMouse, (IDirectInputDevice8**)dev, nullptr) >= 0)
     {
         if (dev->SetCooperativeLevel(input->runtime->hwnd,DISCL_FOREGROUND | DISCL_EXCLUSIVE) >= 0)
         {
@@ -246,28 +246,28 @@ static Mouse* createMouse(gxInput* input)
     {
         input->runtime->debugInfo("mouse: CreateDevice failed");
     }
-    return 0;
+    return nullptr;
 }
 
-static Joystick* createJoystick(gxInput* input, LPCDIDEVICEINSTANCE devinst)
+static Joystick* createJoystick(gxInput* input, const LPCDIDEVICEINSTANCE devinst)
 {
     IDirectInputDevice8* dev;
-    if (input->dirInput->CreateDevice(devinst->guidInstance, (IDirectInputDevice8**)&dev, 0) >= 0)
+    if (input->dirInput->CreateDevice(devinst->guidInstance, (IDirectInputDevice8**)&dev, nullptr) >= 0)
     {
         if (dev->SetCooperativeLevel(input->runtime->hwnd,DISCL_FOREGROUND | DISCL_EXCLUSIVE) >= 0)
         {
             if (dev->SetDataFormat(&c_dfDIJoystick) >= 0)
             {
-                int t = ((devinst->dwDevType >> 8) & 0xff) == DI8DEVTYPE_GAMEPAD ? 1 : 2;
+                const int t = ((devinst->dwDevType >> 8) & 0xff) == DI8DEVTYPE_GAMEPAD ? 1 : 2;
                 return d_new Joystick(input, dev, t);
             }
         }
         dev->Release();
     }
-    return 0;
+    return nullptr;
 }
 
-static BOOL CALLBACK enumJoystick(LPCDIDEVICEINSTANCE devinst, LPVOID pvRef)
+static BOOL CALLBACK enumJoystick(const LPCDIDEVICEINSTANCE devinst, const LPVOID pvRef)
 {
     if ((devinst->dwDevType & 0xff) != DI8DEVTYPE_JOYSTICK) return DIENUM_CONTINUE;
 
@@ -297,27 +297,27 @@ gxInput::~gxInput()
     dirInput->Release();
 }
 
-void gxInput::wm_keydown(int key)
+void gxInput::wm_keydown(const int key)
 {
     if (keyboard) keyboard->downEvent(key);
 }
 
-void gxInput::wm_keyup(int key)
+void gxInput::wm_keyup(const int key)
 {
     if (keyboard) keyboard->upEvent(key);
 }
 
-void gxInput::wm_mousedown(int key)
+void gxInput::wm_mousedown(const int key)
 {
     if (mouse) mouse->downEvent(key);
 }
 
-void gxInput::wm_mouseup(int key)
+void gxInput::wm_mouseup(const int key)
 {
     if (mouse) mouse->upEvent(key);
 }
 
-void gxInput::wm_mousemove(int x, int y)
+void gxInput::wm_mousemove(const int x, const int y)
 {
     if (mouse)
     {
@@ -326,7 +326,7 @@ void gxInput::wm_mousemove(int x, int y)
     }
 }
 
-void gxInput::wm_mousewheel(int dz)
+void gxInput::wm_mousewheel(const int dz)
 {
     if (mouse) mouse->axis_states[2] += dz;
 }
@@ -355,7 +355,7 @@ void gxInput::unacquire()
     if (mouse) mouse->unacquire();
 }
 
-void gxInput::moveMouse(int x, int y)
+void gxInput::moveMouse(const int x, const int y) const
 {
     if (!mouse) return;
     mouse->axis_states[0] = x;
@@ -373,12 +373,12 @@ gxDevice* gxInput::getKeyboard() const
     return keyboard;
 }
 
-gxDevice* gxInput::getJoystick(int n) const
+gxDevice* gxInput::getJoystick(const int n) const
 {
     return n >= 0 && n < joysticks.size() ? joysticks[n] : 0;
 }
 
-int gxInput::getJoystickType(int n) const
+int gxInput::getJoystickType(const int n) const
 {
     return n >= 0 && n < joysticks.size() ? joysticks[n]->type : 0;
 }
@@ -404,7 +404,7 @@ int gxInput::toAscii(int scan) const
     case DIK_RIGHT: return ASC_RIGHT;
     }
     scan &= 0x7f;
-    int virt = MapVirtualKey(scan, 1);
+    const int virt = MapVirtualKey(scan, 1);
     if (!virt) return 0;
 
     static unsigned char mat[256];

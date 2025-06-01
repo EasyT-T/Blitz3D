@@ -1,7 +1,7 @@
 
-#include "std.h"
-#include <queue>
 #include "world.h"
+#include <queue>
+#include "std.h"
 
 //0=tris compared for collision
 //1=max proj err of terrain
@@ -10,7 +10,7 @@ float stats3d[10];
 extern gxScene *gx_scene;
 extern gxRuntime *gx_runtime;
 
-static vector<Object *> _enabled, _visible;
+static std::vector<Object *> _enabled, _visible;
 
 static void enumEnabled() {
     _enabled.clear();
@@ -28,9 +28,9 @@ static void enumVisible() {
 
 /******************************* Update *******************************/
 
-static vector<Object *> _objsByType[1000];
+static std::vector<Object *> _objsByType[1000];
 
-static vector<ObjCollision *> free_colls, used_colls;
+static std::vector<ObjCollision *> free_colls, used_colls;
 
 static ObjCollision *allocObjColl(Object *with, const Vector &coords, const Collision &coll) {
     ObjCollision *c;
@@ -47,12 +47,10 @@ static ObjCollision *allocObjColl(Object *with, const Vector &coords, const Coll
     return c;
 }
 
-static void collided(Object *src, Object *dest, const Line &line, const Collision &coll, float y_scale) {
-
-    ObjCollision *c;
+static void collided(Object *src, Object *dest, const Line &line, const Collision &coll, const float y_scale) {
     const Vector &coords = line * coll.time - coll.normal * src->getCollisionRadii().x;
 
-    c = allocObjColl(dest, coords, coll);
+    ObjCollision* c = allocObjColl(dest, coords, coll);
     c->coords.y *= y_scale;
     src->addCollision(c);
 
@@ -67,20 +65,20 @@ void World::clearCollisions() {
     }
 }
 
-void World::addCollision(int src_type, int dst_type, int method, int response) {
+void World::addCollision(const int src_type, const int dst_type, const int method, const int response) {
 
-    vector<CollInfo> &info = _collInfo[src_type];
+    const std::vector<CollInfo> &info = _collInfo[src_type];
     for (int k = 0; k < info.size(); ++k) {
         const CollInfo &t = info[k];
         if (dst_type == t.dst_type) return;
     }
 
-    CollInfo co = {dst_type, method, response};
+    const CollInfo co = {dst_type, method, response};
     _collInfo[src_type].push_back(co);
 }
 
 bool
-World::hitTest(const Line &line, float radius, Object *obj, const Transform &tf, int method, Collision *curr_coll) {
+World::hitTest(const Line &line, const float radius, Object *obj, const Transform &tf, const int method, Collision *curr_coll) {
     switch (method) {
         case COLLISION_METHOD_SPHERE:
             return curr_coll->sphereCollide(line, radius, tf.v, obj->getCollisionRadii().x);
@@ -103,14 +101,11 @@ bool World::checkLOS(Object *src, Object *dest) {
 
     enumEnabled();
 
-    Object *coll_obj = 0;
     Collision curr_coll;
 
-    Line line(src->getWorldPosition(), dest->getWorldPosition() - src->getWorldPosition());
+    const Line line(src->getWorldPosition(), dest->getWorldPosition() - src->getWorldPosition());
 
-    vector<Object *>::const_iterator it;
-
-    for (it = _enabled.begin(); it != _enabled.end(); ++it) {
+    for (std::vector<Object*>::const_iterator it = _enabled.begin(); it != _enabled.end(); ++it) {
         Object *obj = *it;
 
         if (obj == src || obj == dest || !obj->getPickGeometry() || !obj->getObscurer()) continue;
@@ -122,14 +117,13 @@ bool World::checkLOS(Object *src, Object *dest) {
     return true;
 }
 
-Object *World::traceRay(const Line &line, float radius, ObjCollision *curr_coll) {
+Object *World::traceRay(const Line &line, const float radius, ObjCollision *curr_coll) {
 
     enumEnabled();
 
-    Object *coll_obj = 0;
+    Object *coll_obj = nullptr;
 
-    vector<Object *>::const_iterator it;
-    for (it = _enabled.begin(); it != _enabled.end(); ++it) {
+    for (std::vector<Object*>::const_iterator it = _enabled.begin(); it != _enabled.end(); ++it) {
         Object *obj = *it;
 
         if (!obj->getPickGeometry()) continue;
@@ -185,20 +179,20 @@ void World::collide(Object *src) {
     float td = coll_line.d.length();
     float td_xz = Vector(coll_line.d.x, 0, coll_line.d.z).length();
 
-    const vector<CollInfo> &collinfos = _collInfo[src->getCollisionType()];
+    const std::vector<CollInfo> &collinfos = _collInfo[src->getCollisionType()];
 
     int hits = 0;
     for (;;) {
 
         Collision coll;
-        Object *coll_obj = 0;
-        vector<CollInfo>::const_iterator coll_it, coll_info;
+        Object *coll_obj = nullptr;
+        std::vector<CollInfo>::const_iterator coll_it, coll_info;
 
         for (coll_it = collinfos.begin(); coll_it != collinfos.end(); ++coll_it) {
 
-            vector<Object *>::const_iterator dst_it;
+            std::vector<Object *>::const_iterator dst_it;
 
-            const vector<Object *> &dst_objs = _objsByType[coll_it->dst_type];
+            const std::vector<Object *> &dst_objs = _objsByType[coll_it->dst_type];
 
             for (dst_it = dst_objs.begin(); dst_it != dst_objs.end(); ++dst_it) {
 
@@ -480,7 +474,7 @@ void World::collide( Object *src ){
 }
 */
 
-void World::update(float elapsed) {
+void World::update(const float elapsed) {
 
     stats3d[0] = 0;
 
@@ -490,11 +484,11 @@ void World::update(float elapsed) {
 
     enumEnabled();
 
-    vector<Object *>::const_iterator it;
+    std::vector<Object *>::const_iterator it;
     for (it = _enabled.begin(); it != _enabled.end(); ++it) {
         Object *o = *it;
 
-        if (int n = o->getCollisionType()) {
+        if (const int n = o->getCollisionType()) {
             _objsByType[n].push_back(o);
         }
     }
@@ -518,12 +512,13 @@ void World::update(float elapsed) {
 
 static Transform cam_tform;        //current camera transform
 
-static vector<gxLight *> _lights;
-static vector<Mirror *> _mirrors;
-static vector<Listener *> _listeners;
+static std::vector<gxLight *> _lights;
+static std::vector<Mirror *> _mirrors;
+static std::vector<Listener *> _listeners;
 
 struct OrderComp {
-    bool operator()(Object *a, Object *b) {
+    bool operator()(Object *a, Object *b) const
+    {
         return a->getOrder() < b->getOrder();
     }
 };
@@ -536,25 +531,24 @@ struct TransComp {
     }
 };
 
-static vector<Model *> ord_mods, unord_mods;
+static std::vector<Model *> ord_mods, unord_mods;
 
-static priority_queue<Model *, vector<Model *>, OrderComp> ord_que;
+static std::priority_queue<Model *, std::vector<Model *>, OrderComp> ord_que;
 
-static priority_queue<Camera *, vector<Camera *>, OrderComp> cam_que;
+static std::priority_queue<Camera *, std::vector<Camera *>, OrderComp> cam_que;
 
-static priority_queue<Model *, vector<Model *>, TransComp> transparents;
+static std::priority_queue<Model *, std::vector<Model *>, TransComp> transparents;
 
 void World::capture() {
 
     enumVisible();
 
-    vector<Object *>::const_iterator it;
-    for (it = _visible.begin(); it != _visible.end(); ++it) {
+    for (std::vector<Object*>::const_iterator it = _visible.begin(); it != _visible.end(); ++it) {
         (*it)->capture();
     }
 }
 
-void World::render(float tween) {
+void World::render(const float tween) {
 
     //set render tweens, and build ordered and unordered model lists...
     ord_mods.clear();
@@ -567,13 +561,12 @@ void World::render(float tween) {
 
     enumVisible();
 
-    vector<Object *>::const_iterator it;
-    for (it = _visible.begin(); it != _visible.end(); ++it) {
+    for (std::vector<Object*>::const_iterator it = _visible.begin(); it != _visible.end(); ++it) {
         Object *o = *it;
 
         if (!o->beginRender(tween)) continue;
 
-        if (Light *t = o->getLight()) _lights.push_back(t->getGxLight());
+        if (const Light *t = o->getLight()) _lights.push_back(t->getGxLight());
         else if (Camera *t = o->getCamera()) cam_que.push(t);
         else if (Mirror *t = o->getMirror()) _mirrors.push_back(t);
         else if (Listener *t = o->getListener()) _listeners.push_back(t);
@@ -595,20 +588,19 @@ void World::render(float tween) {
 
         if (!cam->beginRenderFrame()) continue;
 
-        vector<Mirror *>::const_iterator mir_it;
+        std::vector<Mirror *>::const_iterator mir_it;
         for (mir_it = _mirrors.begin(); mir_it != _mirrors.end(); ++mir_it) {
             render(cam, *mir_it);
         }
 
-        render(cam, 0);
+        render(cam, nullptr);
     }
 
     gx_scene->end();
 
 //	gx_runtime->debugLog( "End RenderWorld" );
 
-    vector<Listener *>::const_iterator lis_it;
-    for (lis_it = _listeners.begin(); lis_it != _listeners.end(); ++lis_it) {
+    for (std::vector<Listener*>::const_iterator lis_it = _listeners.begin(); lis_it != _listeners.end(); ++lis_it) {
         (*lis_it)->renderListener();
     }
 }
@@ -628,7 +620,7 @@ void World::render(Camera *cam, Mirror *mirror) {
     gx_scene->setViewMatrix((gxScene::Matrix *) &(-cam_tform));
 
     //initialize render context
-    RenderContext rc(cam_tform, cam->getFrustum(), mirror != 0);
+    const RenderContext rc(cam_tform, cam->getFrustum(), mirror != nullptr);
 
     //draw everything in order
     int ord = 0;
@@ -660,13 +652,13 @@ void World::render(Camera *cam, Mirror *mirror) {
 
 void World::render(Model *mod, const RenderContext &rc) {
 
-    bool trans = mod->render(rc);
+    const bool trans = mod->render(rc);
 
     if (mod->queueSize(Model::QUEUE_OPAQUE)) {
         if (mod->getRenderSpace() == Model::RENDER_SPACE_LOCAL) {
             gx_scene->setWorldMatrix((gxScene::Matrix *) &mod->getRenderTform());
         } else {
-            gx_scene->setWorldMatrix(0);
+            gx_scene->setWorldMatrix(nullptr);
         }
         mod->renderQueue(Model::QUEUE_OPAQUE);
     }
@@ -686,7 +678,7 @@ void World::flushTransparent() {
             gx_scene->setWorldMatrix((gxScene::Matrix *) &mod->getRenderTform());
             local = true;
         } else if (local) {
-            gx_scene->setWorldMatrix(0);
+            gx_scene->setWorldMatrix(nullptr);
             local = false;
         }
         mod->renderQueue(Model::QUEUE_TRANSPARENT);

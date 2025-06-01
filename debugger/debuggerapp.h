@@ -4,15 +4,15 @@
 
 #include "mainframe.h"
 
-class DebuggerApp : public CWinApp {
-    MainFrame *main_frame;
+class DebuggerApp final : public CWinApp {
+    MainFrame * main_frame = nullptr;
 
 public:
-    ~DebuggerApp();
+    ~DebuggerApp() override;
 
-    virtual BOOL InitInstance();
+    BOOL InitInstance() override;
 
-    virtual int ExitInstance();
+    int ExitInstance() override;
 
     MainFrame *mainFrame();
 };

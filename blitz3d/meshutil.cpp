@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "meshutil.h"
+#include "std.h"
 
 MeshModel *MeshUtil::createCube(const Brush &b) {
     static Vector norms[] = {
@@ -39,7 +39,7 @@ MeshModel *MeshUtil::createCube(const Brush &b) {
     return m;
 }
 
-MeshModel *MeshUtil::createSphere(const Brush &b, int segs) {
+MeshModel *MeshUtil::createSphere(const Brush &b, const int segs) {
 
     int h_segs = segs * 2, v_segs = segs;
 
@@ -57,9 +57,9 @@ MeshModel *MeshUtil::createSphere(const Brush &b, int segs) {
         s->addVertex(v);
     }
     for (k = 1; k < v_segs; ++k) {
-        float pitch = k * PI / v_segs - HALFPI;
+        const float pitch = k * PI / v_segs - HALFPI;
         for (int j = 0; j <= h_segs; ++j) {
-            float yaw = (j % h_segs) * TWOPI / h_segs;
+            const float yaw = (j % h_segs) * TWOPI / h_segs;
             v.coords = v.normal = rotationMatrix(pitch, yaw, 0).k;
             v.tex_coords[0][0] = v.tex_coords[1][0] = float(j) / float(h_segs);
             v.tex_coords[0][1] = v.tex_coords[1][1] = float(k) / float(v_segs);
@@ -99,7 +99,7 @@ MeshModel *MeshUtil::createSphere(const Brush &b, int segs) {
     return m;
 }
 
-MeshModel *MeshUtil::createCylinder(const Brush &b, int segs, bool solid) {
+MeshModel *MeshUtil::createCylinder(const Brush &b, const int segs, const bool solid) {
 
     MeshModel *m = d_new MeshModel();
     Surface::Vertex v;
@@ -108,7 +108,7 @@ MeshModel *MeshUtil::createCylinder(const Brush &b, int segs, bool solid) {
     Surface *s = m->createSurface(b);
     int k;
     for (k = 0; k <= segs; ++k) {
-        float yaw = (k % segs) * TWOPI / segs;
+        const float yaw = (k % segs) * TWOPI / segs;
         v.coords = rotationMatrix(0, yaw, 0).k;
         v.coords.y = 1;
         v.normal = Vector(v.coords.x, 0, v.coords.z);
@@ -135,7 +135,7 @@ MeshModel *MeshUtil::createCylinder(const Brush &b, int segs, bool solid) {
     s = m->createSurface(b);
 
     for (k = 0; k < segs; ++k) {
-        float yaw = k * TWOPI / segs;
+        const float yaw = k * TWOPI / segs;
         v.coords = rotationMatrix(0, yaw, 0).k;
         v.coords.y = 1;
         v.normal = Vector(0, 1, 0);
@@ -160,13 +160,12 @@ MeshModel *MeshUtil::createCylinder(const Brush &b, int segs, bool solid) {
     return m;
 }
 
-MeshModel *MeshUtil::createCone(const Brush &b, int segs, bool solid) {
+MeshModel *MeshUtil::createCone(const Brush &b, const int segs, const bool solid) {
     MeshModel *m = d_new MeshModel();
     Surface::Vertex v;
     Surface::Triangle t;
 
-    Surface *s;
-    s = m->createSurface(b);
+    Surface* s = m->createSurface(b);
     int k;
     v.coords = v.normal = Vector(0, 1, 0);
     for (k = 0; k < segs; ++k) {
@@ -175,7 +174,7 @@ MeshModel *MeshUtil::createCone(const Brush &b, int segs, bool solid) {
         s->addVertex(v);
     }
     for (k = 0; k <= segs; ++k) {
-        float yaw = (k % segs) * TWOPI / segs;
+        const float yaw = (k % segs) * TWOPI / segs;
         v.coords = yawMatrix(yaw).k;
         v.coords.y = -1;
         v.normal = Vector(v.coords.x, 0, v.coords.z);
@@ -192,7 +191,7 @@ MeshModel *MeshUtil::createCone(const Brush &b, int segs, bool solid) {
     if (!solid) return m;
     s = m->createSurface(b);
     for (k = 0; k < segs; ++k) {
-        float yaw = k * TWOPI / segs;
+        const float yaw = k * TWOPI / segs;
         v.coords = yawMatrix(yaw).k;
         v.coords.y = -1;
         v.normal = Vector(v.coords.x, 0, v.coords.z);
@@ -209,19 +208,19 @@ MeshModel *MeshUtil::createCone(const Brush &b, int segs, bool solid) {
     return m;
 }
 
-void MeshUtil::lightMesh(MeshModel *m, const Vector &pos, const Vector &rgb, float range) {
+void MeshUtil::lightMesh(MeshModel *m, const Vector &pos, const Vector &rgb, const float range) {
     if (range) {
-        float att = 1.0f / range;
+        const float att = 1.0f / range;
         const MeshModel::SurfaceList &surfs = m->getSurfaces();
         for (int k = 0; k < surfs.size(); ++k) {
             Surface *s = surfs[k];
             for (int j = 0; j < s->numVertices(); ++j) {
                 const Surface::Vertex &v = s->getVertex(j);
                 Vector lv = pos - v.coords;
-                float dp = v.normal.normalized().dot(lv);
+                const float dp = v.normal.normalized().dot(lv);
                 if (dp <= 0) continue;
-                float d = lv.length();
-                float i = 1 / (d * att) * (dp / d);
+                const float d = lv.length();
+                const float i = 1 / (d * att) * (dp / d);
                 s->setColor(j, s->getColor(j) + rgb * i);
             }
         }

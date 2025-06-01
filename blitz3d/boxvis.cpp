@@ -54,12 +54,12 @@ static int faceVis(const Face &src, const Face &dest) {
 
     for (int k = 0; k < 4; ++k) {
         for (int j = 0; j < 4; ++j) {
-            int n = k * 4 + j;
+            const int n = k * 4 + j;
             colls[n].clear();
 
             Vector sv = src.verts[k];
             Vector dv = dest.verts[j];
-            Vector adj = (dv - sv).normalized() * .01f;
+            const Vector adj = (dv - sv).normalized() * .01f;
             dv -= adj;
 
             for (;;) {
@@ -78,8 +78,7 @@ static int faceVis(const Face &src, const Face &dest) {
             if (!colls[n].size()) return 1;
         }
     }
-    CollSet::const_iterator it;
-    for (it = all.begin(); it != all.end(); ++it) {
+    for (CollSet::const_iterator it = all.begin(); it != all.end(); ++it) {
         int k = 0;
         for (; k < 16; ++k) {
             if (!colls[k].count(*it)) break;
@@ -121,7 +120,7 @@ static int faceVis(const Face &src, const Face &dest, int recurs_limit) {
         for (src_it = src_faces.begin(); src_it != src_faces.end(); ++src_it) {
             int cnt = 0;
             for (dest_it = dest_faces.begin(); dest_it != dest_faces.end(); ++dest_it) {
-                int n = faceVis(*src_it, *dest_it);
+                const int n = faceVis(*src_it, *dest_it);
                 if (n == 1) return 1;
                 if (!n) ++cnt;
             }
@@ -139,7 +138,7 @@ static int faceVis(const Face &src, const Face &dest, int recurs_limit) {
     return -1;
 }
 
-bool World::boxVis(const Box &src, const Box &dest, int recurs_limit) {
+bool World::boxVis(const Box &src, const Box &dest, const int recurs_limit) {
 
     w = this;
 
@@ -195,7 +194,7 @@ bool World::boxVis(const Box &src, const Box &dest, int recurs_limit) {
 
             Face dest_face(v0, v1, v2, v3);
 
-            int t = faceVis(src_face, dest_face, recurs_limit);
+            const int t = faceVis(src_face, dest_face, recurs_limit);
 
             if (t) return true;
         }

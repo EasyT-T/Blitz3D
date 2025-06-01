@@ -1,8 +1,8 @@
 
-#include "std.h"
 #include "planemodel.h"
-#include "frustum.h"
 #include "camera.h"
+#include "frustum.h"
+#include "std.h"
 
 static Vector vts[17][17];
 
@@ -14,7 +14,7 @@ struct PlaneModel::Rep {
     gxMesh *mesh;
     int sub_divs;
 
-    Rep(int n) :
+    Rep(const int n) :
             ref_cnt(1), sub_divs(n) {
         mesh = gx_graphics->createMesh(5 * sub_divs * sub_divs, 3 * sub_divs * sub_divs, 0);
     }
@@ -23,7 +23,8 @@ struct PlaneModel::Rep {
         gx_graphics->freeMesh(mesh);
     }
 
-    void render(PlaneModel *model, const RenderContext &rc) {
+    void render(PlaneModel *model, const RenderContext &rc) const
+    {
 
         static Frustum f;
         new(&f) Frustum(rc.getWorldFrustum(), -model->getRenderTform());
@@ -40,16 +41,16 @@ struct PlaneModel::Rep {
 
         int x;
         for (x = 0; x <= sub_divs; ++x) {
-            float t = float(x) / float(sub_divs);
+            const float t = float(x) / float(sub_divs);
             Vector tx = (tr - tl) * t + tl;
             Vector bx = (br - bl) * t + bl;
             for (int y = 0; y <= sub_divs; ++y) {
-                float t = float(y) / float(sub_divs);
+                const float t = float(y) / float(sub_divs);
                 vts[x][y] = (bx - tx) * t + tx;
             }
         }
 
-        Plane plane(Vector(0, 1, 0), 0);
+        const Plane plane(Vector(0, 1, 0), 0);
 
         mesh->lock(true);
         int v_cnt = 0, t_cnt = 0;
@@ -71,12 +72,12 @@ struct PlaneModel::Rep {
 
                     if (vert.y > 0) {
                         if (prev_vert.y <= 0) {
-                            float t = prev_vert.y / (prev_vert.y - vert.y);
+                            const float t = prev_vert.y / (prev_vert.y - vert.y);
                             out_verts[out_cnt++] = (vert - prev_vert) * t + prev_vert;
                         }
                     } else {
                         if (prev_vert.y > 0) {
-                            float t = prev_vert.y / (prev_vert.y - vert.y);
+                            const float t = prev_vert.y / (prev_vert.y - vert.y);
                             out_verts[out_cnt++] = (vert - prev_vert) * t + prev_vert;
                         }
                         out_verts[out_cnt++] = plane.intersect(Line(eye, vert - eye));
@@ -86,7 +87,7 @@ struct PlaneModel::Rep {
 
                 for (k = 0; k < out_cnt; ++k) {
                     const Vector &v = out_verts[k];
-                    float tex_coords[2][2] = {{v.x, v.z},
+                    const float tex_coords[2][2] = {{v.x, v.z},
                                               {v.x, v.z}};
                     mesh->setVertex(v_cnt + k, &v.x, &plane.n.x, tex_coords);
                 }
@@ -102,7 +103,7 @@ struct PlaneModel::Rep {
     }
 };
 
-PlaneModel::PlaneModel(int sub_divs) :
+PlaneModel::PlaneModel(const int sub_divs) :
         rep(d_new Rep(sub_divs)) {
 }
 
@@ -124,16 +125,16 @@ bool PlaneModel::render(const RenderContext &rc) {
     return false;
 }
 
-bool PlaneModel::collide(const Line &l, float radius, Collision *curr_coll, const Transform &tf) {
+bool PlaneModel::collide(const Line &l, const float radius, Collision *curr_coll, const Transform &tf) {
 
-    Line line(-tf * l);
+    const Line line(-tf * l);
 
     Plane p(Vector(0, 1, 0), 0);
     p.d -= radius;
-    float t = p.t_intersect(line);
+    const float t = p.t_intersect(line);
     if (t >= curr_coll->time) return false;
 
-    Vector n = (tf.m.cofactor() * p.n).normalized();
+    const Vector n = (tf.m.cofactor() * p.n).normalized();
 
     return curr_coll->update(l, t, n);
 }

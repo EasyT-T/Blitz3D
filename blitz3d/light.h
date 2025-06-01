@@ -12,17 +12,17 @@ class Light : public Object {
 public:
     Light(int type);
 
-    ~Light();
+    ~Light() override;
 
-    Light *getLight() { return this; }
+    Light *getLight() override { return this; }
 
-    void setRange(float r);
+    void setRange(float r) const;
 
-    void setColor(const Vector &v);
+    void setColor(const Vector &v) const;
 
-    void setConeAngles(float inner, float outer);
+    void setConeAngles(float inner, float outer) const;
 
-    bool beginRender(float tween);
+    bool beginRender(float tween) override;
 
     gxLight *getGxLight() const { return light; }
 

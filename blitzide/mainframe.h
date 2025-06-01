@@ -3,7 +3,7 @@
 #define MAINFRAME_H
 
 #include "editor.h"
-#include "htmlhelp.h"
+#include "helphtml.h"
 #include "tabber.h"
 
 class MainFrame : public CFrameWnd, public HelpListener, EditorListener, TabberListener {
@@ -12,7 +12,7 @@ public:
 
     Editor *getEditor();
 
-    void setTitle(const string &s);
+    void setTitle(const std::string &s);
 
 DECLARE_DYNAMIC(MainFrame)
 
@@ -117,45 +117,45 @@ private:
     CToolBar toolBar;
     CStatusBar statusBar;
 
-    map<CWnd *, Editor *> editors;
-    map<CWnd *, HtmlHelp *> helps;
+    std::map<CWnd *, Editor *> editors;
+    std::map<CWnd *, HelpHtml *> helps;
 
-    string last_quick_help;
+    std::string last_quick_help;
 
-    HtmlHelp *getHelp();
+    HelpHtml *getHelp();
 
-    HtmlHelp *getHelp(int index);
+    HelpHtml *getHelp(int index);
 
-    HtmlHelp *findHelp();
+    HelpHtml *findHelp();
 
     Editor *getEditor(int index);
 
     bool exit_flag;
 
-    void insertRecent(const string &f);
+    void insertRecent(const std::string &f) const;
 
-    void newed(const string &t);
+    void newed(const std::string &t);
 
-    bool open(const string &f);
+    bool open(const std::string &f);
 
     bool close(int n);
 
     bool save(int n);
 
-    void compile(const string &cmd);
+    void compile(const std::string &cmd);
 
     void build(bool exec, bool publish);
 
     //editorlistener
-    void cursorMoved(Editor *editor);
+    void cursorMoved(Editor *editor) override;
 
     //tabberlistener
-    void currentSet(Tabber *tabber, int index);
+    void currentSet(Tabber *tabber, int index) override;
 
     //htmlhelplistener
-    void helpOpen(HtmlHelp *help, const string &file);
+    void helpOpen(HelpHtml *help, const std::string &file) override;
 
-    void helpTitleChange(HtmlHelp *help, const string &title);
+    void helpTitleChange(HelpHtml *help, const std::string &title) override;
 };
 
 #endif

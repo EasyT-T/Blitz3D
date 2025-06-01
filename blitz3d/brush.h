@@ -17,17 +17,17 @@ public:
 
     Brush &operator=(const Brush &t);
 
-    void setColor(const Vector &color);
+    void setColor(const Vector &color) const;
 
-    void setAlpha(float alpha);
+    void setAlpha(float alpha) const;
 
-    void setShininess(float shininess);
+    void setShininess(float shininess) const;
 
-    void setBlend(int blend);
+    void setBlend(int blend) const;
 
-    void setFX(int fx);
+    void setFX(int fx) const;
 
-    void setTexture(int index, const Texture &t, int frame);
+    void setTexture(int index, const Texture &t, int frame) const;
 
     const Vector &getColor() const;
 

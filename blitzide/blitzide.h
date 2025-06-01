@@ -2,16 +2,16 @@
 #ifndef BLITZIDE_H
 #define BLITZIDE_H
 
-#include "prefs.h"
 #include "mainframe.h"
+#include "prefs.h"
 
 class BlitzIDE : public CWinApp {
 public:
     MainFrame *mainFrame;
 
-    virtual BOOL InitInstance();
+    BOOL InitInstance() override;
 
-    virtual int ExitInstance();
+    int ExitInstance() override;
 };
 
 extern BlitzIDE blitzIDE;

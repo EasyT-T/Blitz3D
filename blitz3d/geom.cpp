@@ -1,11 +1,11 @@
 
-#include "std.h"
 #include "geom.h"
+#include "std.h"
 
 Matrix Matrix::tmps[64];
 Transform Transform::tmps[64];
 
-Quat rotationQuat(float p, float y, float r) {
+Quat rotationQuat(const float p, const float y, const float r) {
     return yawQuat(y) * pitchQuat(p) * rollQuat(r);
 }
 

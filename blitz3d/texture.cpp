@@ -1,8 +1,8 @@
 
-#include "std.h"
-#include "geom.h"
 #include "texture.h"
 #include "cachedtexture.h"
+#include "geom.h"
+#include "std.h"
 
 #include "../gxruntime/gxgraphics.h"
 
@@ -10,20 +10,20 @@ extern gxScene *gx_scene;
 extern gxGraphics *gx_graphics;
 
 struct Filter {
-    string t;
+    std::string t;
     int flags;
 
-    Filter(const string &t, int flags) : t(t), flags(flags) {
+    Filter(const std::string &t, const int flags) : t(t), flags(flags) {
     }
 };
 
-static vector<Filter> filters;
+static std::vector<Filter> filters;
 
-static int filterFile(const string &t, int flags) {
+static int filterFile(const std::string &t, int flags) {
     //check filters...
-    string l = tolower(t);
+    const std::string l = tolower(t);
     for (int k = 0; k < filters.size(); ++k) {
-        if (l.find(filters[k].t) != string::npos) {
+        if (l.find(filters[k].t) != std::string::npos) {
             flags |= filters[k].flags;
         }
     }
@@ -34,7 +34,7 @@ struct Texture::Rep {
 
     int ref_cnt;
     CachedTexture cached_tex;
-    vector<gxCanvas *> tex_frames;
+    std::vector<gxCanvas *> tex_frames;
 
     int tex_blend, tex_flags;
     bool transparent;
@@ -43,7 +43,7 @@ struct Texture::Rep {
     bool mat_used, mat_valid;
     gxScene::Matrix matrix;
 
-    Rep(int w, int h, int flags, int cnt) :
+    Rep(const int w, const int h, const int flags, const int cnt) :
             ref_cnt(1), cached_tex(w, h, flags, cnt),
             tex_blend(gxScene::BLEND_MULTIPLY), tex_flags(0),
             sx(1), sy(1), tx(0), ty(0), rot(0), mat_used(false) {
@@ -54,7 +54,7 @@ struct Texture::Rep {
         memset(&matrix, 0, sizeof(matrix));
     }
 
-    Rep(const string &f, int flags, int w, int h, int first, int cnt) :
+    Rep(const std::string &f, const int flags, const int w, const int h, const int first, const int cnt) :
             ref_cnt(1), cached_tex(f, flags, w, h, first, cnt),
             tex_blend(gxScene::BLEND_MULTIPLY), tex_flags(0),
             sx(1), sy(1), tx(0), ty(0), rot(0), mat_used(false) {
@@ -74,22 +74,22 @@ struct Texture::Rep {
     }
 };
 
-Texture::Texture() : rep(0) {
+Texture::Texture() : rep(nullptr) {
 }
 
-Texture::Texture(const string &f, int flags) {
+Texture::Texture(const std::string &f, int flags) {
     flags = filterFile(f, flags) | gxCanvas::CANVAS_TEXTURE;
     if (flags & gxCanvas::CANVAS_TEX_MASK) flags |= gxCanvas::CANVAS_TEX_RGB | gxCanvas::CANVAS_TEX_ALPHA;
     rep = d_new Rep(f, flags, 0, 0, 0, 1);
 }
 
-Texture::Texture(const string &f, int flags, int w, int h, int first, int cnt) {
+Texture::Texture(const std::string &f, int flags, const int w, const int h, const int first, const int cnt) {
     flags = filterFile(f, flags) | gxCanvas::CANVAS_TEXTURE;
     if (flags & gxCanvas::CANVAS_TEX_MASK) flags |= gxCanvas::CANVAS_TEX_RGB | gxCanvas::CANVAS_TEX_ALPHA;
     rep = d_new Rep(f, flags, w, h, first, cnt);
 }
 
-Texture::Texture(int w, int h, int flags, int cnt) {
+Texture::Texture(const int w, const int h, int flags, const int cnt) {
     flags |= gxCanvas::CANVAS_TEXTURE;
     if (flags & gxCanvas::CANVAS_TEX_MASK) flags |= gxCanvas::CANVAS_TEX_RGB | gxCanvas::CANVAS_TEX_ALPHA;
     rep = d_new Rep(w, h, flags, cnt);
@@ -111,7 +111,8 @@ Texture &Texture::operator=(const Texture &t) {
     return *this;
 }
 
-void Texture::setScale(float u_scale, float v_scale) {
+void Texture::setScale(const float u_scale, const float v_scale) const
+{
     if (!rep) return;
     rep->sx = u_scale;
     rep->sy = v_scale;
@@ -119,14 +120,16 @@ void Texture::setScale(float u_scale, float v_scale) {
     rep->mat_used = true;
 }
 
-void Texture::setRotation(float angle) {
+void Texture::setRotation(const float angle) const
+{
     if (!rep) return;
     rep->rot = angle;
     rep->mat_valid = false;
     rep->mat_used = true;
 }
 
-void Texture::setPosition(float u_pos, float v_pos) {
+void Texture::setPosition(const float u_pos, const float v_pos) const
+{
     if (!rep) return;
     rep->tx = u_pos;
     rep->ty = v_pos;
@@ -134,12 +137,14 @@ void Texture::setPosition(float u_pos, float v_pos) {
     rep->mat_used = true;
 }
 
-void Texture::setBlend(int blend) {
+void Texture::setBlend(const int blend) const
+{
     if (!rep) return;
     rep->tex_blend = blend;
 }
 
-void Texture::setFlags(int flags) {
+void Texture::setFlags(const int flags) const
+{
     if (!rep) return;
     rep->tex_flags = flags;
 }
@@ -148,7 +153,7 @@ bool Texture::isTransparent() const {
     return rep ? rep->transparent : false;
 }
 
-gxCanvas *Texture::getCanvas(int n) const {
+gxCanvas *Texture::getCanvas(const int n) const {
     return rep && n >= 0 && n < rep->tex_frames.size() ? rep->tex_frames[n] : 0;
 }
 
@@ -157,7 +162,7 @@ int Texture::getCanvasFlags() const {
 }
 
 CachedTexture *Texture::getCachedTexture() const {
-    return rep ? &rep->cached_tex : 0;
+    return rep ? &rep->cached_tex : nullptr;
 }
 
 int Texture::getBlend() const {
@@ -169,7 +174,7 @@ int Texture::getFlags() const {
 }
 
 const gxScene::Matrix *Texture::getMatrix() const {
-    if (!rep || !rep->mat_used) return 0;
+    if (!rep || !rep->mat_used) return nullptr;
     if (!rep->mat_valid) {
         float c = cos(rep->rot), s = sin(rep->rot);
         rep->matrix.elements[0][0] = c * rep->sx;
@@ -192,6 +197,6 @@ void Texture::clearFilters() {
     filters.clear();
 }
 
-void Texture::addFilter(const string &t, int flags) {
+void Texture::addFilter(const std::string &t, const int flags) {
     filters.push_back(Filter(tolower(t), flags));
 }

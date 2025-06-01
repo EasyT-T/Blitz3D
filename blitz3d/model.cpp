@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "model.h"
+#include "std.h"
 
 extern gxScene *gx_scene;
 
@@ -19,9 +19,9 @@ class Model::MeshQueue {
 public:
     MeshQueue() {}
 
-    MeshQueue(gxMesh *m, int fv, int vc, int ft, int tc, const Brush &b) :
+    MeshQueue(gxMesh *m, const int fv, const int vc, const int ft, const int tc, const Brush &b) :
             mesh(m), fv(fv), vc(vc), ft(ft), tc(tc), brush(b) {
-        int n = brush.getBlend();
+        const int n = brush.getBlend();
         q_type = (n == gxScene::BLEND_REPLACE) ? QUEUE_OPAQUE : QUEUE_TRANSPARENT;
     }
 
@@ -29,7 +29,8 @@ public:
         return q_type;
     }
 
-    void render() {
+    void render() const
+    {
         gx_scene->setRenderState(brush.getRenderState());
         gx_scene->render(mesh, fv, vc, ft, tc);
     }
@@ -39,7 +40,7 @@ public:
         if (!pool) {
             pool = new MeshQueue[GROW];
             for (int k = 0; k < GROW - 1; ++k) pool[k].next = &pool[k + 1];
-            pool[GROW - 1].next = 0;
+            pool[GROW - 1].next = nullptr;
         }
         MeshQueue *t = pool;
         pool = t->next;
@@ -72,7 +73,7 @@ void Model::capture() {
     captured_alpha = brush.getAlpha();
 }
 
-bool Model::beginRender(float t) {
+bool Model::beginRender(const float t) {
     Object::beginRender(t);
     tweened_alpha = brush.getAlpha();
     if (t != 1 && tweened_alpha != captured_alpha) {
@@ -90,10 +91,10 @@ bool Model::doAutoFade(const Vector &eye) {
         //
         //autofading of alpha
         //
-        float d = eye.distance(getRenderTform().v);
+        const float d = eye.distance(getRenderTform().v);
         if (d >= auto_fade_fr) return false;
         if (d >= auto_fade_nr) {
-            float t = 1 - (d - auto_fade_nr) / (auto_fade_fr - auto_fade_nr);
+            const float t = 1 - (d - auto_fade_nr) / (auto_fade_fr - auto_fade_nr);
             alpha *= t;
             if (alpha <= 0) return false;
         }
@@ -115,16 +116,16 @@ void Model::enqueue(MeshQueue *q) {
     queues[q->getQueueType()].push_back(q);
 }
 
-void Model::enqueue(gxMesh *mesh, int fv, int vc, int ft, int tc) {
+void Model::enqueue(gxMesh *mesh, const int fv, const int vc, const int ft, const int tc) {
     enqueue(new MeshQueue(mesh, fv, vc, ft, tc, render_brush));
 }
 
-void Model::enqueue(gxMesh *mesh, int fv, int vc, int ft, int tc, const Brush &brush) {
+void Model::enqueue(gxMesh *mesh, const int fv, const int vc, const int ft, const int tc, const Brush &brush) {
     enqueue(new MeshQueue(mesh, fv, vc, ft, tc, brush));
 }
 
-void Model::renderQueue(int type) {
-    vector<MeshQueue *> *que = &queues[type];
+void Model::renderQueue(const int type) {
+    std::vector<MeshQueue *> *que = &queues[type];
     for (; que->size(); que->pop_back()) {
         MeshQueue *q = que->back();
         q->render();

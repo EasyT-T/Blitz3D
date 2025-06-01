@@ -1,39 +1,46 @@
 
-#include "std.h"
 #include "type.h"
+#include "std.h"
 
 static struct v_type : public Type {
-    bool canCastTo(Type *t) {
+    bool canCastTo(Type *t) override
+    {
         return t == Type::void_type;
     }
 } v;
 
 static struct i_type : public Type {
-    bool intType() {
+    bool intType() override
+    {
         return true;
     }
 
-    bool canCastTo(Type *t) {
+    bool canCastTo(Type *t) override
+    {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } i;
 
 static struct f_type : public Type {
-    bool floatType() {
+    bool floatType() override
+    {
         return true;
     }
 
-    bool canCastTo(Type *t) {
+    bool canCastTo(Type *t) override
+    {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } f;
 
 static struct s_type : public Type {
-    bool stringType() {
+    bool stringType() override
+    {
         return true;
     }
 
-    bool canCastTo(Type *t) {
+    bool canCastTo(Type *t) override
+    {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } s;
@@ -44,7 +51,7 @@ bool StructType::canCastTo(Type *t) {
 
 bool VectorType::canCastTo(Type *t) {
     if (this == t) return true;
-    if (VectorType *v = t->vectorType()) {
+    if (const VectorType *v = t->vectorType()) {
         if (elementType != v->elementType) return false;
         if (sizes.size() != v->sizes.size()) return false;
         for (int k = 0; k < sizes.size(); ++k) {

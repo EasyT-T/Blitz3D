@@ -29,7 +29,7 @@ public:
     void setDirection(const float dir[3]);
     void setConeAngles(float inner, float outer);
 
-    void getColor(float rgb[3]) { memcpy(rgb, &d3d_light.dcvDiffuse, 12); }
+    void getColor(float rgb[3]) const { memcpy(rgb, &d3d_light.dcvDiffuse, 12); }
 };
 
 #endif

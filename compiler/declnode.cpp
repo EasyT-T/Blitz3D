@@ -1,6 +1,5 @@
 
-#include "std.h"
-#include "nodes.h"
+#include "declnode.h"
 
 //////////////////////////////
 // Sequence of declarations //
@@ -56,7 +55,7 @@ void VarDeclNode::proto(DeclSeq *d, Environ *e) {
 
     Type *ty = tagType(tag, e);
     if (!ty) ty = Type::int_type;
-    ConstType *defType = 0;
+    ConstType *defType = nullptr;
 
     if (expr) {
         expr = expr->semant(e);
@@ -69,7 +68,7 @@ void VarDeclNode::proto(DeclSeq *d, Environ *e) {
             else ty = d_new ConstType(c->stringValue());
             e->types.push_back(ty);
             delete expr;
-            expr = 0;
+            expr = nullptr;
         }
         if (kind & DECL_PARAM) {
             defType = ty->constType();
@@ -114,9 +113,8 @@ void FuncDeclNode::semant(Environ *e) {
     sem_env = d_new Environ(genLabel(), sem_type->returnType, 1, e);
     DeclSeq *decls = sem_env->decls;
 
-    int k;
-    for (k = 0; k < sem_type->params->size(); ++k) {
-        Decl *d = sem_type->params->decls[k];
+    for (int k = 0; k < sem_type->params->size(); ++k) {
+        const Decl *d = sem_type->params->decls[k];
         if (!decls->insertDecl(d->name, d->type, d->kind)) ex("duplicate identifier");
     }
 
@@ -126,7 +124,7 @@ void FuncDeclNode::semant(Environ *e) {
 void FuncDeclNode::translate(Codegen *g) {
 
     //var offsets
-    int size = enumVars(sem_env);
+    const int size = enumVars(sem_env);
 
     //enter function
     g->enter("_f" + ident, size);
@@ -135,7 +133,7 @@ void FuncDeclNode::translate(Codegen *g) {
     TNode *t = createVars(sem_env);
     if (t) g->code(t);
     if (g->debug) {
-        string t = genLabel();
+        const std::string t = genLabel();
         g->s_data(ident, t);
         g->code(call("__bbDebugEnter", local(0), iconst((int) sem_env), global(t)));
     }
@@ -183,7 +181,7 @@ void StructDeclNode::translate(Codegen *g) {
     //used and free lists for type
     int k;
     for (k = 0; k < 2; ++k) {
-        string lab = genLabel();
+        std::string lab = genLabel();
         g->i_data(0, lab);    //fields
         g->p_data(lab);    //next
         g->p_data(lab);    //prev
@@ -196,14 +194,14 @@ void StructDeclNode::translate(Codegen *g) {
 
     //type of each field
     for (k = 0; k < sem_type->fields->size(); ++k) {
-        Decl *field = sem_type->fields->decls[k];
+        const Decl *field = sem_type->fields->decls[k];
         Type *type = field->type;
-        string t;
+        std::string t;
         if (type == Type::int_type) t = "__bbIntType";
         else if (type == Type::float_type) t = "__bbFltType";
         else if (type == Type::string_type) t = "__bbStrType";
-        else if (StructType *s = type->structType()) t = "_t" + s->ident;
-        else if (VectorType *v = type->vectorType()) t = v->label;
+        else if (const StructType *s = type->structType()) t = "_t" + s->ident;
+        else if (const VectorType *v = type->vectorType()) t = v->label;
         g->p_data(t);
     }
 
@@ -214,7 +212,7 @@ void StructDeclNode::translate(Codegen *g) {
 //////////////////////
 void DataDeclNode::proto(DeclSeq *d, Environ *e) {
     expr = expr->semant(e);
-    ConstNode *c = expr->constNode();
+    const ConstNode *c = expr->constNode();
     if (!c) ex("Data expression must be constant");
     if (expr->sem_type == Type::string_type) str_label = genLabel();
 }
@@ -251,16 +249,16 @@ void VectorDeclNode::proto(DeclSeq *d, Environ *env) {
     Type *ty = tagType(tag, env);
     if (!ty) ty = Type::int_type;
 
-    vector<int> sizes;
+    std::vector<int> sizes;
     for (int k = 0; k < exprs->size(); ++k) {
         ExprNode *e = exprs->exprs[k] = exprs->exprs[k]->semant(env);
         ConstNode *c = e->constNode();
         if (!c) ex("Blitz array sizes must be constant");
-        int n = c->intValue();
+        const int n = c->intValue();
         if (n < 0) ex("Blitz array sizes must not be negative");
         sizes.push_back(n + 1);
     }
-    string label = genLabel();
+    const std::string label = genLabel();
     sem_type = d_new VectorType(label, ty, sizes);
     if (!d->insertDecl(ident, sem_type, kind)) {
         delete sem_type;
@@ -272,18 +270,18 @@ void VectorDeclNode::proto(DeclSeq *d, Environ *env) {
 void VectorDeclNode::translate(Codegen *g) {
     //type tag!
     g->align_data(4);
-    VectorType *v = sem_type->vectorType();
+    const VectorType *v = sem_type->vectorType();
     g->i_data(6, v->label);
     int sz = 1;
     for (int k = 0; k < v->sizes.size(); ++k) sz *= v->sizes[k];
     g->i_data(sz);
-    string t;
+    std::string t;
     Type *type = v->elementType;
     if (type == Type::int_type) t = "__bbIntType";
     else if (type == Type::float_type) t = "__bbFltType";
     else if (type == Type::string_type) t = "__bbStrType";
-    else if (StructType *s = type->structType()) t = "_t" + s->ident;
-    else if (VectorType *v = type->vectorType()) t = v->label;
+    else if (const StructType *s = type->structType()) t = "_t" + s->ident;
+    else if (const VectorType *v = type->vectorType()) t = v->label;
     g->p_data(t);
 
     if (kind == DECL_GLOBAL) g->i_data(0, "_v" + ident);

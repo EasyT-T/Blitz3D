@@ -3,13 +3,13 @@
 #define EX_H
 
 struct Ex {
-    string ex;        //what happened
+    std::string ex;        //what happened
     int pos;        //source offset
-    string file;
+    std::string file;
 
-    Ex(const string &ex) : ex(ex), pos(-1) {}
+    Ex(const std::string &ex) : ex(ex), pos(-1) {}
 
-    Ex(const string &ex, int pos, const string &t) : ex(ex), pos(pos), file(t) {}
+    Ex(const std::string &ex, const int pos, const std::string &t) : ex(ex), pos(pos), file(t) {}
 };
 
 #endif

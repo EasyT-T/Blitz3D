@@ -44,12 +44,12 @@ public:
     void unlock();
 
     //VERY NAUGHTY!!!!!
-    void setVertex(int n, const void* v)
+    void setVertex(const int n, const void* v) const
     {
         memcpy(locked_verts + n, v, sizeof(dxVertex));
     }
 
-    void setVertex(int n, const float coords[3], const float normal[3], const float tex_coords[2][2])
+    void setVertex(const int n, const float coords[3], const float normal[3], const float tex_coords[2][2]) const
     {
         dxVertex* t = locked_verts + n;
         memcpy(t->coords, coords, 12);
@@ -58,7 +58,7 @@ public:
         memcpy(t->tex_coords, tex_coords, 16);
     }
 
-    void setVertex(int n, const float coords[3], const float normal[3], unsigned argb, const float tex_coords[2][2])
+    void setVertex(const int n, const float coords[3], const float normal[3], const unsigned argb, const float tex_coords[2][2]) const
     {
         dxVertex* t = locked_verts + n;
         memcpy(t->coords, coords, 12);
@@ -67,7 +67,7 @@ public:
         memcpy(t->tex_coords, tex_coords, 16);
     }
 
-    void setTriangle(int n, int v0, int v1, int v2)
+    void setTriangle(const int n, const int v0, const int v1, const int v2) const
     {
         tri_indices[n * 3] = v0;
         tri_indices[n * 3 + 1] = v1;

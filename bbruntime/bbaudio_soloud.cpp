@@ -48,8 +48,8 @@ Sound *bbLoadSound(BBStr *path) {
         delete path;
         return nullptr;
     }
-    auto sound = new Sound();
-    auto r = sound->wav.load(path->c_str());
+    const auto sound = new Sound();
+    const auto r = sound->wav.load(path->c_str());
     delete path;
     if (r == SoLoud::SO_NO_ERROR) return sound;
     delete sound;
@@ -68,19 +68,19 @@ void bbLoopSound(Sound *sound) {
     sound->wav.setLooping(true);
 }
 
-void bbSoundVolume(Sound *sound, float volume) {
+void bbSoundVolume(Sound *sound, const float volume) {
     if (!sound) return;
     debugSound(sound);
     sound->volume = volume;
 }
 
-void bbSoundPan(Sound *sound, float pan) {
+void bbSoundPan(Sound *sound, const float pan) {
     if (!sound) return;
     debugSound(sound);
     sound->pan = pan;
 }
 
-void bbSoundPitch(Sound *sound, int pitch) {
+void bbSoundPitch(Sound *sound, const int pitch) {
     if (!sound) return;
     debugSound(sound);
     sound->pitch = pitch;
@@ -89,9 +89,8 @@ void bbSoundPitch(Sound *sound, int pitch) {
 uint32_t bbPlaySound(Sound *sound) {
     if (!sound) return 0;
     debugSound(sound);
-    uint32_t chan;
     if (sound->pitch) {
-        chan = soloud->play(sound->wav, sound->volume, sound->pan, true, 0);
+        uint32_t chan = soloud->play(sound->wav, sound->volume, sound->pan, true, 0);
         soloud->setSamplerate(chan, (float) sound->pitch);
         soloud->setPause(chan, false);
         return chan;
@@ -99,13 +98,13 @@ uint32_t bbPlaySound(Sound *sound) {
     return soloud->play(sound->wav, sound->volume, sound->pan, false, 0);
 }
 
-uint32_t bbPlay3dSound(Sound *sound, float x, float y, float z, float vx, float vy, float vz) {
+uint32_t bbPlay3dSound(Sound *sound, const float x, const float y, const float z, const float vx, const float vy, const float vz) {
     if (!sound) return 0;
     debugSound(sound);
     sound->wav.set3dAttenuation(SoLoud::AudioSource::INVERSE_DISTANCE, rolloffFactor);
     sound->wav.set3dDopplerFactor(dopplerFactor);
     if (sound->pitch) {
-        auto chan = soloud->play3d(sound->wav, x, y, z, vx, vy, vz, sound->volume, true, 0);
+        const auto chan = soloud->play3d(sound->wav, x, y, z, vx, vy, vz, sound->volume, true, 0);
         soloud->setSamplerate(chan, (float) sound->pitch);
         soloud->setPause(chan, false);
         return chan;
@@ -122,72 +121,72 @@ uint32_t bbPlayMusic(BBStr *path) {
         soloud->stop(musicChannel);
         musicChannel = 0;
     }
-    auto r = musicStream.load(path->c_str());
+    const auto r = musicStream.load(path->c_str());
     delete path;
     if (r != SoLoud::SO_NO_ERROR) return 0;
     return musicChannel = soloud->play(musicStream);
 }
 
-void bbStopChannel(uint32_t channel) {
+void bbStopChannel(const uint32_t channel) {
     if (!channel) return;
     debugChannel(channel);
     soloud->stop(channel);
 }
 
-void bbPauseChannel(uint32_t channel) {
+void bbPauseChannel(const uint32_t channel) {
     if (!channel) return;
     debugChannel(channel);
     soloud->setPause(channel, true);
 }
 
-void bbResumeChannel(uint32_t channel) {
+void bbResumeChannel(const uint32_t channel) {
     if (!channel) return;
     debugChannel(channel);
     soloud->setPause(channel, false);
 }
 
-void bbChannelVolume(uint32_t channel, float volume) {
+void bbChannelVolume(const uint32_t channel, const float volume) {
     if (!channel) return;
     debugChannel(channel);
     soloud->setVolume(channel, volume);
 }
 
-void bbChannelPan(uint32_t channel, float pan) {
+void bbChannelPan(const uint32_t channel, const float pan) {
     if (!channel) return;
     debugChannel(channel);
     soloud->setPan(channel, pan);
 }
 
-void bbChannelPitch(uint32_t channel, int pitch) {
+void bbChannelPitch(const uint32_t channel, const int pitch) {
     if (!channel) return;
     debugChannel(channel);
     soloud->setSamplerate(channel, (float) pitch);
 }
 
-int bbChannelPlaying(uint32_t channel) {
+int bbChannelPlaying(const uint32_t channel) {
     if (!channel) return 0;
     debugChannel(channel);
     return soloud->isValidVoiceHandle(channel);
 }
 
-void bbSet3dChannel(uint32_t channel, float x, float y, float z, float vx, float vy, float vz) {
+void bbSet3dChannel(const uint32_t channel, const float x, const float y, const float z, const float vx, const float vy, const float vz) {
     if (!channel) return;
     debugChannel(channel);
-    auto sc = distanceFactor;
+    const auto sc = distanceFactor;
     soloud->set3dSourceParameters(channel, x * sc, y * sc, z * sc, vx * sc, vy * sc, vz * sc);
 }
 
-void bbSet3dListenerConfig(float roll, float dopp, float dist) {
+void bbSet3dListenerConfig(const float roll, const float dopp, const float dist) {
     if (!soloud) return;
     rolloffFactor = roll;
     dopplerFactor = dopp;
     distanceFactor = dist;
 }
 
-void bbSet3dListener(float x, float y, float z, float kx, float ky, float kz, float jx, float jy, float jz, float vx,
-                     float vy, float vz) {
+void bbSet3dListener(const float x, const float y, const float z, const float kx, const float ky, const float kz, float jx, const float jy, const float jz, const float vx,
+                     const float vy, const float vz) {
     if (!soloud) return;
-    auto sc = distanceFactor;
+    const auto sc = distanceFactor;
     soloud->set3dListenerParameters(x * sc, y * sc, z * sc, kx, ky, kz, jy, jy, jz, vx * sc, vy * sc, vz * sc);
     soloud->update3dAudio();
 }

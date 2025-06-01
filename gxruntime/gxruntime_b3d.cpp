@@ -1,5 +1,5 @@
-#include "std.h"
 #include "gxruntime.h"
+#include "std.h"
 #include "zmouse.h"
 
 #ifndef SPI_SETMOUSESPEED
@@ -22,8 +22,8 @@ struct gxRuntime::GfxDriver
 static const int static_ws = WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 static const int scaled_ws = WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_SIZEBOX | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 
-static string app_title;
-static string app_close;
+static std::string app_title;
+static std::string app_close;
 static gxRuntime* runtime;
 static bool busy, suspended;
 static volatile bool run_flag;
@@ -34,10 +34,10 @@ typedef int (_stdcall *LibFunc)(const void* in, int in_sz, void* out, int out_sz
 struct gxDll
 {
     HINSTANCE hinst;
-    map<string, LibFunc> funcs;
+    std::map<std::string, LibFunc> funcs;
 };
 
-static map<string, gxDll*> libs;
+static std::map<std::string, gxDll*> libs;
 
 static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
@@ -59,7 +59,7 @@ static IDirectDrawClipper* clipper;
 static IDirectDrawSurface7* primSurf;
 static Debugger* debugger;
 
-static set<gxTimer*> timers;
+static std::set<gxTimer*> timers;
 
 enum
 {
@@ -69,9 +69,9 @@ enum
 ////////////////////
 // STATIC STARTUP //
 ////////////////////
-gxRuntime* gxRuntime::openRuntime(HINSTANCE hinst, const string& cmd_line, Debugger* d)
+gxRuntime* gxRuntime::openRuntime(const HINSTANCE hinst, const std::string& cmd_line, Debugger* d)
 {
-    if (runtime) return 0;
+    if (runtime) return nullptr;
 
     //create debugger
     debugger = d;
@@ -83,20 +83,20 @@ gxRuntime* gxRuntime::openRuntime(HINSTANCE hinst, const string& cmd_line, Debug
     wndclass.lpfnWndProc = ::windowProc;
     wndclass.hInstance = hinst;
     wndclass.lpszClassName = "Blitz Runtime Class";
-    wndclass.hCursor = (HCURSOR)LoadCursor(0,IDC_ARROW);
+    wndclass.hCursor = (HCURSOR)LoadCursor(nullptr,IDC_ARROW);
     wndclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     RegisterClass(&wndclass);
 
     gfx_mode = 0;
-    clipper = 0;
-    primSurf = 0;
+    clipper = nullptr;
+    primSurf = nullptr;
     busy = suspended = false;
     run_flag = true;
 
     const char* app_t = " ";
     int ws = WS_CAPTION, ws_ex = 0;
 
-    HWND hwnd = CreateWindowEx(ws_ex, "Blitz Runtime Class", app_t, ws, 0, 0, 0, 0, 0, 0, 0, 0);
+    const HWND hwnd = CreateWindowEx(ws_ex, "Blitz Runtime Class", app_t, ws, 0, 0, 0, 0, nullptr, nullptr, nullptr, nullptr);
 
     UpdateWindow(hwnd);
 
@@ -108,26 +108,25 @@ void gxRuntime::closeRuntime(gxRuntime* r)
 {
     if (!runtime || runtime != r) return;
 
-    map<string, gxDll*>::const_iterator it;
-    for (it = libs.begin(); it != libs.end(); ++it)
+    for (std::map<std::string, gxDll*>::const_iterator it = libs.begin(); it != libs.end(); ++it)
     {
         FreeLibrary(it->second->hinst);
     }
     libs.clear();
 
     delete runtime;
-    runtime = 0;
+    runtime = nullptr;
 }
 
 //////////////////////////
 // RUNTIME CONSTRUCTION //
 //////////////////////////
-gxRuntime::gxRuntime(HINSTANCE hi, const string& cl, HWND hw):
-    hinst(hi), cmd_line(cl), hwnd(hw), curr_driver(0), enum_all(false),
+gxRuntime::gxRuntime(const HINSTANCE hi, const std::string& cl, const HWND hw):
+    hinst(hi), cmd_line(cl), hwnd(hw), curr_driver(nullptr), enum_all(false),
     pointer_visible(true),
-    input(0), graphics(0), fileSystem(0), use_di(false)
+    input(nullptr), graphics(nullptr), fileSystem(nullptr), use_di(false)
 {
-    CoInitialize(0);
+    CoInitialize(nullptr);
 
     enumGfx();
     TIMECAPS tc;
@@ -162,7 +161,7 @@ void gxRuntime::resumeAudio()
 {
 }
 
-void gxRuntime::backupGraphics()
+void gxRuntime::backupGraphics() const
 {
     if (auto_suspend)
     {
@@ -170,7 +169,7 @@ void gxRuntime::backupGraphics()
     }
 }
 
-void gxRuntime::restoreGraphics()
+void gxRuntime::restoreGraphics() const
 {
     if (auto_suspend)
     {
@@ -178,7 +177,7 @@ void gxRuntime::restoreGraphics()
     }
 }
 
-void gxRuntime::resetInput()
+void gxRuntime::resetInput() const
 {
     if (input) input->reset();
 }
@@ -199,7 +198,7 @@ void gxRuntime::acquireInput()
     input->reset();
 }
 
-void gxRuntime::unacquireInput()
+void gxRuntime::unacquireInput() const
 {
     if (!input) return;
     if (gfx_mode == 3 && use_di) input->unacquire();
@@ -274,7 +273,7 @@ void gxRuntime::forceResume()
 ///////////
 // PAINT //
 ///////////
-void gxRuntime::paint()
+void gxRuntime::paint() const
 {
     switch (gfx_mode)
     {
@@ -297,8 +296,8 @@ void gxRuntime::paint()
             dest.right += p.x;
             dest.top += p.y;
             dest.bottom += p.y;
-            gxCanvas* f = graphics->getFrontCanvas();
-            primSurf->Blt(&dest, f->getSurface(), &src, 0, 0);
+            const gxCanvas* f = graphics->getFrontCanvas();
+            primSurf->Blt(&dest, f->getSurface(), &src, 0, nullptr);
         }
         break;
     case 3:
@@ -312,9 +311,9 @@ void gxRuntime::paint()
 //////////
 // FLIP //
 //////////
-void gxRuntime::flip(bool vwait)
+void gxRuntime::flip(const bool vwait)
 {
-    gxCanvas* b = graphics->getBackCanvas();
+    const gxCanvas* b = graphics->getBackCanvas();
     gxCanvas* f = graphics->getFrontCanvas();
     int n;
     switch (gfx_mode)
@@ -336,14 +335,14 @@ void gxRuntime::flip(bool vwait)
             while (graphics->dirDraw->GetVerticalBlankStatus(&vb) >= 0 && vb)
             {
             }
-            n = f->getSurface()->Flip(0,DDFLIP_WAIT);
+            n = f->getSurface()->Flip(nullptr,DDFLIP_WAIT);
         }
         else
         {
-            n = f->getSurface()->Flip(0,DDFLIP_NOVSYNC | DDFLIP_WAIT);
+            n = f->getSurface()->Flip(nullptr,DDFLIP_NOVSYNC | DDFLIP_WAIT);
         }
         if (n >= 0) return;
-        string t = "Flip Failed! Return code:" + itoa(n & 0x7fff);
+        const std::string t = "Flip Failed! Return code:" + itoa(n & 0x7fff);
         debugLog(t.c_str());
         break;
     }
@@ -352,7 +351,7 @@ void gxRuntime::flip(bool vwait)
 ////////////////
 // MOVE MOUSE //
 ////////////////
-void gxRuntime::moveMouse(int x, int y)
+void gxRuntime::moveMouse(int x, int y) const
 {
     POINT p;
     RECT rect;
@@ -381,7 +380,7 @@ void gxRuntime::moveMouse(int x, int y)
 /////////////////
 // WINDOW PROC //
 /////////////////
-LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT gxRuntime::windowProc(const HWND hwnd, const UINT msg, const WPARAM wparam, const LPARAM lparam)
 {
     if (busy)
     {
@@ -407,7 +406,7 @@ LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_CLOSE:
         if (app_close.size())
         {
-            int n = MessageBox(hwnd, app_close.c_str(), app_title.c_str(),
+            const int n = MessageBox(hwnd, app_close.c_str(), app_title.c_str(),
                                MB_OKCANCEL | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
             if (n != IDOK) return 0;
         }
@@ -418,7 +417,7 @@ LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {
             if (gfx_mode == 3)
             {
-                SetCursor(0);
+                SetCursor(nullptr);
                 return 1;
             }
             else if (!pointer_visible)
@@ -430,7 +429,7 @@ LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
                 GetClientRect(hwnd, &r);
                 if (p.x >= 0 && p.y >= 0 && p.x < r.right && p.y < r.bottom)
                 {
-                    SetCursor(0);
+                    SetCursor(nullptr);
                     return 1;
                 }
             }
@@ -519,11 +518,11 @@ LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
         if (lparam & 0x40000000) break;
-        if (int n = ((lparam >> 17) & 0x80) | ((lparam >> 16) & 0x7f)) input->wm_keydown(n);
+        if (const int n = ((lparam >> 17) & 0x80) | ((lparam >> 16) & 0x7f)) input->wm_keydown(n);
         break;
     case WM_KEYUP:
     case WM_SYSKEYUP:
-        if (int n = ((lparam >> 17) & 0x80) | ((lparam >> 16) & 0x7f)) input->wm_keyup(n);
+        if (const int n = ((lparam >> 17) & 0x80) | ((lparam >> 16) & 0x7f)) input->wm_keyup(n);
         break;
     default:
         return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -532,7 +531,7 @@ LRESULT gxRuntime::windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static LRESULT CALLBACK windowProc(const HWND hwnd, const UINT msg, const WPARAM wparam, const LPARAM lparam)
 {
     if (runtime) return runtime->windowProc(hwnd, msg, wparam, lparam);
     return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -541,7 +540,7 @@ static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 //////////////////////////////
 //STOP FROM EXTERNAL SOURCE //
 //////////////////////////////
-void gxRuntime::asyncStop()
+void gxRuntime::asyncStop() const
 {
     PostMessage(hwnd, WM_STOP, 0, 0);
 }
@@ -549,7 +548,7 @@ void gxRuntime::asyncStop()
 //////////////////////////////
 //RUN  FROM EXTERNAL SOURCE //
 //////////////////////////////
-void gxRuntime::asyncRun()
+void gxRuntime::asyncRun() const
 {
     PostMessage(hwnd, WM_RUN, 0, 0);
 }
@@ -557,7 +556,7 @@ void gxRuntime::asyncRun()
 //////////////////////////////
 // END FROM EXTERNAL SOURCE //
 //////////////////////////////
-void gxRuntime::asyncEnd()
+void gxRuntime::asyncEnd() const
 {
     PostMessage(hwnd, WM_END, 0, 0);
 }
@@ -572,11 +571,11 @@ bool gxRuntime::idle()
         MSG msg;
         if (suspended && run_flag)
         {
-            GetMessage(&msg, 0, 0, 0);
+            GetMessage(&msg, nullptr, 0, 0);
         }
         else
         {
-            if (!PeekMessage(&msg, 0, 0, 0,PM_REMOVE)) return run_flag;
+            if (!PeekMessage(&msg, nullptr, 0, 0,PM_REMOVE)) return run_flag;
         }
         switch (msg.message)
         {
@@ -587,7 +586,7 @@ bool gxRuntime::idle()
             if (suspended) forceResume();
             break;
         case WM_END:
-            debugger = 0;
+            debugger = nullptr;
             run_flag = false;
             break;
         default:
@@ -600,9 +599,9 @@ bool gxRuntime::idle()
 ///////////
 // DELAY //
 ///////////
-bool gxRuntime::delay(int ms)
+bool gxRuntime::delay(const int ms)
 {
-    int t = timeGetTime() + ms;
+    const int t = timeGetTime() + ms;
     for (;;)
     {
         if (!idle()) return false;
@@ -616,7 +615,7 @@ bool gxRuntime::delay(int ms)
 ///////////////
 // DEBUGSTMT //
 ///////////////
-void gxRuntime::debugStmt(int pos, const char* file)
+void gxRuntime::debugStmt(const int pos, const char* file)
 {
     if (debugger) debugger->debugStmt(pos, file);
 }
@@ -686,7 +685,7 @@ void gxRuntime::debugLog(const char* t)
 /////////////////////////
 // RETURN COMMAND LINE //
 /////////////////////////
-string gxRuntime::commandLine()
+std::string gxRuntime::commandLine()
 {
     return cmd_line;
 }
@@ -694,17 +693,17 @@ string gxRuntime::commandLine()
 /////////////
 // EXECUTE //
 /////////////
-bool gxRuntime::execute(const string& cmd_line)
+bool gxRuntime::execute(const std::string& cmd_line)
 {
     if (!cmd_line.size()) return false;
 
     //convert cmd_line to cmd and params
-    string cmd = cmd_line, params;
+    std::string cmd = cmd_line, params;
     while (cmd.size() && cmd[0] == ' ') cmd = cmd.substr(1);
     if (cmd.find('\"') == 0)
     {
-        int n = cmd.find('\"', 1);
-        if (n != string::npos)
+        const int n = cmd.find('\"', 1);
+        if (n != std::string::npos)
         {
             params = cmd.substr(n + 1);
             cmd = cmd.substr(1, n - 1);
@@ -712,8 +711,8 @@ bool gxRuntime::execute(const string& cmd_line)
     }
     else
     {
-        int n = cmd.find(' ');
-        if (n != string::npos)
+        const int n = cmd.find(' ');
+        if (n != std::string::npos)
         {
             params = cmd.substr(n + 1);
             cmd = cmd.substr(0, n);
@@ -724,13 +723,13 @@ bool gxRuntime::execute(const string& cmd_line)
 
     SetForegroundWindow(GetDesktopWindow());
 
-    return (int)ShellExecute(GetDesktopWindow(), 0, cmd.c_str(), params.size() ? params.c_str() : 0, 0,SW_SHOW) > 32;
+    return (int)ShellExecute(GetDesktopWindow(), nullptr, cmd.c_str(), params.size() ? params.c_str() : 0, nullptr,SW_SHOW) > 32;
 }
 
 ///////////////
 // APP TITLE //
 ///////////////
-void gxRuntime::setTitle(const string& t, const string& e)
+void gxRuntime::setTitle(const std::string& t, const std::string& e)
 {
     app_title = t;
     app_close = e;
@@ -748,7 +747,7 @@ int gxRuntime::getMilliSecs()
 /////////////////////
 // POINTER VISIBLE //
 /////////////////////
-void gxRuntime::setPointerVisible(bool vis)
+void gxRuntime::setPointerVisible(const bool vis)
 {
     if (pointer_visible == vis) return;
 
@@ -766,11 +765,11 @@ void gxRuntime::setPointerVisible(bool vis)
 /////////////////
 gxInput* gxRuntime::openInput(int flags)
 {
-    if (input) return 0;
+    if (input) return nullptr;
 
     IDirectInput8* di;
     //	if (DirectInputCreateEx(hinst, DIRECTINPUT_VERSION, IID_IDirectInput7, (void**)&di, 0) >= 0) {
-    if (DirectInput8Create(hinst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&di, 0) >= 0)
+    if (DirectInput8Create(hinst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&di, nullptr) >= 0)
     {
         input = d_new gxInput(this, di);
         acquireInput();
@@ -787,7 +786,7 @@ void gxRuntime::closeInput(gxInput* i)
     if (!input || input != i) return;
     unacquireInput();
     delete input;
-    input = 0;
+    input = nullptr;
 }
 
 /////////////////////////////////////////////////////
@@ -797,11 +796,11 @@ static void CALLBACK timerCallback(UINT id, UINT msg, DWORD user, DWORD dw1, DWO
 {
     if (gfx_mode)
     {
-        gxCanvas* f = runtime->graphics->getFrontCanvas();
+        const gxCanvas* f = runtime->graphics->getFrontCanvas();
         if (f->getModify() != mod_cnt)
         {
             mod_cnt = f->getModify();
-            InvalidateRect(runtime->hwnd, 0, false);
+            InvalidateRect(runtime->hwnd, nullptr, false);
         }
     }
 }
@@ -815,16 +814,16 @@ void gxRuntime::backupWindowState()
     t_style = GetWindowLong(hwnd,GWL_STYLE);
 }
 
-void gxRuntime::restoreWindowState()
+void gxRuntime::restoreWindowState() const
 {
     SetWindowLong(hwnd,GWL_STYLE, t_style);
     SetWindowPos(
-        hwnd, 0, t_rect.left, t_rect.top,
+        hwnd, nullptr, t_rect.left, t_rect.top,
         t_rect.right - t_rect.left, t_rect.bottom - t_rect.top,
         SWP_NOZORDER | SWP_FRAMECHANGED);
 }
 
-bool gxRuntime::setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dirDraw)
+bool gxRuntime::setDisplayMode(const int w, const int h, int d, const bool d3d, IDirectDraw7* dirDraw) const
 {
     if (d) return dirDraw->SetDisplayMode(w, h, d, 0, 0) >= 0;
 
@@ -832,7 +831,7 @@ bool gxRuntime::setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dirD
 
     if (d3d)
     {
-        int bd = curr_driver->d3d_desc.dwDeviceRenderBitDepth;
+        const int bd = curr_driver->d3d_desc.dwDeviceRenderBitDepth;
         if (bd & DDBD_32) best_d = 32;
         else if (bd & DDBD_24) best_d = 24;
         else if (bd & DDBD_16) best_d = 16;
@@ -844,7 +843,7 @@ bool gxRuntime::setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dirD
         {
             if (dirDraw->SetDisplayMode(w, h, d, 0, 0) < 0) continue;
             DDCAPS caps = {sizeof(caps)};
-            dirDraw->GetCaps(&caps, 0);
+            dirDraw->GetCaps(&caps, nullptr);
             int n = 0;
             if (caps.dwCaps & DDCAPS_BLT) ++n;
             if (caps.dwCaps & DDCAPS_BLTCOLORFILL) ++n;
@@ -865,7 +864,7 @@ bool gxRuntime::setDisplayMode(int w, int h, int d, bool d3d, IDirectDraw7* dirD
 gxGraphics* gxRuntime::openWindowedGraphics(int w, int h, int d, bool d3d)
 {
     IDirectDraw7* dd;
-    if (DirectDrawCreateEx(curr_driver->guid, (void**)&dd, IID_IDirectDraw7, 0) < 0) return 0;
+    if (DirectDrawCreateEx(curr_driver->guid, (void**)&dd, IID_IDirectDraw7, nullptr) < 0) return nullptr;
 
     //set coop level
     if (dd->SetCooperativeLevel(hwnd,DDSCL_NORMAL) >= 0)
@@ -875,11 +874,11 @@ gxGraphics* gxRuntime::openWindowedGraphics(int w, int h, int d, bool d3d)
         DDSURFACEDESC2 desc = {sizeof(desc)};
         desc.dwFlags = DDSD_CAPS;
         desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
-        if (dd->CreateSurface(&desc, &ps, 0) >= 0)
+        if (dd->CreateSurface(&desc, &ps, nullptr) >= 0)
         {
             //create clipper
             IDirectDrawClipper* cp;
-            if (dd->CreateClipper(0, &cp, 0) >= 0)
+            if (dd->CreateClipper(0, &cp, nullptr) >= 0)
             {
                 //attach clipper
                 if (ps->SetClipper(cp) >= 0)
@@ -897,7 +896,7 @@ gxGraphics* gxRuntime::openWindowedGraphics(int w, int h, int d, bool d3d)
 
                         if (d3d) desc.ddsCaps.dwCaps |= DDSCAPS_3DDEVICE;
 
-                        if (dd->CreateSurface(&desc, &fs, 0) >= 0)
+                        if (dd->CreateSurface(&desc, &fs, nullptr) >= 0)
                         {
                             if (timerID = timeSetEvent(100, 10, timerCallback, 0,TIME_PERIODIC))
                             {
@@ -918,13 +917,13 @@ gxGraphics* gxRuntime::openWindowedGraphics(int w, int h, int d, bool d3d)
         }
     }
     dd->Release();
-    return 0;
+    return nullptr;
 }
 
-gxGraphics* gxRuntime::openExclusiveGraphics(int w, int h, int d, bool d3d)
+gxGraphics* gxRuntime::openExclusiveGraphics(const int w, const int h, const int d, const bool d3d)
 {
     IDirectDraw7* dd;
-    if (DirectDrawCreateEx(curr_driver->guid, (void**)&dd, IID_IDirectDraw7, 0) < 0) return 0;
+    if (DirectDrawCreateEx(curr_driver->guid, (void**)&dd, IID_IDirectDraw7, nullptr) < 0) return nullptr;
 
     //Set coop level
     if (dd->SetCooperativeLevel(hwnd,DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_ALLOWREBOOT) >= 0)
@@ -941,7 +940,7 @@ gxGraphics* gxRuntime::openExclusiveGraphics(int w, int h, int d, bool d3d)
             desc.dwBackBufferCount = 1;
             if (d3d) desc.ddsCaps.dwCaps |= DDSCAPS_3DDEVICE;
 
-            if (dd->CreateSurface(&desc, &ps, 0) >= 0)
+            if (dd->CreateSurface(&desc, &ps, nullptr) >= 0)
             {
                 //find back surface
                 IDirectDrawSurface7* bs;
@@ -957,17 +956,17 @@ gxGraphics* gxRuntime::openExclusiveGraphics(int w, int h, int d, bool d3d)
         }
     }
     dd->Release();
-    return 0;
+    return nullptr;
 }
 
-gxGraphics* gxRuntime::openGraphics(int w, int h, int d, int driver, int flags)
+gxGraphics* gxRuntime::openGraphics(const int w, const int h, const int d, int driver, const int flags)
 {
-    if (graphics) return 0;
+    if (graphics) return nullptr;
 
     busy = true;
 
-    bool d3d = flags & gxGraphics::GRAPHICS_3D ? true : false;
-    bool windowed = flags & gxGraphics::GRAPHICS_WINDOWED ? true : false;
+    const bool d3d = flags & gxGraphics::GRAPHICS_3D ? true : false;
+    const bool windowed = flags & gxGraphics::GRAPHICS_WINDOWED ? true : false;
 
     if (windowed) driver = 0;
 
@@ -996,15 +995,15 @@ gxGraphics* gxRuntime::openGraphics(int w, int h, int d, int driver, int flags)
             }
 
             SetWindowLong(hwnd,GWL_STYLE, ws);
-            SetWindowPos(hwnd, 0, 0, 0, 0, 0,SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
             RECT w_r, c_r;
             GetWindowRect(hwnd, &w_r);
             GetClientRect(hwnd, &c_r);
-            int tw = (w_r.right - w_r.left) - (c_r.right - c_r.left);
-            int th = (w_r.bottom - w_r.top) - (c_r.bottom - c_r.top);
-            int cx = (GetSystemMetrics(SM_CXSCREEN) - ww) / 2;
-            int cy = (GetSystemMetrics(SM_CYSCREEN) - hh) / 2;
+            const int tw = (w_r.right - w_r.left) - (c_r.right - c_r.left);
+            const int th = (w_r.bottom - w_r.top) - (c_r.bottom - c_r.top);
+            const int cx = (GetSystemMetrics(SM_CXSCREEN) - ww) / 2;
+            const int cy = (GetSystemMetrics(SM_CYSCREEN) - hh) / 2;
             POINT zz = {0, 0};
             ClientToScreen(hwnd, &zz);
             int bw = zz.x - w_r.left, bh = zz.y - w_r.top;
@@ -1018,7 +1017,7 @@ gxGraphics* gxRuntime::openGraphics(int w, int h, int d, int driver, int flags)
         backupWindowState();
 
         SetWindowLong(hwnd,GWL_STYLE,WS_VISIBLE | WS_POPUP);
-        SetWindowPos(hwnd, 0, 0, 0, 0, 0,SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+        SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
         ShowCursor(0);
         if (graphics = openExclusiveGraphics(w, h, d, d3d))
@@ -1035,7 +1034,7 @@ gxGraphics* gxRuntime::openGraphics(int w, int h, int d, int driver, int flags)
         }
     }
 
-    if (!graphics) curr_driver = 0;
+    if (!graphics) curr_driver = nullptr;
 
     gfx_lost = false;
 
@@ -1061,15 +1060,15 @@ void gxRuntime::closeGraphics(gxGraphics* g)
     if (clipper)
     {
         clipper->Release();
-        clipper = 0;
+        clipper = nullptr;
     }
     if (primSurf)
     {
         primSurf->Release();
-        primSurf = 0;
+        primSurf = nullptr;
     }
     delete graphics;
-    graphics = 0;
+    graphics = nullptr;
 
     if (gfx_mode == 3)
     {
@@ -1090,7 +1089,7 @@ bool gxRuntime::graphicsLost()
 
 gxFileSystem* gxRuntime::openFileSystem(int flags)
 {
-    if (fileSystem) return 0;
+    if (fileSystem) return nullptr;
 
     fileSystem = d_new gxFileSystem();
     return fileSystem;
@@ -1101,7 +1100,7 @@ void gxRuntime::closeFileSystem(gxFileSystem* f)
     if (!fileSystem || fileSystem != f) return;
 
     delete fileSystem;
-    fileSystem = 0;
+    fileSystem = nullptr;
 }
 
 ////////////////////
@@ -1109,7 +1108,7 @@ void gxRuntime::closeFileSystem(gxFileSystem* f)
 ////////////////////
 static HRESULT WINAPI enumMode(DDSURFACEDESC2* desc, void* context)
 {
-    int dp = desc->ddpfPixelFormat.dwRGBBitCount;
+    const int dp = desc->ddpfPixelFormat.dwRGBBitCount;
     if (dp == 16 || dp == 24 || dp == 32)
     {
         gxRuntime::GfxMode* m = d_new gxRuntime::GfxMode;
@@ -1125,7 +1124,7 @@ static int maxDevType;
 static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDesc, void* context)
 {
     int t = 0;
-    GUID guid = devDesc->deviceGUID;
+    const GUID guid = devDesc->deviceGUID;
     if (guid == IID_IDirect3DRGBDevice) t = 1;
     else if (guid == IID_IDirect3DHALDevice) t = 2;
     else if (guid == IID_IDirect3DTnLHalDevice) t = 3;
@@ -1138,10 +1137,10 @@ static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDe
     return D3DENUMRET_OK;
 }
 
-static BOOL WINAPI enumDriver(GUID FAR * guid, LPSTR desc, LPSTR name, LPVOID context, HMONITOR hm)
+static BOOL WINAPI enumDriver(GUID FAR * guid, const LPSTR desc, LPSTR name, const LPVOID context, HMONITOR hm)
 {
     IDirectDraw7* dd;
-    if (DirectDrawCreateEx(guid, (void**)&dd, IID_IDirectDraw7, 0) < 0) return 0;
+    if (DirectDrawCreateEx(guid, (void**)&dd, IID_IDirectDraw7, nullptr) < 0) return 0;
 
     if (!guid && !desktop_desc.ddpfPixelFormat.dwRGBBitCount)
     {
@@ -1151,8 +1150,8 @@ static BOOL WINAPI enumDriver(GUID FAR * guid, LPSTR desc, LPSTR name, LPVOID co
 
     gxRuntime::GfxDriver* d = d_new gxRuntime::GfxDriver;
 
-    d->guid = guid ? d_new GUID(*guid) : 0;
-    d->name = desc; //string( name )+" "+string( desc );
+    d->guid = guid ? d_new GUID(*guid) : nullptr;
+    d->name = desc; //std::string( name )+" "+std::string( desc );
 
     memset(&d->d3d_desc, 0, sizeof(d->d3d_desc));
     IDirect3D7* dir3d;
@@ -1162,9 +1161,9 @@ static BOOL WINAPI enumDriver(GUID FAR * guid, LPSTR desc, LPSTR name, LPVOID co
         dir3d->EnumDevices(enumDevice, d);
         dir3d->Release();
     }
-    vector<gxRuntime::GfxDriver*>* drivers = (vector<gxRuntime::GfxDriver*>*)context;
+    auto* drivers = static_cast<std::vector<gxRuntime::GfxDriver*>*>(context);
     drivers->push_back(d);
-    dd->EnumDisplayModes(0, 0, d, enumMode);
+    dd->EnumDisplayModes(0, nullptr, d, enumMode);
     dd->Release();
     return 1;
 }
@@ -1186,7 +1185,7 @@ void gxRuntime::denumGfx()
 {
     for (int k = 0; k < drivers.size(); ++k)
     {
-        gxRuntime::GfxDriver* d = drivers[k];
+        const gxRuntime::GfxDriver* d = drivers[k];
         for (int j = 0; j < d->modes.size(); ++j) delete d->modes[j];
         delete d->guid;
         delete d;
@@ -1204,24 +1203,24 @@ int gxRuntime::numGraphicsDrivers()
     return drivers.size();
 }
 
-void gxRuntime::graphicsDriverInfo(int driver, string* name, int* c)
+void gxRuntime::graphicsDriverInfo(const int driver, std::string* name, int* c) const
 {
-    GfxDriver* g = drivers[driver];
+    const GfxDriver* g = drivers[driver];
     int caps = 0;
     if (g->d3d_desc.dwDeviceRenderBitDepth) caps |= GFXMODECAPS_3D;
     *name = g->name;
     *c = caps;
 }
 
-int gxRuntime::numGraphicsModes(int driver)
+int gxRuntime::numGraphicsModes(const int driver) const
 {
     return drivers[driver]->modes.size();
 }
 
-void gxRuntime::graphicsModeInfo(int driver, int mode, int* w, int* h, int* d, int* c)
+void gxRuntime::graphicsModeInfo(const int driver, const int mode, int* w, int* h, int* d, int* c) const
 {
-    GfxDriver* g = drivers[driver];
-    GfxMode* m = g->modes[mode];
+    const GfxDriver* g = drivers[driver];
+    const GfxMode* m = g->modes[mode];
     int caps = 0;
     int bd = 0;
     switch (m->desc.ddpfPixelFormat.dwRGBBitCount)
@@ -1240,7 +1239,7 @@ void gxRuntime::graphicsModeInfo(int driver, int mode, int* w, int* h, int* d, i
     *c = caps;
 }
 
-void gxRuntime::windowedModeInfo(int* c)
+void gxRuntime::windowedModeInfo(int* c) const
 {
     int caps = 0;
     int bd = 0;
@@ -1257,7 +1256,7 @@ void gxRuntime::windowedModeInfo(int* c)
     *c = caps;
 }
 
-gxTimer* gxRuntime::createTimer(int hertz)
+gxTimer* gxRuntime::createTimer(const int hertz)
 {
     gxTimer* t = d_new gxTimer(this, hertz);
     timers.insert(t);
@@ -1271,16 +1270,16 @@ void gxRuntime::freeTimer(gxTimer* t)
     delete t;
 }
 
-static string toDir(string t)
+static std::string toDir(std::string t)
 {
     if (t.size() && t[t.size() - 1] != '\\') t += '\\';
     return t;
 }
 
-string gxRuntime::systemProperty(const std::string& p)
+std::string gxRuntime::systemProperty(const std::string& p)
 {
     char buff[MAX_PATH + 1];
-    string t = tolower(p);
+    const std::string t = tolower(p);
     if (t == "cpu")
     {
         return "Intel";
@@ -1322,11 +1321,11 @@ string gxRuntime::systemProperty(const std::string& p)
     }
     else if (t == "appdir")
     {
-        if (GetModuleFileName(0, buff,MAX_PATH))
+        if (GetModuleFileName(nullptr, buff,MAX_PATH))
         {
-            string t = buff;
-            int n = t.find_last_of('\\');
-            if (n != string::npos) t = t.substr(0, n);
+            std::string t = buff;
+            const int n = t.find_last_of('\\');
+            if (n != std::string::npos) t = t.substr(0, n);
             return toDir(t);
         }
     }
@@ -1369,7 +1368,7 @@ string gxRuntime::systemProperty(const std::string& p)
     return "";
 }
 
-void gxRuntime::enableDirectInput(bool enable)
+void gxRuntime::enableDirectInput(const bool enable)
 {
     if (use_di = enable)
     {
@@ -1384,7 +1383,7 @@ void gxRuntime::enableDirectInput(bool enable)
 int gxRuntime::callDll(const std::string& dll, const std::string& func, const void* in, int in_sz, void* out,
                        int out_sz)
 {
-    map<string, gxDll*>::const_iterator lib_it = libs.find(dll);
+    std::map<std::string, gxDll*>::const_iterator lib_it = libs.find(dll);
 
     if (lib_it == libs.end())
     {
@@ -1396,7 +1395,7 @@ int gxRuntime::callDll(const std::string& dll, const std::string& func, const vo
     }
 
     gxDll* t = lib_it->second;
-    map<string, LibFunc>::const_iterator fun_it = t->funcs.find(func);
+    std::map<std::string, LibFunc>::const_iterator fun_it = t->funcs.find(func);
 
     if (fun_it == t->funcs.end())
     {

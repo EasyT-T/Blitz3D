@@ -1,8 +1,8 @@
 
-#include "stdafx.h"
-#include "prefs.h"
 #include "libs.h"
+#include "prefs.h"
 #include "resource.h"
+#include "stdafx.h"
 
 #include <mmsystem.h>
 
@@ -18,14 +18,15 @@ class Dialog : public CDialog {
 public:
     Dialog() : _quit(false) {}
 
-    afx_msg void OnOK() {
+    afx_msg void OnOK() override
+    {
         _quit = true;
     }
 
     void wait() {
         _quit = false;
         MSG msg;
-        while (!_quit && GetMessage(&msg, 0, 0, 0)) {
+        while (!_quit && GetMessage(&msg, nullptr, 0, 0)) {
             if (!AfxGetApp()->PreTranslateMessage(&msg)) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
@@ -34,15 +35,15 @@ public:
         EndDialog(0);
     }
 
-    void wait(int n) {
-        int _expire = (int) timeGetTime() + n;
+    void wait(const int n) {
+        const int _expire = (int) timeGetTime() + n;
         for (;;) {
             int tm = _expire - (int) timeGetTime();
             if (tm < 0) tm = 0;
-            MsgWaitForMultipleObjects(0, 0, false, tm, QS_ALLEVENTS);
+            MsgWaitForMultipleObjects(0, nullptr, false, tm, QS_ALLEVENTS);
 
             MSG msg;
-            if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 if (!AfxGetApp()->PreTranslateMessage(&msg)) {
                     TranslateMessage(&msg);
                     DispatchMessage(&msg);
@@ -65,16 +66,16 @@ void aboutBlitz(bool delay) {
     int ide_ver = VERSION & 0xffff;
     int lnk_ver = linker_ver & 0xffff;
     int run_ver = runtime_ver & 0xffff;
-    string bcc_v = itoa(ide_ver / 1000) + "." + itoa(ide_ver % 1000);
-    string ide_v = itoa(ide_ver / 1000) + "." + itoa(ide_ver % 1000);
-    string lnk_v = itoa(lnk_ver / 1000) + "." + itoa(lnk_ver % 1000);
-    string run_v = itoa(run_ver / 1000) + "." + itoa(run_ver % 1000);
+    std::string bcc_v = itoa(ide_ver / 1000) + "." + itoa(ide_ver % 1000);
+    std::string ide_v = itoa(ide_ver / 1000) + "." + itoa(ide_ver % 1000);
+    std::string lnk_v = itoa(lnk_ver / 1000) + "." + itoa(lnk_ver % 1000);
+    std::string run_v = itoa(run_ver / 1000) + "." + itoa(run_ver % 1000);
 
-    string credits = _credits;
+    std::string credits = _credits;
 
     about.GetDlgItem(IDC_CREDITS)->SetWindowText(credits.c_str());
 
-    string t = "Blitz3D IDE V" + ide_v;
+    std::string t = "Blitz3D IDE V" + ide_v;
     about.GetDlgItem(IDC_PRODUCT)->SetWindowText(t.c_str());
 
     t = "Compiler V" + bcc_v + " Linker V" + lnk_v;

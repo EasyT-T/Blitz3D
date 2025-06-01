@@ -13,7 +13,7 @@ public:
     void setBones(const vector<Object *> &bones);
 
     //Model interface
-    virtual void render(const RenderContext &rc);
+    void render(const RenderContext &rc) override;
 };
 
 #endif

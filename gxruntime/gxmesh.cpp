@@ -1,13 +1,13 @@
-#include "std.h"
 #include "gxmesh.h"
 #include "gxgraphics.h"
+#include "std.h"
 
 #include "gxruntime.h"
 
 extern gxRuntime* gx_runtime;
 
-gxMesh::gxMesh(gxGraphics* g, IDirect3DVertexBuffer7* vs, WORD* is, int max_vs, int max_ts):
-    graphics(g), locked_verts(0), vertex_buff(vs), tri_indices(is), max_verts(max_vs), max_tris(max_ts),
+gxMesh::gxMesh(gxGraphics* g, IDirect3DVertexBuffer7* vs, WORD* is, const int max_vs, const int max_ts):
+    graphics(g), locked_verts(nullptr), vertex_buff(vs), tri_indices(is), max_verts(max_vs), max_tris(max_ts),
     mesh_dirty(false)
 {
 }
@@ -21,7 +21,7 @@ gxMesh::~gxMesh()
     delete[] tri_indices;
 }
 
-bool gxMesh::lock(bool all)
+bool gxMesh::lock(const bool all)
 {
     if (locked_verts) return true;
 
@@ -43,7 +43,7 @@ bool gxMesh::lock(bool all)
         flags |= (all ? DDLOCK_DISCARDCONTENTS : DDLOCK_NOOVERWRITE);
     }
 
-    if (vertex_buff->Lock(flags, (void**)&locked_verts, 0) >= 0)
+    if (vertex_buff->Lock(flags, (void**)&locked_verts, nullptr) >= 0)
     {
         mesh_dirty = false;
         return true;
@@ -60,7 +60,7 @@ void gxMesh::unlock()
     if (locked_verts)
     {
         vertex_buff->Unlock();
-        locked_verts = 0;
+        locked_verts = nullptr;
     }
 }
 
@@ -107,7 +107,7 @@ void gxMesh::restore(){
 }
 */
 
-void gxMesh::render(int first_vert, int vert_cnt, int first_tri, int tri_cnt)
+void gxMesh::render(const int first_vert, const int vert_cnt, const int first_tri, const int tri_cnt)
 {
     unlock();
     graphics->dir3dDev->DrawIndexedPrimitiveVB(

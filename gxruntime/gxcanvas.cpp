@@ -1,8 +1,8 @@
-#include "std.h"
 #include "gxcanvas.h"
+#include "asmcoder.h"
 #include "gxgraphics.h"
 #include "gxruntime.h"
-#include "asmcoder.h"
+#include "std.h"
 
 #define DEBUG_BITMASK
 
@@ -52,7 +52,7 @@ struct Rect : public RECT
     {
     }
 
-    Rect(int x, int y, int w, int h)
+    Rect(const int x, const int y, const int w, const int h)
     {
         left = x;
         top = y;
@@ -111,8 +111,8 @@ static bool clip(const RECT& viewport, RECT* d, RECT* s)
 }
 
 gxCanvas::gxCanvas(gxGraphics* g, IDirectDrawSurface7* s, int f):
-    graphics(g), main_surf(s), surf(0), z_surf(0), flags(f), cube_mode(CUBEMODE_REFLECTION | CUBESPACE_WORLD),
-    t_surf(0), cm_mask(0), locked_cnt(0), mod_cnt(0), remip_cnt(0)
+    graphics(g), main_surf(s), surf(nullptr), z_surf(nullptr), flags(f), cube_mode(CUBEMODE_REFLECTION | CUBESPACE_WORLD),
+    t_surf(nullptr), cm_mask(nullptr), locked_cnt(0), mod_cnt(0), remip_cnt(0)
 {
     if (flags & CANVAS_TEX_CUBE)
     {
@@ -170,7 +170,7 @@ gxCanvas::gxCanvas(gxGraphics* g, IDirectDrawSurface7* s, int f):
 gxCanvas::~gxCanvas()
 {
     delete[] cm_mask;
-    if (locked_cnt) surf->Unlock(0);
+    if (locked_cnt) surf->Unlock(nullptr);
     if (t_surf) t_surf->Release();
     releaseZBuffer();
     main_surf->Release();
@@ -193,21 +193,21 @@ void gxCanvas::backup() const
         t_desc.dwHeight = desc.dwHeight;
         t_desc.ddpfPixelFormat = desc.ddpfPixelFormat;
 
-        if (graphics->dirDraw->CreateSurface(&t_desc, &t_surf, 0) < 0)
+        if (graphics->dirDraw->CreateSurface(&t_desc, &t_surf, nullptr) < 0)
         {
-            t_surf = 0;
+            t_surf = nullptr;
             return;
         }
     }
 
-    if (t_surf->Blt(0, surf, 0,DDBLT_WAIT, 0) < 0) return;
+    if (t_surf->Blt(nullptr, surf, nullptr,DDBLT_WAIT, nullptr) < 0) return;
 }
 
 void gxCanvas::restore() const
 {
     if (!t_surf) return;
 
-    if (surf->Blt(0, t_surf, 0,DDBLT_WAIT, 0) < 0) return;
+    if (surf->Blt(nullptr, t_surf, nullptr,DDBLT_WAIT, nullptr) < 0) return;
 }
 
 ddSurf* gxCanvas::getSurface() const
@@ -247,10 +247,10 @@ void gxCanvas::updateBitMask(const RECT& r) const
     w = (t.right - t.left) / 32;
     unsigned char* src_row = locked_surf + t.top * locked_pitch + t.left * format.getPitch();
     unsigned* dest_row = cm_mask + t.top * cm_pitch + t.left / 32;
-    unsigned mask_argb = format.toARGB(mask_surf) & 0xffffff;
+    const unsigned mask_argb = format.toARGB(mask_surf) & 0xffffff;
 
 #ifdef DEBUG_BITMASK
-    unsigned* cm_mask_end = cm_mask + cm_pitch * clip_rect.bottom;
+    const unsigned* cm_mask_end = cm_mask + cm_pitch * clip_rect.bottom;
 #endif
 
     while (h--)
@@ -262,7 +262,7 @@ void gxCanvas::updateBitMask(const RECT& r) const
             unsigned mask = 0;
             for (int x = 0; x < 32; ++x)
             {
-                unsigned pix = format.getPixel(src) & 0xffffff;
+                const unsigned pix = format.getPixel(src) & 0xffffff;
                 mask = (mask << 1) | (pix != mask_argb);
                 src += format.getPitch();
             }
@@ -280,7 +280,7 @@ void gxCanvas::updateBitMask(const RECT& r) const
     unlock();
 }
 
-void gxCanvas::setModify(int n)
+void gxCanvas::setModify(const int n) const
 {
     mod_cnt = n;
 }
@@ -299,7 +299,7 @@ bool gxCanvas::attachZBuffer()
     desc.dwHeight = getHeight();
     desc.ddsCaps.dwCaps = DDSCAPS_ZBUFFER | DDSCAPS_VIDEOMEMORY;
     desc.ddpfPixelFormat = graphics->zbuffFmt;
-    if (graphics->dirDraw->CreateSurface(&desc, &z_surf, 0) < 0) return false;
+    if (graphics->dirDraw->CreateSurface(&desc, &z_surf, nullptr) < 0) return false;
     surf->AddAttachedSurface(z_surf);
     return true;
 }
@@ -309,7 +309,7 @@ void gxCanvas::releaseZBuffer()
     if (!z_surf) return;
     surf->DeleteAttachedSurface(0, z_surf);
     z_surf->Release();
-    z_surf = 0;
+    z_surf = nullptr;
 }
 
 void gxCanvas::damage(const RECT& r) const
@@ -323,7 +323,7 @@ void gxCanvas::setFont(gxFont* f)
     font = f;
 }
 
-void gxCanvas::setMask(unsigned argb)
+void gxCanvas::setMask(const unsigned argb)
 {
     mask_surf = format.fromARGB(argb);
 }
@@ -341,19 +341,19 @@ void gxCanvas::setClsColor(unsigned argb)
     clsColor_surf = format.fromARGB(argb);
 }
 
-void gxCanvas::setOrigin(int x, int y)
+void gxCanvas::setOrigin(const int x, const int y)
 {
     origin_x = x;
     origin_y = y;
 }
 
-void gxCanvas::setHandle(int x, int y)
+void gxCanvas::setHandle(const int x, const int y)
 {
     handle_x = x;
     handle_y = y;
 }
 
-void gxCanvas::setViewport(int x, int y, int w, int h)
+void gxCanvas::setViewport(const int x, const int y, const int w, const int h)
 {
     Rect r(x, y, w, h);
     if (!::clip(clip_rect, &r)) r = Rect(0, 0, 0, 0);
@@ -364,11 +364,11 @@ void gxCanvas::setViewport(int x, int y, int w, int h)
 void gxCanvas::cls()
 {
     bltfx.dwFillColor = clsColor_surf;
-    surf->Blt(&viewport, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+    surf->Blt(&viewport, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     damage(viewport);
 }
 
-void gxCanvas::plot(int x, int y)
+void gxCanvas::plot(int x, int y) const
 {
     x += origin_x;
     if (x < viewport.left || x >= viewport.right) return;
@@ -376,31 +376,29 @@ void gxCanvas::plot(int x, int y)
     if (y < viewport.top || y >= viewport.bottom) return;
     bltfx.dwFillColor = color_surf;
     Rect dest(x, y, 1, 1);
-    surf->Blt(&dest, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+    surf->Blt(&dest, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     damage(dest);
 }
 
 void gxCanvas::line(int x0, int y0, int x1, int y1)
 {
     int ddf, padj, sadj;
-    int dx, dy, sx, sy, ax, ay;
+    int sx, sy, ax, ay;
 
     x0 += origin_x;
     y0 += origin_y;
     x1 += origin_x;
     y1 += origin_y;
 
-    int cx0, cx1, cy0, cy1, clip0, clip1;
-
-    cx0 = viewport.left;
-    cx1 = viewport.right - 1;
-    cy0 = viewport.top;
-    cy1 = viewport.bottom - 1;
+    int cx0 = viewport.left;
+    int cx1 = viewport.right - 1;
+    int cy0 = viewport.top;
+    int cy1 = viewport.bottom - 1;
 
     while (true)
     {
-        clip0 = 0;
-        clip1 = 0;
+        int clip0 = 0;
+        int clip1 = 0;
 
         if (y0 > cy1)clip0 |= 1;
         else if (y0 < cy0)clip0 |= 2;
@@ -465,8 +463,8 @@ void gxCanvas::line(int x0, int y0, int x1, int y1)
         }
     }
 
-    dx = x1 - x0;
-    dy = y1 - y0;
+    int dx = x1 - x0;
+    int dy = y1 - y0;
     if ((dx | dy) == 0)
     {
         setPixel(x0, y0, color_argb);
@@ -532,7 +530,7 @@ void gxCanvas::line(int x0, int y0, int x1, int y1)
     unlock();
 }
 
-void gxCanvas::rect(int x, int y, int w, int h, bool solid)
+void gxCanvas::rect(int x, int y, const int w, const int h, const bool solid) const
 {
     x += origin_x;
     y += origin_y;
@@ -543,34 +541,34 @@ void gxCanvas::rect(int x, int y, int w, int h, bool solid)
 
     if (solid)
     {
-        surf->Blt(&dest, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        surf->Blt(&dest, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         damage(dest);
         return;
     }
     Rect r1(x, y, w, 1);
     if (clip(&r1))
     {
-        surf->Blt(&r1, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        surf->Blt(&r1, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     }
     Rect r2(x, y, 1, h);
     if (clip(&r2))
     {
-        surf->Blt(&r2, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        surf->Blt(&r2, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     }
     Rect r3(x + w - 1, y, 1, h);
     if (clip(&r3))
     {
-        surf->Blt(&r3, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        surf->Blt(&r3, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     }
     Rect r4(x, y + h - 1, w, 1);
     if (clip(&r4))
     {
-        surf->Blt(&r4, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        surf->Blt(&r4, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
     }
     damage(dest);
 }
 
-void gxCanvas::oval(int x1, int y1, int w, int h, bool solid)
+void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) const
 {
     x1 += origin_x;
     y1 += origin_y;
@@ -587,7 +585,7 @@ void gxCanvas::oval(int x1, int y1, int w, int h, bool solid)
         y = dest.top - cy;
         for (int t = dest.top; t < dest.bottom; ++y, ++t)
         {
-            float x = sqrt(rsq - y * y) * ar;
+            const float x = sqrt(rsq - y * y) * ar;
             int xa = floor(cx - x), xb = floor(cx + x);
             if (xb <= xa || xa >= viewport.right || xb <= viewport.left) continue;
             Rect dr;
@@ -595,16 +593,16 @@ void gxCanvas::oval(int x1, int y1, int w, int h, bool solid)
             dr.bottom = t + 1;
             dr.left = xa < viewport.left ? viewport.left : xa;
             dr.right = xb > viewport.right ? viewport.right : xb;
-            surf->Blt(&dr, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+            surf->Blt(&dr, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         }
         damage(dest);
         return;
     }
 
-    int p_xa, p_xb, t, hh = floor(cy);
+    int p_xb, hh = floor(cy);
 
-    p_xa = p_xb = cx;
-    t = dest.top;
+    int p_xa = p_xb = cx;
+    int t = dest.top;
     y = t - cy;
     if (dest.top > y1)
     {
@@ -613,14 +611,14 @@ void gxCanvas::oval(int x1, int y1, int w, int h, bool solid)
     }
     for (; t <= hh; ++y, ++t)
     {
-        float x = sqrt(rsq - y * y) * ar;
+        const float x = sqrt(rsq - y * y) * ar;
         int xa = floor(cx - x), xb = floor(cx + x);
         Rect r1(xa, t, p_xa - xa, 1);
         if (r1.right <= r1.left) r1.right = r1.left + 1;
-        if (clip(&r1)) surf->Blt(&r1, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        if (clip(&r1)) surf->Blt(&r1, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         Rect r2(p_xb, t, xb - p_xb, 1);
         if (r2.left >= r2.right) r2.left = r2.right - 1;
-        if (clip(&r2)) surf->Blt(&r2, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        if (clip(&r2)) surf->Blt(&r2, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         p_xa = xa;
         p_xb = xb;
     }
@@ -635,21 +633,21 @@ void gxCanvas::oval(int x1, int y1, int w, int h, bool solid)
     }
     for (; t > hh; --y, --t)
     {
-        float x = sqrt(rsq - y * y) * ar;
+        const float x = sqrt(rsq - y * y) * ar;
         int xa = floor(cx - x), xb = floor(cx + x);
         Rect r1(xa, t, p_xa - xa, 1);
         if (r1.right <= r1.left) r1.right = r1.left + 1;
-        if (clip(&r1)) surf->Blt(&r1, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        if (clip(&r1)) surf->Blt(&r1, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         Rect r2(p_xb, t, xb - p_xb, 1);
         if (r2.left >= r2.right) r2.left = r2.right - 1;
-        if (clip(&r2)) surf->Blt(&r2, 0, 0,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
+        if (clip(&r2)) surf->Blt(&r2, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
         p_xa = xa;
         p_xb = xb;
     }
     damage(dest);
 }
 
-void gxCanvas::blit(int x, int y, gxCanvas* src, int src_x, int src_y, int src_w, int src_h, bool solid)
+void gxCanvas::blit(int x, int y, gxCanvas* src, const int src_x, const int src_y, const int src_w, const int src_h, const bool solid) const
 {
     x += origin_x - src->handle_x;
     y += origin_y - src->handle_y;
@@ -659,7 +657,7 @@ void gxCanvas::blit(int x, int y, gxCanvas* src, int src_x, int src_y, int src_w
 
     if (solid)
     {
-        surf->Blt(&dest_r, src->surf, &src_r,DDBLT_WAIT, 0);
+        surf->Blt(&dest_r, src->surf, &src_r,DDBLT_WAIT, nullptr);
     }
     else
     {
@@ -670,9 +668,9 @@ void gxCanvas::blit(int x, int y, gxCanvas* src, int src_x, int src_y, int src_w
     damage(dest_r);
 }
 
-void gxCanvas::text(int x, int y, const string& t)
+void gxCanvas::text(int x, const int y, const std::string& t)
 {
-    int ty = y + origin_y;
+    const int ty = y + origin_y;
     if (ty >= viewport.bottom) return;
     if (ty + font->getHeight() <= viewport.top) return;
 
@@ -746,7 +744,7 @@ unsigned gxCanvas::getClsColor() const
     return format.toARGB(clsColor_surf);
 }
 
-bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, bool solid) const
+bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const bool solid) const
 {
     x1 -= handle_x;
     x2 -= i2->handle_x;
@@ -797,16 +795,16 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, bool 
     s1 += (ir.top - r1.top) * i1_pitch;
     s2 += (ir.top - r2.top) * i2_pitch;
 
-    int startx = ir.left - r1.left;
-    int stopx = ir.right - r1.left - 1;
-    int shr = startx & 31;
-    int shl = 32 - shr;
-    int cnt = stopx / 32 - startx / 32;
-    unsigned lwm = LWMS[stopx & 31];
+    const int startx = ir.left - r1.left;
+    const int stopx = ir.right - r1.left - 1;
+    const int shr = startx & 31;
+    const int shl = 32 - shr;
+    const int cnt = stopx / 32 - startx / 32;
+    const unsigned lwm = LWMS[stopx & 31];
 
 #ifdef DEBUG_BITMASK
-    unsigned* cm_mask_end1 = i1->cm_mask + i1_pitch * i1->clip_rect.bottom;
-    unsigned* cm_mask_end2 = i2->cm_mask + i2_pitch * i2->clip_rect.bottom;
+    const unsigned* cm_mask_end1 = i1->cm_mask + i1_pitch * i1->clip_rect.bottom;
+    const unsigned* cm_mask_end2 = i2->cm_mask + i2_pitch * i2->clip_rect.bottom;
 #endif
 
     s1 += startx / 32;
@@ -826,7 +824,7 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, bool 
                 gx_runtime->debugError("gxCanvas::collide row overflow");
             }
 #endif
-            unsigned n = *row2++;
+            const unsigned n = *row2++;
             if (((n >> shr) | p) & *row1++) return true;
             p = shl < 32 ? n << shl : 0;
         }
@@ -847,7 +845,7 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, bool 
     return false;
 }
 
-bool gxCanvas::rect_collide(int x1, int y1, int x2, int y2, int w2, int h2, bool solid) const
+bool gxCanvas::rect_collide(int x1, int y1, const int x2, const int y2, const int w2, const int h2, const bool solid) const
 {
     x1 -= handle_x;
     if (x1 + clip_rect.right <= x2 || x1 >= x2 + w2) return false;
@@ -871,9 +869,9 @@ bool gxCanvas::rect_collide(int x1, int y1, int x2, int y2, int w2, int h2, bool
 
     unsigned* s1 = cm_mask + (ir.top - r1.top) * cm_pitch;
 
-    int startx = ir.left - r1.left;
-    int stopx = ir.right - r1.left - 1;
-    int cnt = stopx / 32 - startx / 32;
+    const int startx = ir.left - r1.left;
+    const int stopx = ir.right - r1.left - 1;
+    const int cnt = stopx / 32 - startx / 32;
     unsigned fwm = FWMS[startx & 31];
     unsigned lwm = LWMS[stopx & 31];
 
@@ -886,7 +884,7 @@ bool gxCanvas::rect_collide(int x1, int y1, int x2, int y2, int w2, int h2, bool
     s1 += startx / 32;
     for (int h = ir.top; h < ir.bottom; ++h)
     {
-        unsigned* row = s1;
+        const unsigned* row = s1;
         if (*row & fwm) return true;
         for (int x = 1; x < cnt; ++x)
         {
@@ -903,7 +901,7 @@ bool gxCanvas::lock() const
     if (!locked_cnt++)
     {
         DDSURFACEDESC2 desc = {sizeof(desc)};
-        if (surf->Lock(0, &desc,DDLOCK_WAIT | DDLOCK_NOSYSLOCK, 0) < 0)
+        if (surf->Lock(nullptr, &desc,DDLOCK_WAIT | DDLOCK_NOSYSLOCK, nullptr) < 0)
         {
             --locked_cnt;
             return false;
@@ -920,12 +918,12 @@ void gxCanvas::unlock() const
     if (locked_cnt == 1)
     {
         if (lock_mod_cnt != mod_cnt && cm_mask) updateBitMask(clip_rect);
-        surf->Unlock(0);
+        surf->Unlock(nullptr);
     }
     --locked_cnt;
 }
 
-void gxCanvas::setPixel(int x, int y, unsigned argb)
+void gxCanvas::setPixel(int x, int y, const unsigned argb)
 {
     x += origin_x;
     if (x < viewport.left || x >= viewport.right) return;
@@ -943,12 +941,12 @@ unsigned gxCanvas::getPixel(int x, int y) const
     y += origin_y;
     if (y < viewport.top || y >= viewport.bottom) return format.toARGB(mask_surf);
     lock();
-    unsigned p = getPixelFast(x, y);
+    const unsigned p = getPixelFast(x, y);
     unlock();
     return p;
 }
 
-void gxCanvas::copyPixelFast(int x, int y, gxCanvas* src, int src_x, int src_y)
+void gxCanvas::copyPixelFast(const int x, const int y, gxCanvas* src, const int src_x, const int src_y) const
 {
     switch (format.getDepth())
     {
@@ -988,12 +986,12 @@ void gxCanvas::copyPixel(int x, int y, gxCanvas* src, int src_x, int src_y)
     unlock();
 }
 
-void gxCanvas::setCubeMode(int mode)
+void gxCanvas::setCubeMode(const int mode)
 {
     cube_mode = mode;
 }
 
-void gxCanvas::setCubeFace(int face)
+void gxCanvas::setCubeFace(const int face)
 {
     getTexSurface();
     surf = cube_surfs[face];

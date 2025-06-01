@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "image_util.h"
+#include "std.h"
 
 #pragma pack( push, 1 )
 struct Head {
@@ -60,9 +60,9 @@ struct Rsrc {
     int id;
     void *data;
     int data_sz;
-    vector<Rsrc *> kids;
+    std::vector<Rsrc *> kids;
 
-    Rsrc(int id, Rsrc *p) : id(id), data(0), data_sz(0) {
+    Rsrc(const int id, Rsrc *p) : id(id), data(nullptr), data_sz(0) {
         if (p) p->kids.push_back(this);
 //		cout<<"res id:"<<dec<<id<<hex<<endl;
     }
@@ -77,7 +77,7 @@ struct Section {
     Sect sect;
     char *data;
 
-    Section() : data(0) {}
+    Section() : data(nullptr) {}
 
     ~Section() { delete[] data; }
 };
@@ -94,13 +94,13 @@ static int opts_sz;
 static DDir *ddir;
 static int ddir_sz;
 
-static vector<Section *> sections;
+static std::vector<Section *> sections;
 
 static Rsrc *rsrc_root;
 
 static const char *img_file;
 
-static void openRsrcDir(Section *s, int off, Rsrc *p) {
+static void openRsrcDir(Section *s, const int off, Rsrc *p) {
     char *data = (char *) s->data;
 
     Rdir *dir = (Rdir *) (data + off);
@@ -110,10 +110,10 @@ static void openRsrcDir(Section *s, int off, Rsrc *p) {
         if (ent->data < 0) {    //a node - offset is another dir
             openRsrcDir(s, ent->data & 0x7fffffff, r);
         } else {                //a leaf
-            Rdat *dat = (Rdat *) (data + ent->data);
+            const Rdat *dat = (Rdat *) (data + ent->data);
 //			cout<<"dat addr:"<<dat->addr<<" size:"<<dat->size<<endl;
-            int sz = dat->size;
-            void *src = dat->addr - s->sect.virt_addr + data;
+            const int sz = dat->size;
+            const void *src = dat->addr - s->sect.virt_addr + data;
             void *dest = d_new char[sz];
             memcpy(dest, src, sz);
             r->data = dest;
@@ -123,7 +123,7 @@ static void openRsrcDir(Section *s, int off, Rsrc *p) {
 }
 
 static void openRsrcTree(Section *s) {
-    rsrc_root = d_new Rsrc(0, 0);
+    rsrc_root = d_new Rsrc(0, nullptr);
     openRsrcDir(s, 0, rsrc_root);
 }
 
@@ -138,7 +138,7 @@ static int rsrcSize(Rsrc *r) {
 
 static void closeRsrcDir(Section *s, int off, Rsrc *p) {
 
-    int t, k;
+    int k;
 
     char *data = (char *) s->data;
 
@@ -150,7 +150,7 @@ static void closeRsrcDir(Section *s, int off, Rsrc *p) {
     //to end of dir...
     off += sizeof(Rdir) + sizeof(Rent) * p->kids.size();
 
-    t = off;
+    int t = off;
 
     //write entries
     for (k = 0; k < p->kids.size(); ++ent, ++k) {
@@ -179,21 +179,21 @@ static void closeRsrcDir(Section *s, int off, Rsrc *p) {
     }
 }
 
-static int fileAlign(int n) {
+static int fileAlign(const int n) {
     return (n + (opts->file_align - 1)) & ~(opts->file_align - 1);
 }
 
-static int sectAlign(int n) {
+static int sectAlign(const int n) {
     return (n + (opts->sect_align - 1)) & ~(opts->sect_align - 1);
 }
 
 static void closeRsrcTree(Section *s) {
 
-    int virt_sz = rsrcSize(rsrc_root);
-    int data_sz = fileAlign(virt_sz);
+    const int virt_sz = rsrcSize(rsrc_root);
+    const int data_sz = fileAlign(virt_sz);
 
-    int virt_delta = sectAlign(virt_sz) - sectAlign(s->sect.virt_size);
-    int data_delta = fileAlign(virt_sz) - fileAlign(s->sect.virt_size);
+    const int virt_delta = sectAlign(virt_sz) - sectAlign(s->sect.virt_size);
+    const int data_delta = fileAlign(virt_sz) - fileAlign(s->sect.virt_size);
 
 
     for (int k = 0; k < sections.size(); ++k) {
@@ -220,25 +220,25 @@ static void closeRsrcTree(Section *s) {
     closeRsrcDir(s, 0, rsrc_root);
 
     delete rsrc_root;
-    rsrc_root = 0;
+    rsrc_root = nullptr;
 }
 
-static Rsrc *findRsrc(int id, Rsrc *p) {
+static Rsrc *findRsrc(const int id, Rsrc *p) {
     for (int k = 0; k < p->kids.size(); ++k) {
         if (p->kids[k]->id == id) return p->kids[k];
     }
-    return 0;
+    return nullptr;
 }
 
-static Rsrc *findRsrc(int type, int id, int lang) {
+static Rsrc *findRsrc(const int type, const int id, const int lang) {
     Rsrc *r = findRsrc(type, rsrc_root);
-    if (!r) return 0;
+    if (!r) return nullptr;
     r = findRsrc(id, r);
-    if (!r) return 0;
+    if (!r) return nullptr;
     return findRsrc(lang, r);
 }
 
-static void loadImage(istream &in) {
+static void loadImage(std::istream &in) {
 
     int k;
 
@@ -275,7 +275,7 @@ static void loadImage(istream &in) {
     for (k = 0; k < head->num_sects; ++k) {
         Section *s = sections[k];
         if (!s->sect.data_addr) continue;
-        int data_sz = s->sect.data_size;
+        const int data_sz = s->sect.data_size;
         s->data = d_new char[data_sz];//char[s->sect.virt_size];
         //memset( s->data,0,s->sect.virt_size );
         in.seekg(s->sect.data_addr);
@@ -283,7 +283,7 @@ static void loadImage(istream &in) {
     }
 }
 
-static void saveImage(ostream &out) {
+static void saveImage(std::ostream &out) {
 
     int k;
 
@@ -298,7 +298,7 @@ static void saveImage(ostream &out) {
     }
 
     for (k = 0; k < head->num_sects; ++k) {
-        Section *s = sections[k];
+        const Section *s = sections[k];
         if (!s->sect.data_addr) continue;
         //assumes sect data is in order!!!!!
         while (out.tellp() < s->sect.data_addr) out.put((char) 0xbb);
@@ -312,13 +312,13 @@ static void saveImage(ostream &out) {
 bool openImage(const char *img) {
     img_file = img;
 
-    fstream in(img_file, ios_base::binary | ios_base::in);
+    std::fstream in(img_file, std::ios_base::binary | std::ios_base::in);
     loadImage(in);
     in.close();
     return true;
 }
 
-bool makeExe(int entry) {
+bool makeExe(const int entry) {
     if (!img_file) return false;
 
     head->chars |= 0x0002;        //executable
@@ -328,7 +328,7 @@ bool makeExe(int entry) {
     return true;
 }
 
-bool replaceRsrc(int type, int id, int lang, void *data, int data_sz) {
+bool replaceRsrc(const int type, const int id, const int lang, void *data, const int data_sz) {
     if (!img_file) return false;
 
     for (int k = 0; k < sections.size(); ++k) {
@@ -352,7 +352,7 @@ bool replaceRsrc(int type, int id, int lang, void *data, int data_sz) {
 void closeImage() {
     if (!img_file) return;
 
-    fstream out(img_file, ios_base::binary | ios_base::out | ios_base::trunc);
+    std::fstream out(img_file, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
     saveImage(out);
     out.close();
 
@@ -361,6 +361,6 @@ void closeImage() {
     delete opts;
     delete head;
     delete[] stub;
-    img_file = 0;
+    img_file = nullptr;
 }
 

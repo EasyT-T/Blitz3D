@@ -25,13 +25,13 @@ struct TNode {
     int op;                //opcode
     TNode *l, *r;        //args
     int iconst;            //for CONST type_int
-    string sconst;        //for CONST type_string
+    std::string sconst;        //for CONST type_string
 
-    TNode(int op, TNode *l = 0, TNode *r = 0) : op(op), l(l), r(r), iconst(0) {}
+    TNode(const int op, TNode *l = nullptr, TNode *r = nullptr) : op(op), l(l), r(r), iconst(0) {}
 
-    TNode(int op, TNode *l, TNode *r, int i) : op(op), l(l), r(r), iconst(i) {}
+    TNode(const int op, TNode *l, TNode *r, const int i) : op(op), l(l), r(r), iconst(i) {}
 
-    TNode(int op, TNode *l, TNode *r, const string &s) : op(op), l(l), r(r), iconst(0), sconst(s) {}
+    TNode(const int op, TNode *l, TNode *r, const std::string &s) : op(op), l(l), r(r), iconst(0), sconst(s) {}
 
     ~TNode() {
         delete l;
@@ -43,24 +43,24 @@ struct TNode {
 
 class Codegen {
 public:
-    ostream &out;
+    std::ostream &out;
     bool debug;
 
-    Codegen(ostream &out, bool debug) : out(out), debug(debug) {}
+    Codegen(std::ostream &out, const bool debug) : out(out), debug(debug) {}
 
-    virtual void enter(const string &l, int frameSize) = 0;
+    virtual void enter(const std::string &l, int frameSize) = 0;
 
     virtual void code(TNode *code) = 0;
 
     virtual void leave(TNode *cleanup, int pop_sz) = 0;
 
-    virtual void label(const string &l) = 0;
+    virtual void label(const std::string &l) = 0;
 
-    virtual void i_data(int i, const string &l = "") = 0;
+    virtual void i_data(int i, const std::string &l = "") = 0;
 
-    virtual void s_data(const string &s, const string &l = "") = 0;
+    virtual void s_data(const std::string &s, const std::string &l = "") = 0;
 
-    virtual void p_data(const string &p, const string &l = "") = 0;
+    virtual void p_data(const std::string &p, const std::string &l = "") = 0;
 
     virtual void align_data(int n) = 0;
 

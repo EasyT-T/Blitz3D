@@ -1,11 +1,11 @@
-#include "std.h"
 #include "gxgraphics.h"
 #include "gxruntime.h"
+#include "std.h"
 
 extern gxRuntime* gx_runtime;
 
 gxGraphics::gxGraphics(gxRuntime* rt, IDirectDraw7* dd, IDirectDrawSurface7* fs, IDirectDrawSurface7* bs, bool d3d):
-    runtime(rt), dirDraw(dd), dir3d(0), dir3dDev(0), def_font(0), gfx_lost(false), dummy_mesh(0)
+    runtime(rt), dirDraw(dd), dir3d(nullptr), dir3dDev(nullptr), def_font(nullptr), gfx_lost(false), dummy_mesh(nullptr)
 {
     dirDraw->QueryInterface(IID_IDirectDraw, (void**)&ds_dirDraw);
 
@@ -25,12 +25,12 @@ gxGraphics::gxGraphics(gxRuntime* rt, IDirectDraw7* dd, IDirectDrawSurface7* fs,
     fs->GetPixelFormat(&primFmt);
 
     //are we fullscreen?
-    _gamma = 0;
+    _gamma = nullptr;
     if (fs != bs)
     {
         if (fs->QueryInterface(IID_IDirectDrawGammaControl, (void**)&_gamma) >= 0)
         {
-            if (_gamma->GetGammaRamp(0, &_gammaRamp) < 0) _gamma = 0;
+            if (_gamma->GetGammaRamp(0, &_gammaRamp) < 0) _gamma = nullptr;
         }
     }
     if (!_gamma)
@@ -47,8 +47,7 @@ gxGraphics::~gxGraphics()
     while (font_set.size()) freeFont(*font_set.begin());
     while (canvas_set.size()) freeCanvas(*canvas_set.begin());
 
-    set<string>::iterator it;
-    for (it = font_res.begin(); it != font_res.end(); ++it)
+    for (auto it = font_res.begin(); it != font_res.end(); ++it)
         RemoveFontResource((*it).c_str());
     font_res.clear();
 
@@ -61,20 +60,20 @@ gxGraphics::~gxGraphics()
     dirDraw->Release();
 }
 
-void gxGraphics::setGamma(int r, int g, int b, float dr, float dg, float db)
+void gxGraphics::setGamma(const int r, const int g, const int b, const float dr, const float dg, const float db)
 {
     _gammaRamp.red[r & 255] = dr * 257.0f;
     _gammaRamp.green[g & 255] = dg * 257.0f;
     _gammaRamp.blue[b & 255] = db * 257.0f;
 }
 
-void gxGraphics::updateGamma(bool calibrate)
+void gxGraphics::updateGamma(const bool calibrate)
 {
     if (!_gamma) return;
     _gamma->SetGammaRamp(calibrate ? DDSGR_CALIBRATE : 0, &_gammaRamp);
 }
 
-void gxGraphics::getGamma(int r, int g, int b, float* dr, float* dg, float* db)
+void gxGraphics::getGamma(const int r, const int g, const int b, float* dr, float* dg, float* db) const
 {
     *dr = _gammaRamp.red[r & 255] / 257.0f;
     *dg = _gammaRamp.green[g & 255] / 257.0f;
@@ -99,15 +98,13 @@ bool gxGraphics::restore()
     dirDraw->RestoreAllSurfaces();
 
     //restore all canvases
-    set<gxCanvas*>::iterator it;
-    for (it = canvas_set.begin(); it != canvas_set.end(); ++it)
+    for (std::set<gxCanvas*>::iterator it = canvas_set.begin(); it != canvas_set.end(); ++it)
     {
         (*it)->restore();
     }
 
     //restore all meshes (b3d surfaces)
-    set<gxMesh*>::iterator mesh_it;
-    for (mesh_it = mesh_set.begin(); mesh_it != mesh_set.end(); ++mesh_it)
+    for (std::set<gxMesh*>::iterator mesh_it = mesh_set.begin(); mesh_it != mesh_set.end(); ++mesh_it)
     {
         (*mesh_it)->restore();
     }
@@ -131,19 +128,19 @@ gxFont* gxGraphics::getDefaultFont() const
     return def_font;
 }
 
-void gxGraphics::vwait()
+void gxGraphics::vwait() const
 {
-    dirDraw->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, 0);
+    dirDraw->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, nullptr);
 }
 
-void gxGraphics::flip(bool v)
+void gxGraphics::flip(const bool v) const
 {
     runtime->flip(v);
 }
 
-void gxGraphics::copy(gxCanvas* dest, int dx, int dy, int dw, int dh, gxCanvas* src, int sx, int sy, int sw, int sh)
+void gxGraphics::copy(gxCanvas* dest, const int dx, const int dy, const int dw, const int dh, gxCanvas* src, const int sx, const int sy, const int sw, const int sh)
 {
-    RECT r = {dx, dy, dx + dw, dy + dh};
+    const RECT r = {dx, dy, dx + dw, dy + dh};
     ddUtil::copy(dest->getSurface(), dx, dy, dw, dh, src->getSurface(), sx, sy, sw, sh);
     dest->damage(r);
 }
@@ -158,34 +155,34 @@ int gxGraphics::getScanLine() const
 int gxGraphics::getTotalVidmem() const
 {
     DDCAPS caps = {sizeof(caps)};
-    dirDraw->GetCaps(&caps, 0);
+    dirDraw->GetCaps(&caps, nullptr);
     return caps.dwVidMemTotal;
 }
 
 int gxGraphics::getAvailVidmem() const
 {
     DDCAPS caps = {sizeof(caps)};
-    dirDraw->GetCaps(&caps, 0);
+    dirDraw->GetCaps(&caps, nullptr);
     return caps.dwVidMemFree;
 }
 
-gxMovie* gxGraphics::openMovie(const string& file, int flags)
+gxMovie* gxGraphics::openMovie(const std::string& file, int flags)
 {
     IAMMultiMediaStream* iam_stream;
 
     if (CoCreateInstance(
-        CLSID_AMMultiMediaStream,NULL, CLSCTX_INPROC_SERVER,
+        CLSID_AMMultiMediaStream, nullptr, CLSCTX_INPROC_SERVER,
         IID_IAMMultiMediaStream, (void**)&iam_stream) == S_OK)
     {
-        if (iam_stream->Initialize(STREAMTYPE_READ, AMMSF_NOGRAPHTHREAD,NULL) == S_OK)
+        if (iam_stream->Initialize(STREAMTYPE_READ, AMMSF_NOGRAPHTHREAD, nullptr) == S_OK)
         {
-            if (iam_stream->AddMediaStream(ds_dirDraw, &MSPID_PrimaryVideo, 0,NULL) == S_OK)
+            if (iam_stream->AddMediaStream(ds_dirDraw, &MSPID_PrimaryVideo, 0, nullptr) == S_OK)
             {
-                iam_stream->AddMediaStream(NULL, &MSPID_PrimaryAudio, AMMSF_ADDDEFAULTRENDERER,NULL);
+                iam_stream->AddMediaStream(nullptr, &MSPID_PrimaryAudio, AMMSF_ADDDEFAULTRENDERER, nullptr);
 
                 WCHAR* path = new WCHAR[file.size() + 1];
                 MultiByteToWideChar(CP_ACP, 0, file.c_str(), -1, path, sizeof(WCHAR) * (file.size() + 1));
-                int n = iam_stream->OpenFile(path, 0);
+                const int n = iam_stream->OpenFile(path, 0);
                 delete path;
 
                 if (n == S_OK)
@@ -198,12 +195,12 @@ gxMovie* gxGraphics::openMovie(const string& file, int flags)
         }
         iam_stream->Release();
     }
-    return 0;
+    return nullptr;
 }
 
-gxMovie* gxGraphics::verifyMovie(gxMovie* m)
+gxMovie* gxGraphics::verifyMovie(gxMovie* m) const
 {
-    return movie_set.count(m) ? m : 0;
+    return movie_set.count(m) ? m : nullptr;
 }
 
 void gxGraphics::closeMovie(gxMovie* m)
@@ -211,28 +208,28 @@ void gxGraphics::closeMovie(gxMovie* m)
     if (movie_set.erase(m)) delete m;
 }
 
-gxCanvas* gxGraphics::createCanvas(int w, int h, int flags)
+gxCanvas* gxGraphics::createCanvas(const int w, const int h, const int flags)
 {
     ddSurf* s = ddUtil::createSurface(w, h, flags, this);
-    if (!s) return 0;
+    if (!s) return nullptr;
     gxCanvas* c = d_new gxCanvas(this, s, flags);
     canvas_set.insert(c);
     c->cls();
     return c;
 }
 
-gxCanvas* gxGraphics::loadCanvas(const string& f, int flags)
+gxCanvas* gxGraphics::loadCanvas(const std::string& f, const int flags)
 {
     ddSurf* s = ddUtil::loadSurface(f, flags, this);
-    if (!s) return 0;
+    if (!s) return nullptr;
     gxCanvas* c = d_new gxCanvas(this, s, flags);
     canvas_set.insert(c);
     return c;
 }
 
-gxCanvas* gxGraphics::verifyCanvas(gxCanvas* c)
+gxCanvas* gxGraphics::verifyCanvas(gxCanvas* c) const
 {
-    return canvas_set.count(c) || c == front_canvas || c == back_canvas ? c : 0;
+    return canvas_set.count(c) || c == front_canvas || c == back_canvas ? c : nullptr;
 }
 
 void gxGraphics::freeCanvas(gxCanvas* c)
@@ -255,16 +252,16 @@ int gxGraphics::getDepth() const
     return front_canvas->getDepth();
 }
 
-gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
+gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
 {
     int bold = flags & gxFont::FONT_BOLD ? FW_BOLD : FW_REGULAR;
     int italic = flags & gxFont::FONT_ITALIC ? 1 : 0;
     int underline = flags & gxFont::FONT_UNDERLINE ? 1 : 0;
     int strikeout = 0;
 
-    string t;
+    std::string t;
     int n = f.find('.');
-    if (n != string::npos)
+    if (n != std::string::npos)
     {
         t = fullfilename(f);
         if (!font_res.count(t) && AddFontResource(t.c_str())) font_res.insert(t);
@@ -278,7 +275,7 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
     //save and turn off font smoothing....
     BOOL smoothing = FALSE;
     SystemParametersInfo(SPI_GETFONTSMOOTHING, 0, &smoothing, 0);
-    SystemParametersInfo(SPI_SETFONTSMOOTHING,FALSE, 0, 0);
+    SystemParametersInfo(SPI_SETFONTSMOOTHING,FALSE, nullptr, 0);
 
     HFONT hfont = CreateFont(
         height, 0, 0, 0,
@@ -289,11 +286,11 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
     if (!hfont)
     {
         //restore font smoothing
-        SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, 0, 0);
-        return 0;
+        SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
+        return nullptr;
     }
 
-    HDC hdc = CreateCompatibleDC(0);
+    HDC hdc = CreateCompatibleDC(nullptr);
     HFONT pfont = (HFONT)SelectObject(hdc, hfont);
 
     TEXTMETRIC tm = {0};
@@ -302,8 +299,8 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
         SelectObject(hdc, pfont);
         DeleteDC(hdc);
         DeleteObject(hfont);
-        SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, 0, 0);
-        return 0;
+        SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
+        return nullptr;
     }
     height = tm.tmHeight;
 
@@ -368,7 +365,7 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
                 int x = (offs[k] >> 16) & 0xffff, y = offs[k] & 0xffff;
                 char t = k + first;
                 RECT rect = {x, y, x + widths[k], y + height};
-                ExtTextOut(surf_hdc, x + as[k], y,ETO_CLIPPED, &rect, &t, 1, 0);
+                ExtTextOut(surf_hdc, x + as[k], y,ETO_CLIPPED, &rect, &t, 1, nullptr);
             }
 
             SelectObject(surf_hdc, pfont);
@@ -382,7 +379,7 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
             font_set.insert(font);
 
             //restore font smoothing
-            SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, 0, 0);
+            SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
             return font;
         }
         else
@@ -399,13 +396,13 @@ gxFont* gxGraphics::loadFont(const string& f, int height, int flags)
     delete[] offs;
 
     //restore font smoothing
-    SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, 0, 0);
-    return 0;
+    SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
+    return nullptr;
 }
 
-gxFont* gxGraphics::verifyFont(gxFont* f)
+gxFont* gxGraphics::verifyFont(gxFont* f) const
 {
-    return font_set.count(f) ? f : 0;
+    return font_set.count(f) ? f : nullptr;
 }
 
 void gxGraphics::freeFont(gxFont* f)
@@ -423,7 +420,7 @@ static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDe
 {
     gxGraphics* g = (gxGraphics*)context;
     int t = 0;
-    GUID guid = devDesc->deviceGUID;
+    const GUID guid = devDesc->deviceGUID;
     if (guid == IID_IDirect3DRGBDevice) t = 1;
     else if (guid == IID_IDirect3DHALDevice) t = 2;
     else if (guid == IID_IDirect3DTnLHalDevice) t = 3;
@@ -435,7 +432,7 @@ static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDe
     return D3DENUMRET_OK;
 }
 
-static HRESULT CALLBACK enumZbuffFormat(LPDDPIXELFORMAT format, void* context)
+static HRESULT CALLBACK enumZbuffFormat(const LPDDPIXELFORMAT format, void* context)
 {
     gxGraphics* g = (gxGraphics*)context;
     if (format->dwZBufferBitDepth == g->primFmt.dwRGBBitCount)
@@ -459,7 +456,7 @@ struct TexFmt
     int bits, a_bits, rgb_bits;
 };
 
-static int cntBits(int mask)
+static int cntBits(const int mask)
 {
     int n = 0;
     for (int k = 0; k < 32; ++k)
@@ -469,7 +466,7 @@ static int cntBits(int mask)
     return n;
 }
 
-static vector<TexFmt> tex_fmts;
+static std::vector<TexFmt> tex_fmts;
 
 static HRESULT CALLBACK enumTextureFormat(DDPIXELFORMAT* fmt, void* p)
 {
@@ -484,9 +481,9 @@ static HRESULT CALLBACK enumTextureFormat(DDPIXELFORMAT* fmt, void* p)
     return D3DENUMRET_OK;
 }
 
-static string itobin(int n)
+static std::string itobin(int n)
 {
-    string t;
+    std::string t;
     for (int k = 0; k < 32; n <<= 1, ++k)
     {
         t += (n & 0x80000000) ? '1' : '0';
@@ -496,7 +493,7 @@ static string itobin(int n)
 
 static void debugPF(const DDPIXELFORMAT& pf)
 {
-    string t;
+    std::string t;
     t = "Bits:" + itoa(pf.dwRGBBitCount);
     gx_runtime->debugLog(t.c_str());
     t = "R Mask:" + itobin(pf.dwRBitMask);
@@ -509,7 +506,7 @@ static void debugPF(const DDPIXELFORMAT& pf)
     gx_runtime->debugLog(t.c_str());
 }
 
-static void pickTexFmts(gxGraphics* g, int hi)
+static void pickTexFmts(gxGraphics* g, const int hi)
 {
     //texRGBFmt.
     {
@@ -597,7 +594,7 @@ static void pickTexFmts(gxGraphics* g, int hi)
 
 gxScene* gxGraphics::createScene(int flags)
 {
-    if (scene_set.size()) return 0;
+    if (scene_set.size()) return nullptr;
 
     //get d3d
     if (dirDraw->QueryInterface(IID_IDirect3D7, (void**)&dir3d) >= 0)
@@ -645,43 +642,43 @@ gxScene* gxGraphics::createScene(int flags)
                             return scene;
                         }
                         dir3dDev->Release();
-                        dir3dDev = 0;
+                        dir3dDev = nullptr;
                     }
                     back_canvas->releaseZBuffer();
                 }
             }
         }
         dir3d->Release();
-        dir3d = 0;
+        dir3d = nullptr;
     }
-    return 0;
+    return nullptr;
 }
 
-gxScene* gxGraphics::verifyScene(gxScene* s)
+gxScene* gxGraphics::verifyScene(gxScene* s) const
 {
-    return scene_set.count(s) ? s : 0;
+    return scene_set.count(s) ? s : nullptr;
 }
 
 void gxGraphics::freeScene(gxScene* scene)
 {
     if (!scene_set.erase(scene)) return;
-    dummy_mesh = 0;
+    dummy_mesh = nullptr;
     while (mesh_set.size()) freeMesh(*mesh_set.begin());
     back_canvas->releaseZBuffer();
     if (dir3dDev)
     {
         dir3dDev->Release();
-        dir3dDev = 0;
+        dir3dDev = nullptr;
     }
     if (dir3d)
     {
         dir3d->Release();
-        dir3d = 0;
+        dir3d = nullptr;
     }
     delete scene;
 }
 
-gxMesh* gxGraphics::createMesh(int max_verts, int max_tris, int flags)
+gxMesh* gxGraphics::createMesh(const int max_verts, const int max_tris, int flags)
 {
     static const int VTXFMT =
         D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX2 |
@@ -698,16 +695,16 @@ gxMesh* gxGraphics::createMesh(int max_verts, int max_tris, int flags)
     D3DVERTEXBUFFERDESC desc = {sizeof(desc), (DWORD)vbflags, VTXFMT, (DWORD)max_verts};
 
     IDirect3DVertexBuffer7* buff;
-    if (dir3d->CreateVertexBuffer(&desc, &buff, 0) < 0) return 0;
+    if (dir3d->CreateVertexBuffer(&desc, &buff, 0) < 0) return nullptr;
     WORD* indices = d_new WORD[max_tris * 3];
     gxMesh* mesh = d_new gxMesh(this, buff, indices, max_verts, max_tris);
     mesh_set.insert(mesh);
     return mesh;
 }
 
-gxMesh* gxGraphics::verifyMesh(gxMesh* m)
+gxMesh* gxGraphics::verifyMesh(gxMesh* m) const
 {
-    return mesh_set.count(m) ? m : 0;
+    return mesh_set.count(m) ? m : nullptr;
 }
 
 void gxGraphics::freeMesh(gxMesh* mesh)

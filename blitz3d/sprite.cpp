@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "sprite.h"
+#include "std.h"
 
 extern float stats3d[];
 
@@ -20,7 +20,7 @@ extern gxGraphics *gx_graphics;
 
 static gxMesh *mesh;
 static int mesh_size;
-static vector<int> mesh_indices;
+static std::vector<int> mesh_indices;
 
 static int allocIndex() {
     if (!mesh_indices.size()) {
@@ -30,12 +30,12 @@ static int allocIndex() {
         }
         mesh = gx_graphics->createMesh(mesh_size * 4, mesh_size * 2, 0);
     }
-    int n = mesh_indices.back();
+    const int n = mesh_indices.back();
     mesh_indices.pop_back();
     return n;
 }
 
-static void freeIndex(int n) {
+static void freeIndex(const int n) {
     mesh_indices.push_back(n);
     if (mesh_indices.size() != mesh_size) return;
     gx_graphics->freeMesh(mesh);
@@ -63,21 +63,21 @@ Sprite::~Sprite() {
     freeIndex(mesh_index);
 }
 
-void Sprite::setRotation(float angle) {
+void Sprite::setRotation(const float angle) {
     rot = angle;
 }
 
-void Sprite::setScale(float x, float y) {
+void Sprite::setScale(const float x, const float y) {
     xscale = x;
     yscale = y;
 }
 
-void Sprite::setHandle(float x, float y) {
+void Sprite::setHandle(const float x, const float y) {
     xhandle = x;
     yhandle = y;
 }
 
-void Sprite::setViewmode(int mode) {
+void Sprite::setViewmode(const int mode) {
     view_mode = mode;
 }
 
@@ -89,7 +89,7 @@ void Sprite::capture() {
     captured = true;
 }
 
-bool Sprite::beginRender(float tween) {
+bool Sprite::beginRender(const float tween) {
     Model::beginRender(tween);
     if (tween == 1 || !captured) {
         r_rot = rot;

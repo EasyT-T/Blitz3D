@@ -1,64 +1,64 @@
 
-#include "std.h"
 #include "linker.h"
 #include "image_util.h"
+#include "std.h"
 
 class BBModule : public Module {
 public:
     BBModule();
 
-    BBModule(istream &in);
+    BBModule(std::istream &in);
 
-    ~BBModule();
+    ~BBModule() override;
 
-    void *link(Module *libs);
+    void *link(Module *libs) override;
 
-    bool createExe(const char *exe_file, const char *dll_file);
+    bool createExe(const char *exe_file, const char *dll_file) override;
 
-    int getPC();
+    int getPC() override;
 
-    void emit(int byte);
+    void emit(int byte) override;
 
-    void emitw(int word);
+    void emitw(int word) override;
 
-    void emitd(int dword);
+    void emitd(int dword) override;
 
-    void emitx(void *mem, int sz);
+    void emitx(void *mem, int sz) override;
 
-    bool addSymbol(const char *sym, int pc);
+    bool addSymbol(const char *sym, int pc) override;
 
-    bool addReloc(const char *dest_sym, int pc, bool pcrel);
+    bool addReloc(const char *dest_sym, int pc, bool pcrel) override;
 
-    bool findSymbol(const char *sym, int *pc);
+    bool findSymbol(const char *sym, int *pc) override;
 
 private:
     char *data;
     int data_sz, pc;
     bool linked;
 
-    map<string, int> symbols;
-    map<int, string> rel_relocs, abs_relocs;
+    std::map<std::string, int> symbols;
+    std::map<int, std::string> rel_relocs, abs_relocs;
 
-    bool findSym(const string &t, Module *libs, int *n) {
+    bool findSym(const std::string &t, Module *libs, int *n) {
         if (findSymbol(t.c_str(), n)) return true;
         if (libs->findSymbol(t.c_str(), n)) return true;
-        string err = "Symbol '" + t + "' not found";
+        const std::string err = "Symbol '" + t + "' not found";
         MessageBox(GetDesktopWindow(), err.c_str(), "Blitz Linker Error", MB_TOPMOST | MB_SETFOREGROUND);
         return false;
     }
 
-    void ensure(int n) {
+    void ensure(const int n) {
         if (pc + n <= data_sz) return;
         data_sz = data_sz / 2 + data_sz;
         if (data_sz < pc + n) data_sz = pc + n;
-        char *old_data = data;
+        const char *old_data = data;
         data = d_new char[data_sz];
         memcpy(data, old_data, pc);
         delete old_data;
     }
 };
 
-BBModule::BBModule() : data(0), data_sz(0), pc(0), linked(false) {
+BBModule::BBModule() : data(nullptr), data_sz(0), pc(0), linked(false) {
 }
 
 BBModule::~BBModule() {
@@ -71,9 +71,9 @@ void *BBModule::link(Module *libs) {
     if (linked) return data;
 
     int dest;
-    map<int, string>::iterator it;
+    std::map<int, std::string>::iterator it;
 
-    char *p = (char *) VirtualAlloc(0, pc, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    char *p = (char *) VirtualAlloc(nullptr, pc, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
     memcpy(p, data, pc);
     delete[] data;
     data = p;
@@ -81,13 +81,13 @@ void *BBModule::link(Module *libs) {
     linked = true;
 
     for (it = rel_relocs.begin(); it != rel_relocs.end(); ++it) {
-        if (!findSym(it->second, libs, &dest)) return 0;
+        if (!findSym(it->second, libs, &dest)) return nullptr;
         int *p = (int *) (data + it->first);
         *p += (dest - (int) p);
     }
 
     for (it = abs_relocs.begin(); it != abs_relocs.end(); ++it) {
-        if (!findSym(it->second, libs, &dest)) return 0;
+        if (!findSym(it->second, libs, &dest)) return nullptr;
         int *p = (int *) (data + it->first);
         *p += dest;
     }
@@ -99,46 +99,46 @@ int BBModule::getPC() {
     return pc;
 }
 
-void BBModule::emit(int byte) {
+void BBModule::emit(const int byte) {
     ensure(1);
     data[pc++] = byte;
 }
 
-void BBModule::emitw(int word) {
+void BBModule::emitw(const int word) {
     ensure(2);
     *(short *) (data + pc) = word;
     pc += 2;
 }
 
-void BBModule::emitd(int dword) {
+void BBModule::emitd(const int dword) {
     ensure(4);
     *(int *) (data + pc) = dword;
     pc += 4;
 }
 
-void BBModule::emitx(void *mem, int sz) {
+void BBModule::emitx(void *mem, const int sz) {
     ensure(sz);
     memcpy(data + pc, mem, sz);
     pc += sz;
 }
 
-bool BBModule::addSymbol(const char *sym, int pc) {
-    string t(sym);
+bool BBModule::addSymbol(const char *sym, const int pc) {
+    const std::string t(sym);
     if (symbols.find(t) != symbols.end()) return false;
     symbols[t] = pc;
     return true;
 }
 
-bool BBModule::addReloc(const char *dest_sym, int pc, bool pcrel) {
-    map<int, string> &rel = pcrel ? rel_relocs : abs_relocs;
+bool BBModule::addReloc(const char *dest_sym, const int pc, const bool pcrel) {
+    std::map<int, std::string> &rel = pcrel ? rel_relocs : abs_relocs;
     if (rel.find(pc) != rel.end()) return false;
-    rel[pc] = string(dest_sym);
+    rel[pc] = std::string(dest_sym);
     return true;
 }
 
 bool BBModule::findSymbol(const char *sym, int *pc) {
-    string t = string(sym);
-    map<string, int>::iterator it = symbols.find(t);
+    const std::string t = std::string(sym);
+    const std::map<std::string, int>::iterator it = symbols.find(t);
     if (it == symbols.end()) return false;
     *pc = it->second + (int) data;
     return true;
@@ -172,8 +172,8 @@ bool BBModule::createExe(const char *exe_file, const char *dll_file) {
     //find proc address of bbWinMain
     HMODULE hmod = LoadLibrary(dll_file);
     if (!hmod) return false;
-    int proc = (int) GetProcAddress(hmod, "_bbWinMain@0");
-    int entry = proc - (int) hmod;
+    const int proc = (int) GetProcAddress(hmod, "_bbWinMain@0");
+    const int entry = proc - (int) hmod;
     FreeLibrary(hmod);
     if (!proc) return false;
 
@@ -190,10 +190,9 @@ bool BBModule::createExe(const char *exe_file, const char *dll_file) {
     //num_abss:  name,val...
     //
     qstreambuf buf;
-    iostream out(&buf);
+    std::iostream out(&buf);
 
-    map<string, int>::iterator it;
-    map<int, string>::iterator rit;
+    std::map<int, std::string>::iterator rit;
 
     //write the code
     int sz = pc;
@@ -203,8 +202,8 @@ bool BBModule::createExe(const char *exe_file, const char *dll_file) {
     //write symbols
     sz = symbols.size();
     out.write((char *) &sz, 4);
-    for (it = symbols.begin(); it != symbols.end(); ++it) {
-        string t = it->first + '\0';
+    for (std::map<std::string, int>::iterator it = symbols.begin(); it != symbols.end(); ++it) {
+        std::string t = it->first + '\0';
         out.write(t.data(), t.size());
         sz = it->second;
         out.write((char *) &sz, 4);
@@ -214,7 +213,7 @@ bool BBModule::createExe(const char *exe_file, const char *dll_file) {
     sz = rel_relocs.size();
     out.write((char *) &sz, 4);
     for (rit = rel_relocs.begin(); rit != rel_relocs.end(); ++rit) {
-        string t = rit->second + '\0';
+        std::string t = rit->second + '\0';
         out.write(t.data(), t.size());
         sz = rit->first;
         out.write((char *) &sz, 4);
@@ -224,7 +223,7 @@ bool BBModule::createExe(const char *exe_file, const char *dll_file) {
     sz = abs_relocs.size();
     out.write((char *) &sz, 4);
     for (rit = abs_relocs.begin(); rit != abs_relocs.end(); ++rit) {
-        string t = rit->second + '\0';
+        std::string t = rit->second + '\0';
         out.write(t.data(), t.size());
         sz = rit->first;
         out.write((char *) &sz, 4);

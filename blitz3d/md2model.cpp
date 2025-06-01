@@ -1,26 +1,26 @@
 
-#include "std.h"
-#include "md2rep.h"
 #include "md2model.h"
+#include "md2rep.h"
+#include "std.h"
 
 struct MD2Model::Rep : public MD2Rep {
     int ref_cnt;
 
-    Rep(const string &f) : MD2Rep(f),
+    Rep(const std::string &f) : MD2Rep(f),
                            ref_cnt(1) {
     }
 };
 
-MD2Model::MD2Model(const string &f) :
+MD2Model::MD2Model(const std::string &f) :
         rep(d_new Rep(f)),
         anim_mode(0), anim_time(0),
-        render_a(0), render_b(0), render_t(0), trans_verts(0) {
+        render_a(0), render_b(0), render_t(0), trans_verts(nullptr) {
 }
 
 MD2Model::MD2Model(const MD2Model &t) :
         Model(t), rep(t.rep),
         anim_mode(0), anim_time(0),
-        render_a(0), render_b(0), render_t(0), trans_verts(0) {
+        render_a(0), render_b(0), render_t(0), trans_verts(nullptr) {
     ++rep->ref_cnt;
 }
 
@@ -29,7 +29,7 @@ MD2Model::~MD2Model() {
     if (trans_verts) delete[] trans_verts;
 }
 
-void MD2Model::startMD2Anim(int first, int last, int mode, float speed, float trans) {
+void MD2Model::startMD2Anim(int first, int last, int mode, const float speed, const float trans) {
 
     if (last < first) std::swap(first, last);
 
@@ -63,7 +63,7 @@ void MD2Model::startMD2Anim(int first, int last, int mode, float speed, float tr
     }
 }
 
-void MD2Model::animate(float e) {
+void MD2Model::animate(const float e) {
     Model::animate(e);
     if (!anim_mode) return;
     if (anim_mode & 0x8000) {

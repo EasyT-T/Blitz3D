@@ -1,11 +1,11 @@
 
-#include "stdafx.h"
-#include "resource.h"
 #include "blitzide.h"
-#include "mainframe.h"
-#include "prefs.h"
 #include "about.h"
 #include "libs.h"
+#include "mainframe.h"
+#include "prefs.h"
+#include "resource.h"
+#include "stdafx.h"
 
 BlitzIDE blitzIDE;
 

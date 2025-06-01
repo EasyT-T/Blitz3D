@@ -2,8 +2,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include <list>
-
 #include "geom.h"
 
 class Animation {

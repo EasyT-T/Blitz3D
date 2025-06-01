@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "md2norms.h"
+#include "std.h"
 
 float md2norms[162][3] = {
         {-0.525731f, 0.000000f,  0.850651f},

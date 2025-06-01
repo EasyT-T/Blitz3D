@@ -45,7 +45,7 @@ public:
 
     ~Surface();
 
-    void setName(const string &t);
+    void setName(const std::string &t);
 
     void setBrush(const Brush &b);
 
@@ -56,29 +56,29 @@ public:
         ++mon->geom_changes;
     }
 
-    void setVertex(int n, const Vertex &v) {
+    void setVertex(const int n, const Vertex &v) {
         vertices[n] = v;
         if (n < valid_vs) valid_vs = n;
         ++mon->geom_changes;
     }
 
-    void setCoords(int n, const Vector &v) {
+    void setCoords(const int n, const Vector &v) {
         vertices[n].coords = v;
         if (n < valid_vs) valid_vs = n;
         ++mon->geom_changes;
     }
 
-    void setNormal(int n, const Vector &v) {
+    void setNormal(const int n, const Vector &v) {
         vertices[n].normal = v;
         if (n < valid_vs) valid_vs = n;
     }
 
-    void setColor(int n, unsigned argb) {
+    void setColor(const int n, const unsigned argb) {
         vertices[n].color = argb;
         if (n < valid_vs) valid_vs = n;
     }
 
-    void setTexCoords(int n, const Vector &v, int i) {
+    void setTexCoords(const int n, const Vector &v, const int i) {
         vertices[n].tex_coords[i][0] = v.x;
         vertices[n].tex_coords[i][1] = v.y;
         if (n < valid_vs) valid_vs = n;
@@ -89,7 +89,7 @@ public:
         ++mon->geom_changes;
     }
 
-    void setTriangle(int n, const Triangle &t) {
+    void setTriangle(const int n, const Triangle &t) {
         triangles[n] = t;
         if (n < valid_ts) valid_ts = n;
         ++mon->geom_changes;
@@ -99,17 +99,17 @@ public:
 
     void setColor(int index, const Vector &v);
 
-    void addVertices(const vector<Vertex> &verts);
+    void addVertices(const std::vector<Vertex> &verts);
 
-    void addTriangles(const vector<Triangle> &tris);
+    void addTriangles(const std::vector<Triangle> &tris);
 
     void updateNormals();
 
     gxMesh *getMesh();
 
-    gxMesh *getMesh(const vector<Bone> &bones);
+    gxMesh *getMesh(const std::vector<Bone> &bones);
 
-    string getName() const { return name; }
+    std::string getName() const { return name; }
 
     const Brush &getBrush() const { return brush; }
 
@@ -117,16 +117,16 @@ public:
 
     int numTriangles() const { return triangles.size(); }
 
-    const Vertex &getVertex(int n) const { return vertices[n]; }
+    const Vertex &getVertex(const int n) const { return vertices[n]; }
 
-    const Triangle &getTriangle(int n) const { return triangles[n]; }
+    const Triangle &getTriangle(const int n) const { return triangles[n]; }
 
 private:
     Brush brush;
-    string name;
+    std::string name;
     gxMesh *mesh;
-    vector<Vertex> vertices;
-    vector<Triangle> triangles;
+    std::vector<Vertex> vertices;
+    std::vector<Triangle> triangles;
     int mesh_vs, mesh_ts;
     int valid_vs, valid_ts;
     Monitor *mon;

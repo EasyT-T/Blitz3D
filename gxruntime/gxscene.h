@@ -1,8 +1,8 @@
 #ifndef GXSCENE_H
 #define GXSCENE_H
 
-#include <map>
 #include <d3d.h>
+#include "std.h"
 
 #include "gxlight.h"
 
@@ -94,7 +94,7 @@ public:
 
     //state
     int hwTexUnits();
-    int gfxDriverCaps3D();
+    int gfxDriverCaps3D() const;
 
     void setWBuffer(bool enable);
     void setHWMultiTex(bool enable);
@@ -117,9 +117,9 @@ public:
 
     //rendering
     bool begin(const std::vector<gxLight*>& lights);
-    void clear(const float rgb[3], float alpha, float z, bool clear_argb, bool clear_z);
+    void clear(const float rgb[3], float alpha, float z, bool clear_argb, bool clear_z) const;
     void render(gxMesh* mesh, int first_vert, int vert_cnt, int first_tri, int tri_cnt);
-    void end();
+    void end() const;
 
     //lighting
     gxLight* createLight(int flags);
@@ -163,7 +163,7 @@ private:
     void setRS(int n, int t);
     void setTSS(int n, int s, int t);
 
-    void setLights();
+    void setLights() const;
     void setZMode();
     void setAmbient();
     void setFogMode();

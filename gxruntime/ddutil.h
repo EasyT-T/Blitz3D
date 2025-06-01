@@ -2,6 +2,7 @@
 #define DDUTIL_H
 
 #include <ddraw.h>
+#include "std.h"
 
 class gxGraphics;
 typedef IDirectDrawSurface7 ddSurf;
@@ -27,11 +28,11 @@ class PixelFormat
     char *plot_code, *point_code;
 
 public:
-    PixelFormat(): plot_code(0)
+    PixelFormat(): plot_code(nullptr)
     {
     }
 
-    PixelFormat(const DDPIXELFORMAT& pf): plot_code(0)
+    PixelFormat(const DDPIXELFORMAT& pf): plot_code(nullptr)
     {
         setFormat(pf);
     }
@@ -50,19 +51,19 @@ public:
         return pitch;
     }
 
-    unsigned fromARGB(unsigned n) const
+    unsigned fromARGB(const unsigned n) const
     {
         return ((n >> ashr << ashl) & amask) | ((n >> rshr << rshl) & rmask) | ((n >> gshr << gshl) & gmask) | ((n >>
             bshr << bshl) & bmask);
     }
 
-    unsigned toARGB(unsigned n) const
+    unsigned toARGB(const unsigned n) const
     {
         return ((n & amask) >> ashl << ashr) | ((n & rmask) >> rshl << rshr) | ((n & gmask) >> gshl << gshr) | ((n &
             bmask) >> bshl << bshr) | argbfill;
     }
 
-    void setPixel(void* p, unsigned n) const { plot(p, n); }
+    void setPixel(void* p, const unsigned n) const { plot(p, n); }
     unsigned getPixel(void* p) const { return point(p); }
 };
 

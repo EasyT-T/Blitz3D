@@ -1,6 +1,6 @@
-#include "std.h"
 #include "gxdevice.h"
 #include "gxruntime.h"
+#include "std.h"
 
 gxDevice::gxDevice()
 {
@@ -19,19 +19,19 @@ void gxDevice::reset()
     put = get = 0;
 }
 
-void gxDevice::downEvent(int key)
+void gxDevice::downEvent(const int key)
 {
     down_state[key] = true;
     ++hit_count[key];
     if (put - get < QUE_SIZE) que[put++ & QUE_MASK] = key;
 }
 
-void gxDevice::upEvent(int key)
+void gxDevice::upEvent(const int key)
 {
     down_state[key] = false;
 }
 
-void gxDevice::setDownState(int key, bool down)
+void gxDevice::setDownState(const int key, const bool down)
 {
     if (down == down_state[key]) return;
     if (down) downEvent(key);
@@ -45,16 +45,16 @@ void gxDevice::flush()
     put = get = 0;
 }
 
-bool gxDevice::keyDown(int key)
+bool gxDevice::keyDown(const int key)
 {
     update();
     return down_state[key];
 }
 
-int gxDevice::keyHit(int key)
+int gxDevice::keyHit(const int key)
 {
     update();
-    int n = hit_count[key];
+    const int n = hit_count[key];
     hit_count[key] -= n;
     return n;
 }
@@ -65,7 +65,7 @@ int gxDevice::getKey()
     return get < put ? que[get++ & QUE_MASK] : 0;
 }
 
-float gxDevice::getAxisState(int axis)
+float gxDevice::getAxisState(const int axis)
 {
     update();
     return axis_states[axis];

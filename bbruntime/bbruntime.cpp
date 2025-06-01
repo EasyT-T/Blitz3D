@@ -1,6 +1,6 @@
-#include "std.h"
-#include "bbsys.h"
 #include "bbruntime.h"
+#include "bbsys.h"
+#include "std.h"
 
 void bbEnd() {
     RTEX(0);
@@ -19,7 +19,7 @@ void bbAppTitle(BBStr *ti, BBStr *cp) {
 }
 
 void bbRuntimeError(BBStr *str) {
-    string t = *str;
+    std::string t = *str;
     delete str;
     if (t.size() > 255) t[255] = 0;
     static char err[256];
@@ -28,15 +28,15 @@ void bbRuntimeError(BBStr *str) {
 }
 
 int bbExecFile(BBStr *f) {
-    string t = *f;
+    const std::string t = *f;
     delete f;
-    int n = gx_runtime->execute(t);
+    const int n = gx_runtime->execute(t);
     if (!gx_runtime->idle())
         RTEX(0);
     return n;
 }
 
-void bbDelay(int ms) {
+void bbDelay(const int ms) {
     if (!gx_runtime->delay(ms))
         RTEX(0);
 }
@@ -50,32 +50,32 @@ BBStr *bbCommandLine() {
 }
 
 BBStr *bbSystemProperty(BBStr *p) {
-    string t = gx_runtime->systemProperty(*p);
+    const std::string t = gx_runtime->systemProperty(*p);
     delete p;
     return d_new BBStr(t);
 }
 
 BBStr *bbGetEnv(BBStr *env_var) {
-    char *p = getenv(env_var->c_str());
+    const char *p = getenv(env_var->c_str());
     BBStr *val = d_new BBStr(p ? p : "");
     delete env_var;
     return val;
 }
 
 void bbSetEnv(BBStr *env_var, BBStr *val) {
-    string t = *env_var + "=" + *val;
+    const std::string t = *env_var + "=" + *val;
     putenv(t.c_str());
     delete env_var;
     delete val;
 }
 
-gxTimer *bbCreateTimer(int hertz) {
+gxTimer *bbCreateTimer(const int hertz) {
     gxTimer *t = gx_runtime->createTimer(hertz);
     return t;
 }
 
 int bbWaitTimer(gxTimer *t) {
-    int n = t->wait();
+    const int n = t->wait();
     if (!gx_runtime->idle())
         RTEX(0);
     return n;
@@ -90,7 +90,7 @@ void bbDebugLog(BBStr *t) {
     delete t;
 }
 
-void _bbDebugStmt(int pos, const char *file) {
+void _bbDebugStmt(const int pos, const char *file) {
     gx_runtime->debugStmt(pos, file);
     if (!gx_runtime->idle())
         RTEX(0);
@@ -214,7 +214,7 @@ void bbruntime_link(void (*rtSym)(const char *sym, void *pc)) {
 
 //start up error
 static void sue(const char *t) {
-    string p = string("Startup Error: ") + t;
+    const std::string p = std::string("Startup Error: ") + t;
     gx_runtime->debugInfo(p.c_str());
 }
 
@@ -274,12 +274,12 @@ bool bbruntime_destroy() {
     return true;
 }
 
-const char *bbruntime_run(gxRuntime *rt, void (*pc)(), bool dbg) {
+const char *bbruntime_run(gxRuntime *rt, void (*pc)(), const bool dbg) {
     debug = dbg;
     gx_runtime = rt;
 
     if (!bbruntime_create()) return "Unable to start program";
-    const char *t = 0;
+    const char *t = nullptr;
     try {
         if (!gx_runtime->idle())
             RTEX(0);

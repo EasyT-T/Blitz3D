@@ -2,10 +2,10 @@
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
-#include "tabber.h"
 #include "debugger.h"
-#include "sourcefile.h"
 #include "debugtree.h"
+#include "sourcefile.h"
+#include "tabber.h"
 
 class MainFrame : public CFrameWnd, public Debugger {
 
@@ -16,8 +16,8 @@ class MainFrame : public CFrameWnd, public Debugger {
     ConstsTree consts_tree;
     GlobalsTree globals_tree;
     LocalsTree locals_tree;
-    map<const char *, int> file_tabs;
-    map<const char *, SourceFile *> files;
+    std::map<const char *, int> file_tabs;
+    std::map<const char *, SourceFile *> files;
 
     int state, step_level, cur_pos;
     const char *cur_file;
@@ -27,23 +27,23 @@ class MainFrame : public CFrameWnd, public Debugger {
 public:
     MainFrame();
 
-    ~MainFrame();
+    ~MainFrame() override;
 
-    void debugRun();
+    void debugRun() override;
 
-    void debugStop();
+    void debugStop() override;
 
-    void debugStmt(int srcpos, const char *file);
+    void debugStmt(int srcpos, const char *file) override;
 
-    void debugEnter(void *frame, void *env, const char *func);
+    void debugEnter(void *frame, void *env, const char *func) override;
 
-    void debugLeave();
+    void debugLeave() override;
 
-    void debugLog(const char *msg);
+    void debugLog(const char *msg) override;
 
-    void debugMsg(const char *msg, bool serious);
+    void debugMsg(const char *msg, bool serious) override;
 
-    void debugSys(void *msg);
+    void debugSys(void *msg) override;
 
     void showCurStmt();
 

@@ -8,15 +8,15 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "toker.h"
 #include "nodes.h"
+#include "toker.h"
 
 class Parser {
 public:
 
     Parser(Toker &t);
 
-    ProgNode *parse(const string &main);
+    ProgNode *parse(const std::string &main);
 
 private:
     enum Dialect {
@@ -27,10 +27,10 @@ private:
     };
     Dialect dialect = DIALECT_CLASSIC;
 
-    string incfile;
-    set<string> included;
+    std::string incfile;
+    std::set<std::string> included;
     Toker *toker, *main_toker;
-    map<string, DimNode *> arrayDecls;
+    std::map<std::string, DimNode *> arrayDecls;
 
     DeclSeqNode *consts;
     DeclSeqNode *structs;
@@ -41,21 +41,21 @@ private:
 
     void parseStmtSeq(StmtSeqNode *stmts, int scope);
 
-    void ex(const string &s);
+    void ex(const std::string &s);
 
-    void exp(const string &s);
+    void exp(const std::string &s);
 
-    string parseIdent();
+    std::string parseIdent();
 
     void parseChar(int c);
 
-    string parseTypeTag();
+    std::string parseTypeTag();
 
     VarNode *parseVar(bool mustExist = false);
 
-    VarNode *parseVar(const string &ident, const string &tag, bool mustExist = false);
+    VarNode *parseVar(const std::string &ident, const std::string &tag, bool mustExist = false);
 
-    CallNode *parseCall(const string &ident, const string &tag);
+    CallNode *parseCall(const std::string &ident, const std::string &tag);
 
     IfNode *parseIf();
 

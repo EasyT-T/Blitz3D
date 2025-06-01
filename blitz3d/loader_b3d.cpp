@@ -1,22 +1,22 @@
 
-#include "std.h"
 #include "loader_b3d.h"
 #include "meshmodel.h"
-#include "pivot.h"
 #include "meshutil.h"
+#include "pivot.h"
+#include "std.h"
 
 //#define SHOW_BONES
 
 static FILE *in;
-static vector<int> chunk_stack;
-static vector<Texture> textures;
-static vector<Brush> brushes;
-static vector<Object *> bones;
+static std::vector<int> chunk_stack;
+static std::vector<Texture> textures;
+static std::vector<Brush> brushes;
+static std::vector<Object *> bones;
 
 static bool collapse;
 static bool animonly;
 
-static int swap_endian(int n) {
+static int swap_endian(const int n) {
     return ((n & 0xff) << 24) | ((n & 0xff00) << 8) | ((n & 0xff0000) >> 8) | ((n & 0xff000000) >> 24);
 }
 
@@ -43,11 +43,11 @@ static int chunkSize() {
     return chunk_stack.back() - ftell(in);
 }
 
-static void read(void *buf, int n) {
+static void read(void *buf, const int n) {
     fread(buf, n, 1, in);
 }
 
-static void skip(int n) {
+static void skip(const int n) {
     fseek(in, n, SEEK_CUR);
 }
 
@@ -57,7 +57,7 @@ static int readInt() {
     return n;
 }
 
-static void readIntArray(int t[], int n) {
+static void readIntArray(int t[], const int n) {
     read(t, n * 4);
 }
 
@@ -67,7 +67,7 @@ static float readFloat() {
     return n;
 }
 
-static void readFloatArray(float t[], int n) {
+static void readFloatArray(float t[], const int n) {
     read(t, n * 4);
 }
 
@@ -83,8 +83,8 @@ static void readColor(unsigned *t) {
     *t = (int(a * 255) << 24) | (int(r * 255) << 16) | (int(g * 255) << 8) | int(b * 255);
 }
 
-static string readString() {
-    string t;
+static std::string readString() {
+    std::string t;
     for (;;) {
         char c;
         read(&c, 1);
@@ -95,13 +95,13 @@ static string readString() {
 
 static void readTextures() {
     while (chunkSize()) {
-        string name = readString();
-        int flags = readInt();
-        int blend = readInt();
+        std::string name = readString();
+        const int flags = readInt();
+        const int blend = readInt();
         float pos[2], scl[2];
         readFloatArray(pos, 2);
         readFloatArray(scl, 2);
-        float rot = readFloat();
+        const float rot = readFloat();
 
         //create texture
         Texture tex(name, flags & 0xffff);
@@ -118,17 +118,17 @@ static void readTextures() {
 }
 
 static void readBrushes() {
-    int n_texs = readInt();
+    const int n_texs = readInt();
 
     int tex_id[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
 
     while (chunkSize()) {
-        string name = readString();
+        std::string name = readString();
         float col[4];
         readFloatArray(col, 4);
-        float shi = readFloat();
-        int blend = readInt();
-        int fx = readInt();
+        const float shi = readFloat();
+        const int blend = readInt();
+        const int fx = readInt();
         readIntArray(tex_id, n_texs);
 
         Brush bru;
@@ -150,9 +150,9 @@ static void readBrushes() {
 
 static int readVertices() {
 
-    int flags = readInt();
-    int tc_sets = readInt();
-    int tc_size = readInt();
+    const int flags = readInt();
+    const int tc_sets = readInt();
+    const int tc_size = readInt();
 
     float tc[4] = {0};
 
@@ -176,8 +176,8 @@ static int readVertices() {
 }
 
 static void readTriangles() {
-    int brush_id = readInt();
-    Brush b = brush_id >= 0 ? brushes[brush_id] : Brush();
+    const int brush_id = readInt();
+    const Brush b = brush_id >= 0 ? brushes[brush_id] : Brush();
     while (chunkSize()) {
         int verts[3];
         readIntArray(verts, 3);
@@ -220,17 +220,17 @@ static Object *readBone() {
     bones.push_back(bone);
 
     while (chunkSize()) {
-        int vert = readInt();
-        float weight = readFloat();
+        const int vert = readInt();
+        const float weight = readFloat();
         MeshLoader::addBone(vert, weight, bones.size());
     }
     return bone;
 }
 
 static void readKeys(Animation &anim) {
-    int flags = readInt();
+    const int flags = readInt();
     while (chunkSize()) {
-        int frame = readInt();
+        const int frame = readInt();
         if (flags & 1) {
             float pos[3];
             readFloatArray(pos, 3);
@@ -251,9 +251,9 @@ static void readKeys(Animation &anim) {
 
 static Object *readObject(Object *parent) {
 
-    Object *obj = 0;
+    Object *obj = nullptr;
 
-    string name = readString();
+    const std::string name = readString();
     float pos[3], scl[3], rot[4];
     readFloatArray(pos, 3);
     readFloatArray(scl, 3);
@@ -261,7 +261,7 @@ static Object *readObject(Object *parent) {
 
     Animation keys;
     int anim_len = 0;
-    MeshModel *mesh = 0;
+    MeshModel *mesh = nullptr;
     int mesh_flags, mesh_brush;
 
     while (chunkSize()) {
@@ -319,29 +319,29 @@ static Object *readObject(Object *parent) {
     return obj;
 }
 
-MeshModel *Loader_B3D::load(const string &f, const Transform &conv, int hint) {
+MeshModel *Loader_B3D::load(const std::string &f, const Transform &conv, const int hint) {
 
     collapse = !!(hint & MeshLoader::HINT_COLLAPSE);
     animonly = !!(hint & MeshLoader::HINT_ANIMONLY);
 
     in = fopen(f.c_str(), "rb");
-    if (!in) return 0;
+    if (!in) return nullptr;
 
     ::clear();
 
-    int tag = readChunk();
+    const int tag = readChunk();
     if (tag != 'BB3D') {
         fclose(in);
-        return 0;
+        return nullptr;
     }
 
-    int version = readInt();
+    const int version = readInt();
     if (version > 1) {
         fclose(in);
-        return 0;
+        return nullptr;
     }
 
-    Object *obj = 0;
+    Object *obj = nullptr;
     while (chunkSize()) {
         switch (readChunk()) {
             case 'TEXS':
@@ -351,7 +351,7 @@ MeshModel *Loader_B3D::load(const string &f, const Transform &conv, int hint) {
                 readBrushes();
                 break;
             case 'NODE':
-                obj = readObject(0);
+                obj = readObject(nullptr);
                 break;
         }
         exitChunk();
@@ -360,5 +360,5 @@ MeshModel *Loader_B3D::load(const string &f, const Transform &conv, int hint) {
 
     ::clear();
 
-    return obj ? obj->getModel()->getMeshModel() : 0;
+    return obj ? obj->getModel()->getMeshModel() : nullptr;
 }

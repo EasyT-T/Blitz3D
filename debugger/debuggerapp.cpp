@@ -1,8 +1,8 @@
 
-#include "stdafx.h"
-#include "debugger.h"
 #include "debuggerapp.h"
+#include "debugger.h"
 #include "resource.h"
+#include "stdafx.h"
 #include "../blitzide/prefs.h"
 
 DebuggerApp debuggerApp;
@@ -21,10 +21,10 @@ BOOL DebuggerApp::InitInstance() {
     RECT rect;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &rect, 0);
 
-    int x = rect.left;
-    int w = rect.right - x;
-    int h = 240;
-    int y = rect.bottom - h;
+    const int x = rect.left;
+    const int w = rect.right - x;
+    const int h = 240;
+    const int y = rect.bottom - h;
 
     main_frame->Create(0, "Blitz Debugger",
                        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,

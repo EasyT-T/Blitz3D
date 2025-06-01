@@ -9,7 +9,7 @@ struct Var {
     int index;
     Type *type;
 
-    Var(int i, Type *t) : index(i), type(t) {}
+    Var(const int i, Type *t) : index(i), type(t) {}
 };
 
 #endif

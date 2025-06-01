@@ -8,9 +8,9 @@
 #ifndef ENVIRON_H
 #define ENVIRON_H
 
-#include "type.h"
 #include "decl.h"
 #include "label.h"
+#include "type.h"
 
 class Environ {
 public:
@@ -19,29 +19,29 @@ public:
     DeclSeq *funcDecls;
     DeclSeq *typeDecls;
 
-    vector<Type *> types;
+    std::vector<Type *> types;
 
-    vector<Label *> labels;
+    std::vector<Label *> labels;
     Environ *globals;
     Type *returnType;
-    string funcLabel, breakLabel;
-    list<Environ *> children;        //for delete!
+    std::string funcLabel, breakLabel;
+    std::list<Environ *> children;        //for delete!
 
-    Environ(const string &f, Type *r, int l, Environ *gs);
+    Environ(const std::string &f, Type *r, int l, Environ *gs);
 
     ~Environ();
 
-    Decl *findDecl(const string &s);
+    Decl *findDecl(const std::string &s);
 
-    Decl *findFunc(const string &s);
+    Decl *findFunc(const std::string &s);
 
-    Type *findType(const string &s);
+    Type *findType(const std::string &s);
 
-    Label *findLabel(const string &s);
+    Label *findLabel(const std::string &s);
 
-    Label *insertLabel(const string &s, int def, int src, int sz);
+    Label *insertLabel(const std::string &s, int def, int src, int sz);
 
-    string setBreak(const string &s);
+    std::string setBreak(const std::string &s);
 };
 
 #endif

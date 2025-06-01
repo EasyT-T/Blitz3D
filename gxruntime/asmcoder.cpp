@@ -18,12 +18,9 @@ void (__fastcall *span)(void* s, int* argb, int n);
 
 void main()
 {
-    void* pixmap;
-    int n;
-
     AsmCoder* coder = new AsmCoder();
 
-    pixmap = new int[640 * 480];
+    void* pixmap = new int[640 * 480];
 
     plot = (void (__fastcall *)(void*, int))new char[96];
     point = (int (__fastcall *)(void*))new char[96];
@@ -34,7 +31,7 @@ void main()
     //	n=coder->CodePoint(point,16,0,0xf800,0x07e0,0x001f);		//0:5:6:5
     //	printf("pointcode size=%d\n",n);
 
-    n = coder->CodePlot(plot, 24, 0, 0xff0000, 0xff00, 0xff); //0:5:6:5
+    int n = coder->CodePlot(plot, 24, 0, 0xff0000, 0xff00, 0xff); //0:5:6:5
     printf("plotcode size=%d\n", n);
 
     n = coder->CodePoint(point, 24, 0, 0xff0000, 0xff00, 0x00ff); //0:5:6:5
@@ -48,7 +45,7 @@ void main()
 
     plot(pixmap, 0x818283);
     //	short *b=(short *)pixmap;
-    int* b = (int*)pixmap;
+    const int* b = (int*)pixmap;
     printf("b[0]=0x%x\n", b[0]);
     n = point(pixmap);
     printf("point(0,0)=0x%x\n", n);

@@ -1,33 +1,31 @@
 
-#include "std.h"
 #include "meshloader.h"
 #include "meshmodel.h"
+#include "std.h"
 
 struct Tri {
-    int verts[3];
+    int vertices[3];
 };
 
 struct MLSurf {
-    vector<Tri> tris;
+    std::vector<Tri> tris;
 };
 
 struct MLMesh {
-    map<Brush, MLSurf *> brush_map;
-    vector<Surface::Vertex> verts;
+    std::map<Brush, MLSurf *> brush_map;
+    std::vector<Surface::Vertex> vertices;
 
-    MLMesh() {
-    }
+    MLMesh() = default;
 
     ~MLMesh() {
-        map<Brush, MLSurf *>::const_iterator it;
-        for (it = brush_map.begin(); it != brush_map.end(); ++it) {
+        for (std::map<Brush, MLSurf*>::const_iterator it = brush_map.begin(); it != brush_map.end(); ++it) {
             delete it->second;
         }
     }
 };
 
 static MLMesh *ml_mesh;
-static vector<MLMesh *> mesh_stack;
+static std::vector<MLMesh *> mesh_stack;
 
 void MeshLoader::beginMesh() {
     mesh_stack.push_back(ml_mesh);
@@ -35,19 +33,19 @@ void MeshLoader::beginMesh() {
 }
 
 int MeshLoader::numVertices() {
-    return ml_mesh->verts.size();
+    return static_cast<int>(ml_mesh->vertices.size());
 }
 
 void MeshLoader::addVertex(const Surface::Vertex &v) {
-    ml_mesh->verts.push_back(v);
+    ml_mesh->vertices.push_back(v);
 }
 
 void MeshLoader::addTriangle(const int verts[3], const Brush &b) {
     addTriangle(verts[0], verts[1], verts[2], b);
 }
 
-void MeshLoader::addBone(int n, float w, int b) {
-    Surface::Vertex &v = ml_mesh->verts[n];
+void MeshLoader::addBone(const int n, const float w, const int b) {
+    Surface::Vertex &v = ml_mesh->vertices[n];
     int i;
     for (i = 0; i < MAX_SURFACE_BONES; ++i) {
         if (v.bone_bones[i] == 255 || w > v.bone_weights[i]) break;
@@ -61,33 +59,29 @@ void MeshLoader::addBone(int n, float w, int b) {
     v.bone_weights[i] = w;
 }
 
-Surface::Vertex &MeshLoader::refVertex(int n) {
-    return ml_mesh->verts[n];
+Surface::Vertex &MeshLoader::refVertex(const int n) {
+    return ml_mesh->vertices[n];
 }
 
-void MeshLoader::addTriangle(int v0, int v1, int v2, const Brush &b) {
+void MeshLoader::addTriangle(const int v0, const int v1, const int v2, const Brush &b) {
     //find surface
     MLSurf *surf;
-    map<Brush, MLSurf *>::const_iterator it = ml_mesh->brush_map.find(b);
+    const std::map<Brush, MLSurf *>::const_iterator it = ml_mesh->brush_map.find(b);
     if (it != ml_mesh->brush_map.end()) surf = it->second;
     else {
         surf = d_new MLSurf;
-        ml_mesh->brush_map.insert(make_pair(b, surf));
+        ml_mesh->brush_map.insert(std::make_pair(b, surf));
     }
 
-    Tri tri;
-    tri.verts[0] = v0;
-    tri.verts[1] = v1;
-    tri.verts[2] = v2;
+    const Tri tri{v0, v1, v2};
     surf->tris.push_back(tri);
 }
 
 void MeshLoader::endMesh(MeshModel *mesh) {
     if (mesh) {
         //fix bone weights
-        int k, max_bones = 0;
-        for (k = 0; k < ml_mesh->verts.size(); ++k) {
-            Surface::Vertex &v = ml_mesh->verts[k];
+        int max_bones = 0;
+        for (auto & v : ml_mesh->vertices) {
             if (v.bone_bones[0] == 255) continue;
             int j;
             float t = 0;
@@ -101,24 +95,23 @@ void MeshLoader::endMesh(MeshModel *mesh) {
                 v.bone_weights[j] *= t;
             }
         }
-        map<int, int> vert_map;
-        map<Brush, MLSurf *>::iterator it;
-        for (it = ml_mesh->brush_map.begin(); it != ml_mesh->brush_map.end(); ++it) {
+        std::map<int, int> vert_map;
+        for (auto mesh_it = ml_mesh->brush_map.begin(); mesh_it != ml_mesh->brush_map.end(); ++mesh_it) {
             vert_map.clear();
-            Brush b = it->first;
-            MLSurf *t = it->second;
+            Brush b = mesh_it->first;
+            const MLSurf *t = mesh_it->second;
             Surface *surf = mesh->findSurface(b);
             if (!surf) surf = mesh->createSurface(b);
-            for (int k = 0; k < t->tris.size(); ++k) {
-                Surface::Triangle tri;
+            for (const auto k : t->tris) {
+                Surface::Triangle tri{};
                 for (int j = 0; j < 3; ++j) {
-                    int n = t->tris[k].verts[j], id;
-                    map<int, int>::const_iterator it = vert_map.find(n);
-                    if (it != vert_map.end()) id = it->second;
+                    int n = k.vertices[j], id;
+                    std::map<int, int>::const_iterator vert_it = vert_map.find(n);
+                    if (vert_it != vert_map.end()) id = vert_it->second;
                     else {
                         id = surf->numVertices();
-                        surf->addVertex(ml_mesh->verts[n]);
-                        vert_map.insert(make_pair(n, id));
+                        surf->addVertex(ml_mesh->vertices[n]);
+                        vert_map.insert(std::make_pair(n, id));
                     }
                     tri.verts[j] = id;
                 }

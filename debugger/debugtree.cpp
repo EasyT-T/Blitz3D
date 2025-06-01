@@ -1,6 +1,6 @@
 
-#include "stdafx.h"
 #include "debugtree.h"
+#include "stdafx.h"
 #include "../blitzide/prefs.h"
 
 #include "../bbruntime/basic.h"
@@ -17,7 +17,7 @@ DebugTree::DebugTree() : st_nest(0) {
 DebugTree::~DebugTree() {
 }
 
-int DebugTree::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+int DebugTree::OnCreate(const LPCREATESTRUCT lpCreateStruct) {
     CTreeCtrl::OnCreate(lpCreateStruct);
 
     SetBkColor(prefs.rgb_bkgrnd);
@@ -27,13 +27,13 @@ int DebugTree::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     return 0;
 }
 
-static string typeTag(Type *t) {
+static std::string typeTag(Type *t) {
     if (t->intType()) return "";
     if (t->floatType()) return "#";
     if (t->stringType()) return "$";
-    if (StructType *s = t->structType()) return "." + s->ident;
-    if (VectorType *v = t->vectorType()) {
-        string s = typeTag(v->elementType) + "[";
+    if (const StructType *s = t->structType()) return "." + s->ident;
+    if (const VectorType *v = t->vectorType()) {
+        std::string s = typeTag(v->elementType) + "[";
         for (int k = 0; k < v->sizes.size(); ++k) {
             if (k) s += ",";
             s += itoa(v->sizes[k] - 1);
@@ -43,12 +43,12 @@ static string typeTag(Type *t) {
     return "";
 }
 
-HTREEITEM DebugTree::insertVar(void *var, Decl *d, const string &name, HTREEITEM it, HTREEITEM parent) {
+HTREEITEM DebugTree::insertVar(void *var, Decl *d, const std::string &name, HTREEITEM it, const HTREEITEM parent) {
 
-    string s = name;
+    std::string s = name;
 
-    ConstType *ct = d->type->constType();
-    StructType *st = d->type->structType();
+    const ConstType *ct = d->type->constType();
+    const StructType *st = d->type->structType();
     VectorType *vt = d->type->vectorType();
 
     if (ct) {
@@ -69,7 +69,7 @@ HTREEITEM DebugTree::insertVar(void *var, Decl *d, const string &name, HTREEITEM
         } else if (t->floatType()) {
             s += "=" + ftoa(*(float *) var);
         } else if (t->stringType()) {
-            BBStr *str = *(BBStr **) var;
+            const BBStr *str = *(BBStr **) var;
             if (str) s += "=\"" + *str + '\"';
             else s += "=\"\"";
         } else if (st) {
@@ -103,7 +103,7 @@ HTREEITEM DebugTree::insertVar(void *var, Decl *d, const string &name, HTREEITEM
                 }
             }
         } else {
-            while (HTREEITEM t = GetChildItem(it)) {
+            while (const HTREEITEM t = GetChildItem(it)) {
                 DeleteItem(t);
             }
         }
@@ -131,14 +131,14 @@ void ConstsTree::reset(Environ *env) {
             char name[256];
             d->getName(name);
 
-            it = insertVar(0, d, name, it, TVI_ROOT);
+            it = insertVar(nullptr, d, name, it, TVI_ROOT);
         }
     }
 }
 
 /******************************* GLOBALS **********************************/
 
-GlobalsTree::GlobalsTree() : module(0), envron(0) {
+GlobalsTree::GlobalsTree() : module(nullptr), envron(nullptr) {
 }
 
 void GlobalsTree::reset(Module *mod, Environ *env) {
@@ -159,8 +159,8 @@ void GlobalsTree::refresh() {
             char name[256];
             d->getName(name);
 
-            void *var = 0;
-            module->findSymbol(("_v" + string(name)).c_str(), (int *) &var);
+            void *var = nullptr;
+            module->findSymbol(("_v" + std::string(name)).c_str(), (int *) &var);
             it = insertVar(var, d, name, it, TVI_ROOT);
         }
     }
@@ -168,7 +168,7 @@ void GlobalsTree::refresh() {
 
 /******************************** LOCALS **********************************/
 
-LocalsTree::LocalsTree() : envron(0) {
+LocalsTree::LocalsTree() : envron(nullptr) {
 }
 
 void LocalsTree::reset(Environ *env) {
@@ -187,7 +187,7 @@ void LocalsTree::refresh() {
     }
 
     while (item) {
-        HTREEITEM next = GetNextSiblingItem(item);
+        const HTREEITEM next = GetNextSiblingItem(item);
         DeleteItem(item);
         item = next;
     }

@@ -1,14 +1,14 @@
-#include "std.h"
 #include "gxlight.h"
-#include "gxscene.h"
 #include "gxgraphics.h"
+#include "gxscene.h"
+#include "std.h"
 
 const float PI = 3.14159265359f; //180 degrees
 const float TWOPI = PI * 2.0f; //360 degrees
 const float HALFPI = PI * .5f; //90  degrees
 const float EPSILON = .000001f;
 
-gxLight::gxLight(gxScene* s, int type):
+gxLight::gxLight(gxScene* s, const int type):
     scene(s)
 {
     memset(&d3d_light, 0, sizeof(d3d_light));
@@ -40,7 +40,7 @@ gxLight::~gxLight()
 {
 }
 
-void gxLight::setRange(float r)
+void gxLight::setRange(const float r)
 {
     d3d_light.dvAttenuation1 = 1.0f / r;
 }
@@ -59,7 +59,7 @@ void gxLight::setDirection(const float dir[3])
     d3d_light.dvDirection.z = dir[2];
 }
 
-void gxLight::setConeAngles(float inner, float outer)
+void gxLight::setConeAngles(const float inner, const float outer)
 {
     d3d_light.dvTheta = inner;
     d3d_light.dvPhi = outer;

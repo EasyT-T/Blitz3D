@@ -1,9 +1,9 @@
 #ifndef GXMOVIE_H
 #define GXMOVIE_H
 
-#include "mmstream.h"    // multimedia stream interfaces
 #include "amstream.h"    // DirectShow multimedia stream interfaces
 #include "ddstream.h"    // DirectDraw multimedia stream interfaces
+#include "mmstream.h"    // multimedia stream interfaces
 
 #include "gxcanvas.h"
 

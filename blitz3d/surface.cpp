@@ -1,17 +1,17 @@
 
-#include "std.h"
 #include "surface.h"
+#include "std.h"
 
 extern gxGraphics *gx_graphics;
 
 static Surface::Monitor nop_mon;
 
 Surface::Surface() :
-        mesh(0), mesh_vs(0), mesh_ts(0), valid_vs(0), valid_ts(0), mon(&nop_mon) {
+        mesh(nullptr), mesh_vs(0), mesh_ts(0), valid_vs(0), valid_ts(0), mon(&nop_mon) {
 }
 
 Surface::Surface(Monitor *m) :
-        mesh(0), mesh_vs(0), mesh_ts(0), valid_vs(0), valid_ts(0), mon(m) {
+        mesh(nullptr), mesh_vs(0), mesh_ts(0), valid_vs(0), valid_ts(0), mon(m) {
 }
 
 Surface::~Surface() {
@@ -23,11 +23,11 @@ void Surface::setBrush(const Brush &b) {
     ++mon->brush_changes;
 }
 
-void Surface::setName(const string &n) {
+void Surface::setName(const std::string &n) {
     name = n;
 }
 
-void Surface::clear(bool verts, bool tris) {
+void Surface::clear(const bool verts, const bool tris) {
     if (verts) {
         vertices.clear();
         valid_vs = 0;
@@ -39,12 +39,12 @@ void Surface::clear(bool verts, bool tris) {
     ++mon->geom_changes;
 }
 
-void Surface::addVertices(const vector<Vertex> &verts) {
+void Surface::addVertices(const std::vector<Vertex> &verts) {
     vertices.insert(vertices.end(), verts.begin(), verts.end());
     ++mon->geom_changes;
 }
 
-void Surface::setColor(int n, const Vector &v) {
+void Surface::setColor(const int n, const Vector &v) {
     int r = floor(v.x * 255);
     if (r < 0)r = 0; else if (r > 255)r = 255;
     int g = floor(v.y * 255);
@@ -52,26 +52,26 @@ void Surface::setColor(int n, const Vector &v) {
     int b = floor(v.z * 255);
     if (b < 0)b = 0; else if (b > 255)b = 255;
 
-    unsigned argb = 0xff000000 | (r << 16) | (g << 8) | b;
+    const unsigned argb = 0xff000000 | (r << 16) | (g << 8) | b;
 
     vertices[n].color = argb;
     if (n < valid_vs) valid_vs = n;
 }
 
-Vector Surface::getColor(int n) const {
-    float r = (vertices[n].color & 0x00ff0000) >> 16;
-    float g = (vertices[n].color & 0x0000ff00) >> 8;
-    float b = vertices[n].color & 0x000000ff;
+Vector Surface::getColor(const int n) const {
+    const float r = (vertices[n].color & 0x00ff0000) >> 16;
+    const float g = (vertices[n].color & 0x0000ff00) >> 8;
+    const float b = vertices[n].color & 0x000000ff;
     return Vector(r / 255.0f, g / 255.0f, b / 255.0f);
 }
 
-void Surface::addTriangles(const vector<Triangle> &tris) {
+void Surface::addTriangles(const std::vector<Triangle> &tris) {
     triangles.insert(triangles.end(), tris.begin(), tris.end());
 }
 
 void Surface::updateNormals() {
     int k;
-    map<Vector, Vector> norm_map;
+    std::map<Vector, Vector> norm_map;
     for (k = 0; k < triangles.size(); ++k) {
         const Triangle &t = triangles[k];
         const Vector &v0 = vertices[t.verts[0]].coords;
@@ -121,7 +121,7 @@ gxMesh *Surface::getMesh() {
     return mesh;
 }
 
-gxMesh *Surface::getMesh(const vector<Bone> &bones) {
+gxMesh *Surface::getMesh(const std::vector<Bone> &bones) {
 
     valid_vs = valid_ts = 0;
 

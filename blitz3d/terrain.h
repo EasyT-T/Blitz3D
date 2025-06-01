@@ -10,25 +10,25 @@ class Terrain : public Model {
 public:
     Terrain(int size_shift);
 
-    ~Terrain();
+    ~Terrain() override;
 
-    Terrain *getTerrain() { return this; }
+    Terrain *getTerrain() override { return this; }
 
-    void setDetail(int n, bool morph);
+    void setDetail(int n, bool morph) const;
 
-    void setHeight(int x, int z, float h, bool realtime);
+    void setHeight(int x, int z, float h, bool realtime) const;
 
-    void setShading(bool shading);
+    void setShading(bool shading) const;
 
     int getSize() const;
 
     float getHeight(int x, int z) const;
 
     //model interface
-    bool render(const RenderContext &rc);
+    bool render(const RenderContext &rc) override;
 
     //object interface
-    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &tf);
+    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &tf) override;
 
 private:
     TerrainRep *rep;

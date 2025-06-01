@@ -1,5 +1,5 @@
-#include "std.h"
 #include "bbsockets.h"
+#include "std.h"
 
 static bool socks_ok;
 static WSADATA wsadata;
@@ -7,7 +7,7 @@ static int recv_timeout;
 static int read_timeout;
 static int accept_timeout;
 
-static void close(SOCKET sock, int e) {
+static void close(const SOCKET sock, const int e) {
     if (e < 0) {
         int opt = 1;
         setsockopt(sock, SOL_SOCKET, SO_DONTLINGER, (char *) &opt, sizeof(opt));
@@ -21,39 +21,39 @@ class TCPStream;
 
 class TCPServer;
 
-static set<UDPStream *> udp_set;
-static set<TCPStream *> tcp_set;
-static set<TCPServer *> server_set;
+static std::set<UDPStream *> udp_set;
+static std::set<TCPStream *> tcp_set;
+static std::set<TCPServer *> server_set;
 
 class UDPStream : public bbStream {
 public:
     UDPStream(SOCKET s);
 
-    ~UDPStream();
+    ~UDPStream() override;
 
-    int read(char *buff, int size);
+    int read(char *buff, int size) override;
 
-    int write(const char *buff, int size);
+    int write(const char *buff, int size) override;
 
-    int avail();
+    int avail() override;
 
-    int eof();
+    int eof() override;
 
     int recv();
 
     int send(int ip, int port);
 
-    int getIP();
+    int getIP() const;
 
-    int getPort();
+    int getPort() const;
 
-    int getMsgIP();
+    int getMsgIP() const;
 
-    int getMsgPort();
+    int getMsgPort() const;
 
 private:
     SOCKET sock;
-    vector<char> in_buf, out_buf;
+    std::vector<char> in_buf, out_buf;
     sockaddr_in addr, in_addr, out_addr;
     int in_get, e;
 };
@@ -70,14 +70,14 @@ UDPStream::~UDPStream() {
 
 int UDPStream::read(char *buff, int size) {
     if (e) return 0;
-    int n = in_buf.size() - in_get;
+    const int n = in_buf.size() - in_get;
     if (n < size) size = n;
     memcpy(buff, &in_buf[in_get], size);
     in_get += size;
     return size;
 }
 
-int UDPStream::write(const char *buff, int size) {
+int UDPStream::write(const char *buff, const int size) {
     if (e) return 0;
     out_buf.insert(out_buf.end(), buff, buff + size);
     return size;
@@ -105,7 +105,7 @@ int UDPStream::recv() {
         }
         fd_set fd = {1, sock};
         timeval tv = {dt / 1000, (dt % 1000) * 1000};
-        int n = ::select(0, &fd, 0, 0, &tv);
+        int n = ::select(0, &fd, nullptr, nullptr, &tv);
         if (!n) return 0;
         if (n != 1) {
             e = -1;
@@ -128,30 +128,34 @@ int UDPStream::recv() {
 }
 
 //send, empty buffer
-int UDPStream::send(int ip, int port) {
+int UDPStream::send(const int ip, const int port) {
     if (e) return 0;
-    int sz = out_buf.size();
+    const int sz = out_buf.size();
     out_addr.sin_addr.S_un.S_addr = htonl(ip);
     out_addr.sin_port = htons(port ? port : addr.sin_port);
-    int n = ::sendto(sock, (char *) out_buf.data(), sz, 0, (sockaddr *) &out_addr, sizeof(out_addr));
+    const int n = ::sendto(sock, (char *) out_buf.data(), sz, 0, (sockaddr *) &out_addr, sizeof(out_addr));
     if (n != sz) return e = -1;
     out_buf.clear();
     return sz;
 }
 
-int UDPStream::getIP() {
+int UDPStream::getIP() const
+{
     return ntohl(addr.sin_addr.S_un.S_addr);
 }
 
-int UDPStream::getPort() {
+int UDPStream::getPort() const
+{
     return ntohs(addr.sin_port);
 }
 
-int UDPStream::getMsgIP() {
+int UDPStream::getMsgIP() const
+{
     return ntohl(in_addr.sin_addr.S_un.S_addr);
 }
 
-int UDPStream::getMsgPort() {
+int UDPStream::getMsgPort() const
+{
     return ntohs(in_addr.sin_port);
 }
 
@@ -159,19 +163,19 @@ class TCPStream : public bbStream {
 public:
     TCPStream(SOCKET s, TCPServer *t);
 
-    ~TCPStream();
+    ~TCPStream() override;
 
-    int read(char *buff, int size);
+    int read(char *buff, int size) override;
 
-    int write(const char *buff, int size);
+    int write(const char *buff, int size) override;
 
-    int avail();
+    int avail() override;
 
-    int eof();
+    int eof() override;
 
-    int getIP();
+    int getIP() const;
 
-    int getPort();
+    int getPort() const;
 
 private:
     SOCKET sock;
@@ -192,10 +196,10 @@ public:
 private:
     int e;
     SOCKET sock;
-    set<TCPStream *> accepted_set;
+    std::set<TCPStream *> accepted_set;
 };
 
-TCPStream::TCPStream(SOCKET s, TCPServer *t) : sock(s), server(t), e(0) {
+TCPStream::TCPStream(const SOCKET s, TCPServer *t) : sock(s), server(t), e(0) {
     sockaddr_in addr;
     int len = sizeof(addr);
     if (getpeername(s, (sockaddr *) &addr, &len)) {
@@ -211,7 +215,7 @@ TCPStream::~TCPStream() {
     close(sock, e);
 }
 
-int TCPStream::read(char *buff, int size) {
+int TCPStream::read(char *buff, const int size) {
     if (e) return 0;
     char *b = buff, *l = buff + size;
     int tout;
@@ -224,7 +228,7 @@ int TCPStream::read(char *buff, int size) {
         }
         fd_set fd = {1, sock};
         timeval tv = {dt / 1000, (dt % 1000) * 1000};
-        int n = ::select(0, &fd, 0, 0, &tv);
+        int n = ::select(0, &fd, nullptr, nullptr, &tv);
         if (n != 1) {
             e = -1;
             break;
@@ -243,9 +247,9 @@ int TCPStream::read(char *buff, int size) {
     return b - buff;
 }
 
-int TCPStream::write(const char *buff, int size) {
+int TCPStream::write(const char *buff, const int size) {
     if (e) return 0;
-    int n = ::send(sock, buff, size, 0);
+    const int n = ::send(sock, buff, size, 0);
     if (n == SOCKET_ERROR) {
         e = -1;
         return 0;
@@ -255,7 +259,7 @@ int TCPStream::write(const char *buff, int size) {
 
 int TCPStream::avail() {
     unsigned long t;
-    int n = ::ioctlsocket(sock, FIONREAD, &t);
+    const int n = ::ioctlsocket(sock, FIONREAD, &t);
     if (n == SOCKET_ERROR) {
         e = -1;
         return 0;
@@ -266,8 +270,8 @@ int TCPStream::avail() {
 int TCPStream::eof() {
     if (e) return e;
     fd_set fd = {1, sock};
-    timeval tv = {0, 0};
-    switch (::select(0, &fd, 0, 0, &tv)) {
+    const timeval tv = {0, 0};
+    switch (::select(0, &fd, nullptr, nullptr, &tv)) {
         case 0:
             break;
         case 1:
@@ -279,15 +283,17 @@ int TCPStream::eof() {
     return e;
 }
 
-int TCPStream::getIP() {
+int TCPStream::getIP() const
+{
     return ip;
 }
 
-int TCPStream::getPort() {
+int TCPStream::getPort() const
+{
     return port;
 }
 
-TCPServer::TCPServer(SOCKET s) : sock(s), e(0) {
+TCPServer::TCPServer(const SOCKET s) : sock(s), e(0) {
 }
 
 TCPServer::~TCPServer() {
@@ -296,19 +302,19 @@ TCPServer::~TCPServer() {
 }
 
 TCPStream *TCPServer::accept() {
-    if (e) return 0;
+    if (e) return nullptr;
     fd_set fd = {1, sock};
-    timeval tv = {accept_timeout / 1000, (accept_timeout % 1000) * 1000};
-    int n = ::select(0, &fd, 0, 0, &tv);
-    if (n == 0) return 0;
+    const timeval tv = {accept_timeout / 1000, (accept_timeout % 1000) * 1000};
+    const int n = ::select(0, &fd, nullptr, nullptr, &tv);
+    if (n == 0) return nullptr;
     if (n != 1) {
         e = -1;
-        return 0;
+        return nullptr;
     }
-    SOCKET t = ::accept(sock, 0, 0);
+    const SOCKET t = ::accept(sock, nullptr, nullptr);
     if (t == INVALID_SOCKET) {
         e = -1;
-        return 0;
+        return nullptr;
     }
     TCPStream *s = d_new TCPStream(t, this);
     accepted_set.insert(s);
@@ -337,11 +343,11 @@ static inline void debugTCPServer(TCPServer *p) {
     }
 }
 
-static vector<int> host_ips;
+static std::vector<int> host_ips;
 
 int bbCountHostIPs(BBStr *host) {
     host_ips.clear();
-    HOSTENT *h = gethostbyname(host->c_str());
+    const HOSTENT *h = gethostbyname(host->c_str());
     delete host;
     if (!h) return 0;
     char **p = h->h_addr_list;
@@ -349,7 +355,7 @@ int bbCountHostIPs(BBStr *host) {
     return host_ips.size();
 }
 
-int bbHostIP(int index) {
+int bbHostIP(const int index) {
     if (debug) {
         if (index < 1 || index > host_ips.size()) {
             RTEX("Host index out of range");
@@ -358,9 +364,9 @@ int bbHostIP(int index) {
     return host_ips[index - 1];
 }
 
-UDPStream *bbCreateUDPStream(int port) {
-    if (!socks_ok) return 0;
-    SOCKET s = ::socket(AF_INET, SOCK_DGRAM, 0);
+UDPStream *bbCreateUDPStream(const int port) {
+    if (!socks_ok) return nullptr;
+    const SOCKET s = ::socket(AF_INET, SOCK_DGRAM, 0);
     if (s != INVALID_SOCKET) {
         sockaddr_in addr = {AF_INET, htons(port)};
         if (!::bind(s, (sockaddr *) &addr, sizeof(addr))) {
@@ -370,7 +376,7 @@ UDPStream *bbCreateUDPStream(int port) {
         }
         ::closesocket(s);
     }
-    return 0;
+    return nullptr;
 }
 
 void bbCloseUDPStream(UDPStream *p) {
@@ -384,7 +390,7 @@ int bbRecvUDPMsg(UDPStream *p) {
     return p->recv();
 }
 
-void bbSendUDPMsg(UDPStream *p, int ip, int port) {
+void bbSendUDPMsg(UDPStream *p, const int ip, const int port) {
     debugUDPStream(p);
     p->send(ip, port);
 }
@@ -409,20 +415,20 @@ int bbUDPMsgPort(UDPStream *p) {
     return p->getMsgPort();
 }
 
-void bbUDPTimeouts(int rt) {
+void bbUDPTimeouts(const int rt) {
     recv_timeout = rt;
 }
 
-BBStr *bbDottedIP(int ip) {
+BBStr *bbDottedIP(const int ip) {
     return d_new BBStr(
             itoa((ip >> 24) & 255) + "." + itoa((ip >> 16) & 255) + "." +
             itoa((ip >> 8) & 255) + "." + itoa(ip & 255));
 }
 
-static int findHostIP(const string &t) {
-    int ip = inet_addr(t.c_str());
+static int findHostIP(const std::string &t) {
+    const int ip = inet_addr(t.c_str());
     if (ip != INADDR_NONE) return ip;
-    HOSTENT *h = gethostbyname(t.c_str());
+    const HOSTENT *h = gethostbyname(t.c_str());
     if (!h) return -1;
     char *p;
     for (char **list = h->h_addr_list; p = *list; ++list) {
@@ -431,33 +437,33 @@ static int findHostIP(const string &t) {
     return 0;
 }
 
-TCPStream *bbOpenTCPStream(BBStr *server, int port, int local_port) {
+TCPStream *bbOpenTCPStream(BBStr *server, const int port, const int local_port) {
     if (!socks_ok) {
         delete server;
-        return 0;
+        return nullptr;
     }
-    int ip = findHostIP(*server);
+    const int ip = findHostIP(*server);
     delete server;
-    if (ip == -1) return 0;
-    SOCKET s = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (ip == -1) return nullptr;
+    const SOCKET s = ::socket(AF_INET, SOCK_STREAM, 0);
     if (s != INVALID_SOCKET) {
         if (local_port) {
             sockaddr_in addr = {AF_INET, htons(local_port)};
             if (::bind(s, (sockaddr *) &addr, sizeof(addr))) {
                 ::closesocket(s);
-                return 0;
+                return nullptr;
             }
         }
         sockaddr_in addr = {AF_INET, htons(port)};
         addr.sin_addr.S_un.S_addr = ip;
         if (!::connect(s, (sockaddr *) &addr, sizeof(addr))) {
-            TCPStream *p = d_new TCPStream(s, 0);
+            TCPStream *p = d_new TCPStream(s, nullptr);
             tcp_set.insert(p);
             return p;
         }
         ::closesocket(s);
     }
-    return 0;
+    return nullptr;
 }
 
 void bbCloseTCPStream(TCPStream *p) {
@@ -466,8 +472,8 @@ void bbCloseTCPStream(TCPStream *p) {
     delete p;
 }
 
-TCPServer *bbCreateTCPServer(int port) {
-    SOCKET s = ::socket(AF_INET, SOCK_STREAM, 0);
+TCPServer *bbCreateTCPServer(const int port) {
+    const SOCKET s = ::socket(AF_INET, SOCK_STREAM, 0);
     if (s != INVALID_SOCKET) {
         sockaddr_in addr = {AF_INET, htons(port)};
         if (!::bind(s, (sockaddr *) &addr, sizeof(addr))) {
@@ -479,7 +485,7 @@ TCPServer *bbCreateTCPServer(int port) {
         }
         ::closesocket(s);
     }
-    return 0;
+    return nullptr;
 }
 
 void bbCloseTCPServer(TCPServer *p) {
@@ -496,7 +502,7 @@ TCPStream *bbAcceptTCPStream(TCPServer *server) {
         tcp_set.insert(tcp);
         return tcp;
     }
-    return 0;
+    return nullptr;
 }
 
 int bbTCPStreamIP(TCPStream *p) {
@@ -509,7 +515,7 @@ int bbTCPStreamPort(TCPStream *p) {
     return p->getPort();
 }
 
-void bbTCPTimeouts(int rt, int at) {
+void bbTCPTimeouts(const int rt, const int at) {
     read_timeout = rt;
     accept_timeout = at;
 }

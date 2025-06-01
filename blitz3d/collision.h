@@ -12,7 +12,7 @@ struct Collision {
     void *surface;
     unsigned short index;
 
-    Collision() : time(1), surface(0), index(~0) {}
+    Collision() : time(1), surface(nullptr), index(~0) {}
 
     bool update(const Line &line, float time, const Vector &normal);
 

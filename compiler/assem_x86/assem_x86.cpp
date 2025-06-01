@@ -7,13 +7,13 @@
 
 */
 
-#include "../std.h"
-#include "../ex.h"
 #include "assem_x86.h"
+#include "../ex.h"
+#include "../std.h"
 
 #include <iomanip>
 
-typedef map<string, Inst *> InstMap;
+typedef std::map<std::string, Inst *> InstMap;
 typedef InstMap::value_type InstPair;
 typedef InstMap::const_iterator InstIter;
 
@@ -21,7 +21,7 @@ static InstMap instMap;
 
 //#define LOG
 
-Assem_x86::Assem_x86(istream &in, Module *mod) : Assem(in, mod) {
+Assem_x86::Assem_x86(std::istream &in, Module *mod) : Assem(in, mod) {
 
     //build instruction map, if not built already.
     if (!instMap.size()) {
@@ -31,7 +31,7 @@ Assem_x86::Assem_x86(istream &in, Module *mod) : Assem(in, mod) {
     }
 }
 
-static int findCC(const string &s) {
+static int findCC(const std::string &s) {
     if (s == "o") return 0;
     if (s == "no") return 1;
     if (s == "b" || s == "c" || s == "nae") return 2;
@@ -51,30 +51,32 @@ static int findCC(const string &s) {
     return -1;
 }
 
-void Assem_x86::align(int n) {
-    int pc = mod->getPC();
+void Assem_x86::align(const int n) const
+{
+    const int pc = mod->getPC();
     int sz = (pc + (n - 1)) / n * n - pc;
     while (sz--) mod->emit(0x90);
 }
 
-void Assem_x86::emit(int n) {
+void Assem_x86::emit(int n) const
+{
 #ifdef LOG
     clog<<hex<<(int(n)&0xff)<<dec<<' ';
 #endif
     mod->emit(n);
 }
 
-void Assem_x86::emitw(int n) {
+void Assem_x86::emitw(const int n) {
     emit(n);
     emit((n >> 8));
 }
 
-void Assem_x86::emitd(int n) {
+void Assem_x86::emitd(const int n) {
     emitw(n);
     emitw(n >> 16);
 }
 
-void Assem_x86::emitImm(const Operand &o, int size) {
+void Assem_x86::emitImm(const Operand &o, const int size) {
 
     if (size < 4 && o.immLabel.size()) throw Ex("immediate value cannot by a label");
 
@@ -92,7 +94,7 @@ void Assem_x86::emitImm(const Operand &o, int size) {
     }
 }
 
-void Assem_x86::emitImm(const string &s, int size) {
+void Assem_x86::emitImm(const std::string &s, const int size) {
 
     Operand op(s);
     op.parse();
@@ -100,17 +102,17 @@ void Assem_x86::emitImm(const string &s, int size) {
     emitImm(op, size);
 }
 
-void Assem_x86::r_reloc(const string &s) {
+void Assem_x86::r_reloc(const std::string &s) {
     if (!s.size()) return;
     mod->addReloc(s.c_str(), mod->getPC(), true);
 }
 
-void Assem_x86::a_reloc(const string &s) {
+void Assem_x86::a_reloc(const std::string &s) {
     if (!s.size()) return;
     mod->addReloc(s.c_str(), mod->getPC(), false);
 }
 
-void Assem_x86::assemInst(const string &name, const string &lhs, const string &rhs) {
+void Assem_x86::assemInst(const std::string &name, const std::string &lhs, const std::string &rhs) {
 
     //parse operands
     Operand lop(lhs), rop(rhs);
@@ -119,7 +121,7 @@ void Assem_x86::assemInst(const string &name, const string &lhs, const string &r
 
     //find instruction
     int cc = -1;
-    Inst *inst = 0;
+    const Inst *inst = nullptr;
 
     //kludge for condition code instructions...
     if (name[0] == 'j') {
@@ -137,7 +139,7 @@ void Assem_x86::assemInst(const string &name, const string &lhs, const string &r
     if (inst) {
         if (!(lop.mode & inst->lmode) || !(rop.mode & inst->rmode)) throw Ex("illegal addressing mode");
     } else {
-        InstIter it = instMap.find(name);
+        const InstIter it = instMap.find(name);
         if (it == instMap.end()) throw Ex("unrecognized instruction");
         inst = it->second;
         for (;;) {
@@ -243,7 +245,7 @@ void Assem_x86::assemInst(const string &name, const string &lhs, const string &r
     }
 }
 
-void Assem_x86::assemDir(const string &name, const string &op) {
+void Assem_x86::assemDir(const std::string &name, const std::string &op) {
 
     if (!op.size()) throw Ex("operand error");
 
@@ -267,16 +269,15 @@ void Assem_x86::assemDir(const string &name, const string &op) {
     }
 }
 
-void Assem_x86::assemLine(const string &line) {
+void Assem_x86::assemLine(const std::string &line) {
 
     int i = 0;
-    string name;
-    vector<string> ops;
+    std::vector<std::string> ops;
 
     //label?
     if (!isspace(line[i])) {
         while (!isspace(line[i])) ++i;
-        string lab = line.substr(0, i);
+        const std::string lab = line.substr(0, i);
         if (!mod->addSymbol(lab.c_str(), mod->getPC())) throw Ex("duplicate label");
     }
 
@@ -285,9 +286,9 @@ void Assem_x86::assemLine(const string &line) {
     if (line[i] == '\n' || line[i] == ';') return;
 
     //fetch instruction name
-    int from = i;
+    const int from = i;
     for (++i; !isspace(line[i]); ++i) {}
-    name = line.substr(from, i - from);
+    std::string name = line.substr(from, i - from);
 
     for (;;) {
 
@@ -295,7 +296,7 @@ void Assem_x86::assemLine(const string &line) {
         while (isspace(line[i]) && line[i] != '\n') ++i;
         if (line[i] == '\n' || line[i] == ';') break;
 
-        int from = i;
+        const int from = i;
         if (line[i] == '\"') {
             for (++i; line[i] != '\"' && line[i] != '\n'; ++i) {}
             if (line[i++] != '\"') throw Ex("missing close quote");
@@ -329,7 +330,7 @@ void Assem_x86::assemLine(const string &line) {
 
 void Assem_x86::assemble() {
 
-    string line;
+    std::string line;
 
     while (!in.eof()) {
         try {

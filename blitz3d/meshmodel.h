@@ -9,28 +9,28 @@ class MeshCollider;
 
 class MeshModel : public Model {
 public:
-    typedef vector<Surface *> SurfaceList;
+    typedef std::vector<Surface *> SurfaceList;
 
     MeshModel();
 
     MeshModel(const MeshModel &t);
 
-    ~MeshModel();
+    ~MeshModel() override;
 
     //Entity interface
-    virtual MeshModel *getMeshModel() { return this; }
+    MeshModel *getMeshModel() override { return this; }
 
-    virtual Entity *clone() { return d_new MeshModel(*this); }
+    Entity *clone() override { return d_new MeshModel(*this); }
 
     //Object interface
-    virtual bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t);
+    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t) override;
 
     //Model interface
-    virtual void setRenderBrush(const Brush &b);
+    void setRenderBrush(const Brush &b) override;
 
-    virtual bool render(const RenderContext &rc);
+    bool render(const RenderContext &rc) override;
 
-    virtual void renderQueue(int type);
+    void renderQueue(int type) override;
 
     //boned mesh!
     void createBones();
@@ -38,17 +38,17 @@ public:
     //MeshModel interface
     Surface *createSurface(const Brush &b);
 
-    void setCullBox(const Box &box);
+    void setCullBox(const Box &box) const;
 
-    void updateNormals();
+    void updateNormals() const;
 
-    void flipTriangles();
+    void flipTriangles() const;
 
-    void transform(const Transform &t);
+    void transform(const Transform &t) const;
 
-    void paint(const Brush &b);
+    void paint(const Brush &b) const;
 
-    void add(const MeshModel &t);
+    void add(const MeshModel &t) const;
 
     void optimize();
 
@@ -69,9 +69,9 @@ private:
     Rep *rep;
     int brush_changes;
     Brush render_brush;
-    vector<Brush> brushes;
+    std::vector<Brush> brushes;
 
-    vector<Surface::Bone> surf_bones;
+    std::vector<Surface::Bone> surf_bones;
 
     MeshModel &operator=(const MeshModel &);
 };

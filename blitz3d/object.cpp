@@ -1,11 +1,11 @@
 
-#include "std.h"
 #include "object.h"
+#include "std.h"
 
 extern gxRuntime *gx_runtime;
 
 Object::Object() :
-        order(0), animator(0), last_copy(0),
+        order(0), animator(nullptr), last_copy(nullptr),
         coll_type(0), coll_radii(Vector(1, 1, 1)), coll_box(Box(Vector(-1, -1, -1), Vector(1, 1, 1))),
         pick_geom(0), obscurer(false), captured(false) {
     reset();
@@ -13,7 +13,7 @@ Object::Object() :
 
 Object::Object(const Object &o) :
         Entity(o),
-        order(o.order), animator(0), last_copy(0),
+        order(o.order), animator(nullptr), last_copy(nullptr),
         coll_type(o.coll_type), coll_radii(o.coll_radii), coll_box(o.coll_box),
         pick_geom(o.pick_geom), obscurer(o.obscurer), captured(false) {
     reset();
@@ -41,7 +41,7 @@ void Object::reset() {
     prev_tform = getWorldTform();
 }
 
-void Object::setCollisionType(int type) {
+void Object::setCollisionType(const int type) {
     coll_type = type;
 }
 
@@ -58,13 +58,13 @@ void Object::setAnimator(Animator *t) {
     animator = t;
 }
 
-void Object::beginUpdate(float e) {
+void Object::beginUpdate(const float e) {
     elapsed = e;
     colls.clear();
     animate(e);
 }
 
-void Object::animate(float e) {
+void Object::animate(const float e) {
     if (animator) animator->update(e);
 }
 
@@ -84,15 +84,15 @@ void Object::capture() {
     captured = true;
 }
 
-bool Object::beginRender(float tween) {
+bool Object::beginRender(const float tween) {
     updateSounds();
     if (tween == 1 || !captured) {
         render_tform = getWorldTform();
         render_tform_valid = true;
     } else {
-        Vector pos = (getLocalPosition() - capt_pos) * tween + capt_pos;
-        Vector scl = (getLocalScale() - capt_scl) * tween + capt_scl;
-        Quat rot = capt_rot.slerpTo(getLocalRotation(), tween);
+        const Vector pos = (getLocalPosition() - capt_pos) * tween + capt_pos;
+        const Vector scl = (getLocalScale() - capt_scl) * tween + capt_scl;
+        const Quat rot = capt_rot.slerpTo(getLocalRotation(), tween);
         tween_tform.m = Matrix(rot);
         tween_tform.m.i *= scl.x;
         tween_tform.m.j *= scl.y;
@@ -129,7 +129,7 @@ const Object::Collisions &Object::getCollisions() const {
 const Transform &Object::getRenderTform() const {
     if (render_tform_valid) return render_tform;
 
-    Object *parent = (Object *) getParent();
+    const Object *parent = (Object *) getParent();
     render_tform = parent ? parent->getRenderTform() * tween_tform : tween_tform;
     render_tform_valid = true;
 
@@ -150,7 +150,7 @@ uint32_t Object::emitSound(Sound *sound) {
     if (!sound) return 0;
 
     auto &pos = getWorldTform().v;
-    auto chan = bbPlay3dSound(sound, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
+    const auto chan = bbPlay3dSound(sound, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
 
     for (int k = 0; k < channels.size(); ++k) {
         if (chan == channels[k]) return chan;
@@ -162,7 +162,7 @@ uint32_t Object::emitSound(Sound *sound) {
 
 void Object::updateSounds() {
     for (int k = 0; k < channels.size(); ++k) {
-        if (auto chan = channels[k]) {
+        if (const auto chan = channels[k]) {
             if (bbChannelPlaying(chan)) {
                 auto &pos = getWorldTform().v;
                 bbSet3dChannel(chan, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);

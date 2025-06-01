@@ -2,6 +2,8 @@
 #ifndef TILE_H
 #define TILE_H
 
+#include "../std.h"
+
 enum {
     EAX = 1, ECX, EDX, EDI, ESI, EBX
 };
@@ -10,9 +12,9 @@ struct Tile {
 
     int want_l, want_r, hits, argFrame;
 
-    Tile(const string &a, Tile *l = 0, Tile *r = 0);
+    Tile(const std::string &a, Tile *l = nullptr, Tile *r = nullptr);
 
-    Tile(const string &a, const string &a2, Tile *l = 0, Tile *r = 0);
+    Tile(const std::string &a, const std::string &a2, Tile *l = nullptr, Tile *r = nullptr);
 
     ~Tile();
 
@@ -23,7 +25,7 @@ struct Tile {
 private:
     int need;
     Tile *l, *r;
-    string assem, assem2;
+    std::string assem, assem2;
 
 };
 

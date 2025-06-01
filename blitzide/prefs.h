@@ -44,7 +44,7 @@ public:
 
     void open();
 
-    void close();
+    void close() const;
 
 private:
 

@@ -1,16 +1,16 @@
 
-#include "std.h"
 #include "frustum.h"
+#include "std.h"
 
 Frustum::Frustum() {
 }
 
-Frustum::Frustum(float nr, float fr, float w, float h) {
+Frustum::Frustum(const float nr, const float fr, const float w, const float h) {
     verts[VERT_TLNEAR] = Vector(w * -.5f, h * +.5f, nr);
     verts[VERT_TRNEAR] = Vector(w * +.5f, h * +.5f, nr);
     verts[VERT_BRNEAR] = Vector(w * +.5f, h * -.5f, nr);
     verts[VERT_BLNEAR] = Vector(w * -.5f, h * -.5f, nr);
-    float t = fr / nr;
+    const float t = fr / nr;
     verts[VERT_TLFAR] = verts[VERT_TLNEAR] * t;
     verts[VERT_TRFAR] = verts[VERT_TRNEAR] * t;
     verts[VERT_BRFAR] = verts[VERT_BRNEAR] * t;
@@ -26,7 +26,7 @@ Frustum::Frustum(const Frustum &f, const Transform &t) {
     makePlanes();
 }
 
-bool Frustum::cull(const Vector v[], int cnt) const {
+bool Frustum::cull(const Vector v[], const int cnt) const {
     for (int n = 0; n < 6; ++n) {
         int k;
         for (k = 0; k < cnt && planes[n].distance(v[k]) < 0; ++k) {}

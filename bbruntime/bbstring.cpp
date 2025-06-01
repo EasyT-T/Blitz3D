@@ -1,6 +1,6 @@
-#include "std.h"
-#include "bbsys.h"
 #include <time.h>
+#include "bbsys.h"
+#include "std.h"
 
 #define CHKPOS(x) if( (x)<0 ) RTEX( "parameter must be positive" );
 #define CHKOFF(x) if( (x)<=0 ) RTEX( "parameter must be greater than 0" );
@@ -12,7 +12,7 @@ BBStr *bbString(BBStr *s, int n) {
     return t;
 }
 
-BBStr *bbLeft(BBStr *s, int n) {
+BBStr *bbLeft(BBStr *s, const int n) {
     CHKPOS(n);
     *s = s->substr(0, n);
     return s;
@@ -28,7 +28,7 @@ BBStr *bbRight(BBStr *s, int n) {
 
 BBStr *bbReplace(BBStr *s, BBStr *from, BBStr *to) {
     int n = 0, from_sz = from->size(), to_sz = to->size();
-    while (n < s->size() && (n = s->find(*from, n)) != string::npos) {
+    while (n < s->size() && (n = s->find(*from, n)) != std::string::npos) {
         s->replace(n, from_sz, *to);
         n += to_sz;
     }
@@ -40,13 +40,13 @@ BBStr *bbReplace(BBStr *s, BBStr *from, BBStr *to) {
 int bbInstr(BBStr *s, BBStr *t, int from) {
     CHKOFF(from);
     --from;
-    int n = s->find(*t, from);
+    const int n = s->find(*t, from);
     delete s;
     delete t;
-    return n == string::npos ? 0 : n + 1;
+    return n == std::string::npos ? 0 : n + 1;
 }
 
-BBStr *bbMid(BBStr *s, int o, int n) {
+BBStr *bbMid(BBStr *s, int o, const int n) {
     CHKOFF(o);
     --o;
     if (o > s->size()) o = s->size();
@@ -73,7 +73,7 @@ BBStr *bbTrim(BBStr *s) {
     return s;
 }
 
-BBStr *bbLSet(BBStr *s, int n) {
+BBStr *bbLSet(BBStr *s, const int n) {
     CHKPOS(n);
     if (s->size() > n) *s = s->substr(0, n);
     else {
@@ -82,7 +82,7 @@ BBStr *bbLSet(BBStr *s, int n) {
     return s;
 }
 
-BBStr *bbRSet(BBStr *s, int n) {
+BBStr *bbRSet(BBStr *s, const int n) {
     CHKPOS(n);
     if (s->size() > n) *s = s->substr(s->size() - n);
     else {
@@ -91,7 +91,7 @@ BBStr *bbRSet(BBStr *s, int n) {
     return s;
 }
 
-BBStr *bbChr(int n) {
+BBStr *bbChr(const int n) {
     BBStr *t = d_new BBStr();
     *t += (char) n;
     return t;
@@ -117,13 +117,13 @@ BBStr *bbBin(int n) {
 }
 
 int bbAsc(BBStr *s) {
-    int n = s->size() ? (*s)[0] & 255 : -1;
+    const int n = s->size() ? (*s)[0] & 255 : -1;
     delete s;
     return n;
 }
 
 int bbLen(BBStr *s) {
-    int n = s->size();
+    const int n = s->size();
     delete s;
     return n;
 }

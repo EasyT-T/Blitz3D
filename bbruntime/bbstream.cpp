@@ -1,7 +1,7 @@
-#include "std.h"
 #include "bbstream.h"
+#include "std.h"
 
-static set<bbStream *> stream_set;
+static std::set<bbStream *> stream_set;
 
 void debugStream(bbStream *s) {
     if (stream_set.count(s)) return;
@@ -61,7 +61,7 @@ BBStr *bbReadString(bbStream *s) {
     if (s->read((char *) &len, 4)) {
         char *buff = d_new char[len];
         if (s->read(buff, len)) {
-            *str = string(buff, len);
+            *str = std::string(buff, len);
         }
         delete[] buff;
     }
@@ -115,7 +115,7 @@ void bbWriteLine(bbStream *s, BBStr *t) {
     delete t;
 }
 
-void bbCopyStream(bbStream *s, bbStream *d, int buff_size) {
+void bbCopyStream(bbStream *s, bbStream *d, const int buff_size) {
     if (debug) {
         debugStream(s);
         debugStream(d);
@@ -124,7 +124,7 @@ void bbCopyStream(bbStream *s, bbStream *d, int buff_size) {
     }
     char *buff = d_new char[buff_size];
     while (s->eof() == 0 && d->eof() == 0) {
-        int n = s->read(buff, buff_size);
+        const int n = s->read(buff, buff_size);
         d->write(buff, n);
         if (n < buff_size) break;
     }

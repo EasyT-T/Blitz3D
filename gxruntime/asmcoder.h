@@ -60,28 +60,28 @@ public:
         off = 0;
     }
 
-    void Code(int c)
+    void Code(const int c)
     {
         if (ptr) ptr[off] = c;
         off++;
     }
 
-    void Code16(int c)
+    void Code16(const int c)
     {
         if (ptr) *(short*)(ptr + off) = c;
         off += 2;
     }
 
-    void Code32(int c)
+    void Code32(const int c)
     {
         if (ptr) *(int*)(ptr + off) = c;
         off += 4;
     }
 
-    void push(Reg32 reg) { Code(0x50 + reg); }
-    void pop(Reg32 reg) { Code(0x58 + reg); }
+    void push(const Reg32 reg) { Code(0x50 + reg); }
+    void pop(const Reg32 reg) { Code(0x58 + reg); }
 
-    void ret(int n = 0)
+    void ret(const int n = 0)
     {
         if (n == 0) Code(0xc3);
         else
@@ -92,25 +92,25 @@ public:
         }
     }
 
-    void mov(Reg32 dest, Reg32 src)
+    void mov(const Reg32 dest, const Reg32 src)
     {
         Code(0x8b);
         Code((0xc0) | (dest << 3) | (src));
     }
 
-    void Or(Reg32 dest, Reg32 src)
+    void Or(const Reg32 dest, const Reg32 src)
     {
         Code(0x0b);
         Code((0xc0) | (dest << 3) | (src));
     }
 
-    void add(Reg32 dest, Reg32 src)
+    void add(const Reg32 dest, const Reg32 src)
     {
         Code(0x03);
         Code((0xc0) | (dest << 3) | (src));
     }
 
-    void load32(Reg32 dest, Reg32 src, int disp = 0)
+    void load32(const Reg32 dest, const Reg32 src, const int disp = 0)
     {
         if (disp == 0 && src != ebp)
         {
@@ -125,13 +125,13 @@ public:
         }
     }
 
-    void load16(Reg32 dest, Reg32 src, int disp = 0)
+    void load16(const Reg32 dest, const Reg32 src, const int disp = 0)
     {
         Code(0x66);
         load32(dest, src, disp);
     }
 
-    void load8(Reg32 dest, Reg32 src, int disp = 0)
+    void load8(const Reg32 dest, const Reg32 src, const int disp = 0)
     {
         Code(0x8a);
         if (disp == 0 && src != ebp) { Code((dest << 3) | (src)); }
@@ -142,7 +142,7 @@ public:
         }
     }
 
-    void store32(Reg32 dest, int disp, Reg32 src)
+    void store32(const Reg32 dest, const int disp, const Reg32 src)
     {
         if (disp == 0 && dest != ebp)
         {
@@ -158,13 +158,13 @@ public:
         }
     }
 
-    void store16(Reg32 dest, int disp, Reg32 src)
+    void store16(const Reg32 dest, const int disp, const Reg32 src)
     {
         Code(0x66);
         store32(dest, disp, src);
     }
 
-    void store8(Reg32 dest, int disp, Reg32 src)
+    void store8(const Reg32 dest, const int disp, const Reg32 src)
     {
         Code(0x88);
         if (disp == 0 && dest != ebp)
@@ -179,17 +179,17 @@ public:
         }
     }
 
-    void lea(Reg32 dest, int scale, Reg32 src1, Reg32 src2, int disp = 0)
+    void lea(Reg32 dest, const int scale, const Reg32 src1, const Reg32 src2, const int disp = 0)
     {
-        int n, mod, sib;
+        int n;
         if (disp == 0) n = 0;
         else
         {
             if (disp >= -128 && disp < 128) n = 1;
             else n = 2;
         }
-        mod = (n << 6) | 4;
-        sib = (src1 << 3) | src2;
+        int mod = (n << 6) | 4;
+        int sib = (src1 << 3) | src2;
         if (scale == 2) sib |= 0x40;
         if (scale == 4) sib |= 0x80;
         if (scale == 8) sib |= 0xc0;
@@ -200,11 +200,10 @@ public:
         else if (n == 2) Code32(disp);
     }
 
-    void lea(Reg32 dest, int scale, Reg32 src, int disp = 0)
+    void lea(const Reg32 dest, const int scale, const Reg32 src, const int disp = 0)
     {
-        int mod, sib;
-        sib = (src << 3) | 5;
-        mod = (dest << 3) | 4;
+        int sib = (src << 3) | 5;
+        int mod = (dest << 3) | 4;
         if (scale == 2) sib |= 0x40;
         if (scale == 4) sib |= 0x80;
         if (scale == 8) sib |= 0xc0;
@@ -214,14 +213,14 @@ public:
         Code32(disp);
     }
 
-    void imul(Reg32 dest, int imm, Reg32 src)
+    void imul(const Reg32 dest, const int imm, const Reg32 src)
     {
         Code(0x69);
         Code((0xc0) | (dest << 3) | (src));
         Code32(imm);
     }
 
-    void shift(Reg32 reg, int imm) //+imm=left -imm=right
+    void shift(const Reg32 reg, int imm) //+imm=left -imm=right
     {
         int op;
         if (imm == 0) return;
@@ -244,7 +243,7 @@ public:
         }
     }
 
-    void And(Reg32 reg, int imm)
+    void And(const Reg32 reg, const int imm)
     {
         if (imm == 0xffffffff) return;
         if (imm >= -128 && imm < 128)
@@ -265,7 +264,7 @@ public:
         }
     }
 
-    void Or(Reg32 reg, int imm)
+    void Or(const Reg32 reg, const int imm)
     {
         if (imm == 0) return;
         if (imm >= -128 && imm < 128)
@@ -286,20 +285,20 @@ public:
         }
     }
 
-    void jnz(int label)
+    void jnz(const int label)
     {
         Code(0x75);
         Code(label - (off + 1));
     }
 
-    void add(Reg32 reg, int imm)
+    void add(const Reg32 reg, const int imm)
     {
         Code(0x83);
         Code(0xc0 + reg);
         Code(imm);
     }
 
-    void neg(Reg32 reg)
+    void neg(const Reg32 reg)
     {
         Code(0xf7);
         Code(0xd8 + reg);
@@ -311,7 +310,7 @@ class AsmCoder : IA32
 public:
     int amsb, rmsb, gmsb, bmsb;
 
-    void CalcMSBs(int amask, int rmask, int gmask, int bmask)
+    void CalcMSBs(const int amask, const int rmask, const int gmask, const int bmask)
     {
         unsigned int u;
         amsb = 0;
@@ -355,7 +354,7 @@ public:
     // ecx=void *t pixel
     // edx=int argb
 
-    int CodePlot(void* code, int depth, int amask, int rmask, int gmask, int bmask)
+    int CodePlot(void* code, const int depth, const int amask, const int rmask, const int gmask, const int bmask)
     {
         Reset(code);
         CalcMSBs(amask, rmask, gmask, bmask);
@@ -406,7 +405,7 @@ public:
 
     // ecx=void*pix
 
-    int CodePoint(void* code, int depth, int amask, int rmask, int gmask, int bmask)
+    int CodePoint(void* code, const int depth, const int amask, const int rmask, const int gmask, const int bmask)
     {
         Reset(code);
         CalcMSBs(amask, rmask, gmask, bmask);
@@ -461,10 +460,8 @@ public:
     // edx=int *argb
     // 8(esp)=count
 
-    int CodeSpan(void* code, int depth, int amask, int rmask, int gmask, int bmask)
+    int CodeSpan(void* code, const int depth, const int amask, const int rmask, const int gmask, const int bmask)
     {
-        int loop;
-
         Reset(code);
         CalcMSBs(amask, rmask, gmask, bmask);
 
@@ -479,7 +476,7 @@ public:
         mov(ebp, ecx); //ebp=[pix]
         neg(edi);
 
-        loop = off;
+        int loop = off;
         // loop
         load32(eax, esi);
         add(esi, 4);

@@ -30,7 +30,7 @@ struct BBObj {
 struct BBType {
     int type;
 
-    BBType(int n) : type(n) {
+    BBType(const int n) : type(n) {
     }
 };
 
@@ -84,7 +84,7 @@ struct BBStr : public std::string {
 
     void operator delete(void *q);
 
-    void *operator new(size_t size, const char *file, int line) { return operator new(size); }
+    void *operator new(const size_t size, const char *file, int line) { return operator new(size); }
 
     void operator delete(void *q, const char *file, int line) { operator delete(q); }
 };

@@ -1,8 +1,8 @@
 
-#include "stdafx.h"
 #include "mainframe.h"
-#include "resource.h"
 #include "debuggerapp.h"
+#include "resource.h"
+#include "stdafx.h"
 #include "../blitzide/prefs.h"
 
 #include <fstream>
@@ -41,31 +41,30 @@ BEGIN_MESSAGE_MAP(MainFrame, CFrameWnd)
 
 END_MESSAGE_MAP()
 
-MainFrame::MainFrame() : state(STARTING), step_level(-1), cur_pos(0), cur_file(0) {
+MainFrame::MainFrame() : state(STARTING), step_level(-1), cur_pos(0), cur_file(nullptr) {
 }
 
 MainFrame::~MainFrame() {
-    map<const char *, SourceFile *>::iterator it;
-    for (it = files.begin(); it != files.end(); ++it) delete it->second;
+    for (std::map<const char*, SourceFile*>::iterator it = files.begin(); it != files.end(); ++it) delete it->second;
 }
 
-int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+int MainFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct) {
     CFrameWnd::OnCreate(lpCreateStruct);
 
     prefs.open();
 
-    string tb = prefs.homeDir + "/cfg/dbg_toolbar.bmp";
+    const std::string tb = prefs.homeDir + "/cfg/dbg_toolbar.bmp";
 
     //Toolbar
-    HBITMAP toolbmp = (HBITMAP) LoadImage(
-            0, tb.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
+    const HBITMAP toolbmp = (HBITMAP) LoadImage(
+            nullptr, tb.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
 
     BITMAP bm;
     GetObject(toolbmp, sizeof(bm), &bm);
 
     int n = 0;
-    UINT toolbuts[] = {ID_STOP, ID_RUN, ID_STEPOVER, ID_STEPINTO, ID_STEPOUT, ID_END};
-    int toolcnt = sizeof(toolbuts) / sizeof(UINT);
+    const UINT toolbuts[] = {ID_STOP, ID_RUN, ID_STEPOVER, ID_STEPINTO, ID_STEPOUT, ID_END};
+    const int toolcnt = sizeof(toolbuts) / sizeof(UINT);
     for (int k = 0; k < toolcnt; ++k) if (toolbuts[k] != ID_SEPARATOR) ++n;
 
     SIZE imgsz, butsz;
@@ -126,11 +125,11 @@ int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     return 0;
 }
 
-void MainFrame::setState(int n) {
+void MainFrame::setState(const int n) {
     state = n;
     SendMessageToDescendants(WM_IDLEUPDATECMDUI, (WPARAM) TRUE, 0, TRUE, TRUE);
     if (shouldRun()) {
-        if (HWND app = ::FindWindow("Blitz Runtime Class", 0)) {
+        if (const HWND app = ::FindWindow("Blitz Runtime Class", nullptr)) {
             ::SetActiveWindow(app);
         }
     } else {
@@ -142,7 +141,7 @@ void MainFrame::OnClose() {
     cmdEnd();
 }
 
-void MainFrame::OnSize(UINT type, int sw, int sh) {
+void MainFrame::OnSize(const UINT type, const int sw, const int sh) {
     CFrameWnd::OnSize(type, sw, sh);
 
     CRect r, t;
@@ -186,7 +185,7 @@ void MainFrame::debugStop() {
     showCurStmt();
 }
 
-void MainFrame::debugStmt(int pos, const char *file) {
+void MainFrame::debugStmt(const int pos, const char *file) {
     cur_pos = pos;
     cur_file = file;
 
@@ -210,11 +209,11 @@ void MainFrame::debugLeave() {
     locals_tree.popFrame();
 }
 
-void MainFrame::debugMsg(const char *msg, bool serious) {
+void MainFrame::debugMsg(const char *msg, const bool serious) {
     if (serious) {
-        ::MessageBox(0, msg, "Runtime Error", MB_OK | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
+        ::MessageBox(nullptr, msg, "Runtime Error", MB_OK | MB_ICONWARNING | MB_TOPMOST | MB_SETFOREGROUND);
     } else {
-        ::MessageBox(0, msg, "Runtime Message", MB_OK | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
+        ::MessageBox(nullptr, msg, "Runtime Message", MB_OK | MB_ICONINFORMATION | MB_TOPMOST | MB_SETFOREGROUND);
     }
 }
 
@@ -229,49 +228,49 @@ void MainFrame::debugSys(void *m) {
 }
 
 void MainFrame::cmdStop() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (const HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         ::PostMessage(hwnd, WM_STOP, 0, 0);
     }
 }
 
 void MainFrame::cmdRun() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (const HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         step_level = -1;
         ::PostMessage(hwnd, WM_RUN, 0, 0);
     }
 }
 
 void MainFrame::cmdEnd() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (const HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         ::PostMessage(hwnd, WM_END, 0, 0);
         setState(ENDING);
     }
 }
 
 void MainFrame::cmdStepOver() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (const HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         ::PostMessage(hwnd, WM_RUN, 0, 0);
     }
 }
 
 void MainFrame::cmdStepInto() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (const HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         step_level = locals_tree.size() + 1;
         ::PostMessage(hwnd, WM_RUN, 0, 0);
     }
 }
 
 void MainFrame::cmdStepOut() {
-    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", 0)) {
+    if (HWND hwnd = ::FindWindow("Blitz Runtime Class", nullptr)) {
         step_level = locals_tree.size() - 1;
-        ::PostMessage(0, WM_RUN, 0, 0);
+        ::PostMessage(nullptr, WM_RUN, 0, 0);
     }
 }
 
 SourceFile *MainFrame::sourceFile(const char *file) {
     if (!file) file = "<unknown>";
 
-    map<const char *, SourceFile *>::const_iterator it = files.find(file);
+    std::map<const char *, SourceFile *>::const_iterator it = files.find(file);
 
     if (it != files.end()) {
         tabber.setCurrent(file_tabs[file]);
@@ -281,7 +280,7 @@ SourceFile *MainFrame::sourceFile(const char *file) {
     //crete new source file
     SourceFile *t = new SourceFile();
 
-    it = files.insert(make_pair(file, t)).first;
+    it = files.insert(std::make_pair(file, t)).first;
 
     int tab = files.size();
 
@@ -295,7 +294,7 @@ SourceFile *MainFrame::sourceFile(const char *file) {
         if (in.is_open()) t->setText(in);
     }
 
-    file_tabs.insert(make_pair(file, tab));
+    file_tabs.insert(std::make_pair(file, tab));
 
     if (const char *p = strrchr(file, '/')) file = p + 1;
     if (const char *p = strrchr(file, '\\')) file = p + 1;
@@ -306,7 +305,8 @@ SourceFile *MainFrame::sourceFile(const char *file) {
     return t;
 }
 
-void MainFrame::updateCmdUI(CCmdUI *ui) {
+void MainFrame::updateCmdUI(CCmdUI *ui)
+{
     if (state != RUNNING && state != STOPPED) {
         ui->Enable(false);
         return;

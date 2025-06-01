@@ -24,9 +24,9 @@ public:
 
     bool cull(const Vector vecs[], int cnt) const;
 
-    const Plane &getPlane(int n) const { return planes[n]; }
+    const Plane &getPlane(const int n) const { return planes[n]; }
 
-    const Vector &getVertex(int n) const { return verts[n]; }
+    const Vector &getVertex(const int n) const { return verts[n]; }
 
 private:
     Plane planes[6];

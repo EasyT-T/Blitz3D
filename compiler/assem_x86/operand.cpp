@@ -1,8 +1,8 @@
 
-#include "../std.h"
-#include "../ex.h"
 #include "operand.h"
 #include "insts.h"
+#include "../ex.h"
+#include "../std.h"
 
 static const char *regs[] = {
         "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh",
@@ -22,7 +22,7 @@ Operand::Operand()
         : mode(NONE), reg(-1), imm(0), offset(0), baseReg(-1), indexReg(-1), shift(0) {
 }
 
-Operand::Operand(const string &s)
+Operand::Operand(const std::string &s)
         : mode(NONE), reg(-1), imm(0), offset(0), baseReg(-1), indexReg(-1), shift(0), s(s) {
 }
 
@@ -43,7 +43,7 @@ bool Operand::parseSize(int *sz) {
     return true;
 }
 
-bool Operand::parseChar(char c) {
+bool Operand::parseChar(const char c) {
     if (!s.size() || s[0] != c) return false;
     s = s.substr(1);
     return true;
@@ -53,7 +53,7 @@ bool Operand::parseReg(int *reg) {
     int i;
     for (i = 0; i < s.size() && isalpha(s[i]); ++i) {}
     if (!i) return false;
-    string t = s.substr(0, i);
+    const std::string t = s.substr(0, i);
     for (int j = 0; j < 24; ++j) {
         if (t == regs[j]) {
             *reg = j;
@@ -75,7 +75,7 @@ bool Operand::parseFPReg(int *reg) {
     return true;
 }
 
-bool Operand::parseLabel(string *label) {
+bool Operand::parseLabel(std::string *label) {
     if (!s.size() || (!isalpha(s[0]) && s[0] != '_')) return false;
     int i;
     for (i = 1; i < s.size() && (isalnum(s[i]) || s[i] == '_'); ++i) {}
@@ -88,7 +88,7 @@ bool Operand::parseConst(int *iconst) {
     int i, sgn = s.size() && (s[0] == '-' || s[0] == '+');
     for (i = sgn; i < s.size() && isdigit(s[i]); ++i) {}
     if (i == sgn) return false;
-    int n = atoi(s.c_str());
+    const int n = atoi(s.c_str());
     *iconst = n;
     s = s.substr(i);
     return true;
@@ -146,7 +146,7 @@ void Operand::parse() {
 
     for (;;) {
         int n;
-        string l;
+        std::string l;
         if (parseReg(&n)) {
             if (n < 16) throw Ex("register must be 32 bit");
             n &= 7;

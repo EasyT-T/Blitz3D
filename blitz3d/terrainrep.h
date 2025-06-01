@@ -12,13 +12,13 @@ public:
 
     ~TerrainRep();
 
-    void clear();
+    void clear() const;
 
     void setShading(bool shading);
 
     void setDetail(int n, bool morph);
 
-    void setHeight(int x, int z, float h, bool realtime);
+    void setHeight(int x, int z, float h, bool realtime) const;
 
     void setTile(int x, int z, const Brush &brush);
 

@@ -8,15 +8,13 @@
 
 #define DIRECTSOUND_VERSION 0x700
 
-#include <set>
-#include <map>
-#include <list>
-#include <string>
-#include <vector>
 #include <fstream>
 #include <iostream>
+#include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 #include <windows.h>
-
-using namespace std;
 
 #endif

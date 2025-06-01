@@ -6,7 +6,7 @@
 
 class RenderContext {
 public:
-    RenderContext(const Transform &t, const Frustum &f, bool r) :
+    RenderContext(const Transform &t, const Frustum &f, const bool r) :
             camera_tform(t), camera_frustum(f), ref(r) {
         new(&world_frustum) Frustum(f, t);
     }

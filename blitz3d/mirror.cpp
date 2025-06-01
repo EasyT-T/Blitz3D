@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "mirror.h"
+#include "std.h"
 
 Mirror::Mirror() {
 }

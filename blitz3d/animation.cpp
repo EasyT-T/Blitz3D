@@ -1,12 +1,12 @@
 
-#include "std.h"
 #include "animation.h"
+#include "std.h"
 
 struct Animation::Rep {
 
     int ref_cnt;
 
-    typedef map<int, Quat> KeyList;
+    typedef std::map<int, Quat> KeyList;
 
     KeyList scale_anim, rot_anim, pos_anim;
 
@@ -19,37 +19,33 @@ struct Animation::Rep {
             scale_anim(t.scale_anim), rot_anim(t.rot_anim), pos_anim(t.pos_anim) {
     }
 
-    Vector getLinearValue(const KeyList &keys, float time) const {
-        KeyList::const_iterator next, curr;
-
-        //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
-        next = keys.upper_bound((int) time);
+    Vector getLinearValue(const KeyList &keys, const float time) const {
+	    //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
+        KeyList::const_iterator next = keys.upper_bound((int)time);
 
         if (next == keys.begin()) return next->second.v;
-        curr = next;
+        KeyList::const_iterator curr = next;
         --curr;
         if (next == keys.end()) return curr->second.v;
 
-        float delta = (time - curr->first) / (next->first - curr->first);
+        const float delta = (time - curr->first) / (next->first - curr->first);
         return (next->second.v - curr->second.v) * delta + curr->second.v;
     }
 
-    Quat getSlerpValue(const KeyList &keys, float time) const {
-        KeyList::const_iterator next, curr;
-
-        //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
-        next = keys.upper_bound((int) time);
+    Quat getSlerpValue(const KeyList &keys, const float time) const {
+	    //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
+        KeyList::const_iterator next = keys.upper_bound((int)time);
 
         if (next == keys.begin()) return next->second;
-        curr = next;
+        KeyList::const_iterator curr = next;
         --curr;
         if (next == keys.end()) return curr->second;
 
-        float delta = (time - curr->first) / (next->first - curr->first);
+        const float delta = (time - curr->first) / (next->first - curr->first);
         return curr->second.slerpTo(next->second, delta);
     }
 
-    void setKey(KeyList &keys, int time, const Quat &value) {
+    void setKey(KeyList &keys, const int time, const Quat &value) {
         keys[time] = value;
     }
 };
@@ -63,7 +59,7 @@ Animation::Animation(const Animation &t) :
     ++rep->ref_cnt;
 }
 
-Animation::Animation(const Animation &t, int first, int last) :
+Animation::Animation(const Animation &t, const int first, const int last) :
         rep(new Rep()) {
     Rep::KeyList::const_iterator it;
     for (it = t.rep->pos_anim.begin(); it != t.rep->pos_anim.end(); ++it) {
@@ -99,17 +95,17 @@ Animation::Rep *Animation::write() {
     return rep;
 }
 
-void Animation::setScaleKey(int time, const Vector &q) {
+void Animation::setScaleKey(const int time, const Vector &q) {
     write();
     rep->setKey(rep->scale_anim, time, Quat(0, q));
 }
 
-void Animation::setPositionKey(int time, const Vector &q) {
+void Animation::setPositionKey(const int time, const Vector &q) {
     write();
     rep->setKey(rep->pos_anim, time, Quat(0, q));
 }
 
-void Animation::setRotationKey(int time, const Quat &q) {
+void Animation::setRotationKey(const int time, const Quat &q) {
     write();
     rep->setKey(rep->rot_anim, time, q);
 }
@@ -126,17 +122,17 @@ int Animation::numPositionKeys() const {
     return rep->pos_anim.size();
 }
 
-Vector Animation::getScale(float time) const {
+Vector Animation::getScale(const float time) const {
     if (!rep->scale_anim.size()) return Vector(1, 1, 1);
     return rep->getLinearValue(rep->scale_anim, time);
 }
 
-Vector Animation::getPosition(float time) const {
+Vector Animation::getPosition(const float time) const {
     if (!rep->pos_anim.size()) return Vector(0, 0, 0);
     return rep->getLinearValue(rep->pos_anim, time);
 }
 
-Quat Animation::getRotation(float time) const {
+Quat Animation::getRotation(const float time) const {
     if (!rep->rot_anim.size()) return Quat();
     return rep->getSlerpValue(rep->rot_anim, time);
 }

@@ -1,6 +1,6 @@
 
-#include "std.h"
 #include "skinmodel.h"
+#include "std.h"
 
 SkinModel::SkinModel() {
     setRenderSpace(RENDER_SPACE_WORLD);
@@ -15,7 +15,7 @@ void SkinModel::render(const RenderContext &rc) {
 
     int k;
     for (k = 0; k < _bones.size(); ++k) {
-        Object *obj = _bones[k];
+        const Object *obj = _bones[k];
         _surf_bones[k].coord_tform = obj->getRenderTform();
         _surf_bones[k].normal_tform = _surf_bones[k].coord_tform.m.cofactor();
     }

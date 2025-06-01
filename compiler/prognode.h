@@ -2,15 +2,16 @@
 #ifndef PROGNODE_H
 #define PROGNODE_H
 
+#include "declnode.h"
 #include "node.h"
-#include "codegen.h"
+#include "std.h"
 
 struct UserFunc {
-    string ident, proc, lib;
+    std::string ident, proc, lib;
 
     UserFunc(const UserFunc &t) : ident(t.ident), proc(t.proc), lib(t.lib) {}
 
-    UserFunc(const string &id, const string &pr, const string &lb) : ident(id), proc(pr), lib(lb) {}
+    UserFunc(const std::string &id, const std::string &pr, const std::string &lb) : ident(id), proc(pr), lib(lb) {}
 };
 
 struct ProgNode : public Node {
@@ -23,13 +24,14 @@ struct ProgNode : public Node {
 
     Environ *sem_env;
 
-    string file_lab;
+    std::string file_lab;
 
     ProgNode(DeclSeqNode *c, DeclSeqNode *s, DeclSeqNode *f, DeclSeqNode *d, StmtSeqNode *ss) : consts(c), structs(s),
                                                                                                 funcs(f), datas(d),
                                                                                                 stmts(ss) {}
 
-    ~ProgNode() {
+    ~ProgNode() override
+    {
         delete consts;
         delete structs;
         delete funcs;
@@ -39,7 +41,7 @@ struct ProgNode : public Node {
 
     Environ *semant(Environ *e);
 
-    void translate(Codegen *g, const vector<UserFunc> &userfuncs);
+    void translate(Codegen *g, const std::vector<UserFunc> &userfuncs);
 };
 
 #endif

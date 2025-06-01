@@ -1,10 +1,10 @@
 
-#include "stdafx.h"
-#include "resource.h"
 #include "mainframe.h"
 #include "about.h"
 #include "blitzide.h"
 #include "libs.h"
+#include "resource.h"
+#include "stdafx.h"
 
 #include <mmsystem.h>
 
@@ -86,33 +86,31 @@ BEGIN_MESSAGE_MAP(MainFrame, CFrameWnd)
 END_MESSAGE_MAP()
 
 enum {
-    TAB_INVALID, TAB_EDITOR, TAB_HTMLHELP, TAB_DEBUGLOG
+    TAB_INVALID, TAB_EDITOR, TAB_HELPHTML, TAB_DEBUGLOG
 };
 
-static string getFile(const string &f) {
-    int n;
-    string t = f;
-    n = t.rfind('/');
-    if (n != string::npos) t = t.substr(n + 1);
+static std::string getFile(const std::string &f) {
+    std::string t = f;
+    int n = t.rfind('/');
+    if (n != std::string::npos) t = t.substr(n + 1);
     n = t.rfind('\\');
-    if (n != string::npos) t = t.substr(n + 1);
+    if (n != std::string::npos) t = t.substr(n + 1);
     return t;
 }
 
-static string getPath(const string &f) {
-    int n;
-    string t = f;
-    n = t.rfind('/');
-    if (n != string::npos) t = t.substr(0, n);
+static std::string getPath(const std::string &f) {
+    std::string t = f;
+    int n = t.rfind('/');
+    if (n != std::string::npos) t = t.substr(0, n);
     n = t.rfind('\\');
-    if (n != string::npos) t = t.substr(0, n);
+    if (n != std::string::npos) t = t.substr(0, n);
     return t;
 }
 
 MainFrame::MainFrame() : exit_flag(false) {
 }
 
-int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+int MainFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct) {
     CFrameWnd::OnCreate(lpCreateStruct);
     this->DragAcceptFiles();
 
@@ -130,8 +128,8 @@ int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
     if (!toolbmp) {
         BITMAP bm;
-        string t = prefs.homeDir + "/cfg/ide_toolbar.bmp";
-        toolbmp = (HBITMAP) LoadImage(0, t.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
+        const std::string t = prefs.homeDir + "/cfg/ide_toolbar.bmp";
+        toolbmp = (HBITMAP) LoadImage(nullptr, t.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
         if (!toolbmp) {
             AfxMessageBox("toolbar bitmap failed to load!");
             ExitProcess(0);
@@ -149,10 +147,9 @@ int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     toolBar.SetSizes(butsz, imgsz);
     toolBar.SetButtons(toolbuts, toolcnt);
 
-    int style;
-    style = WS_CHILD | WS_VISIBLE | CBRS_ALIGN_BOTTOM;
+    int style = WS_CHILD | WS_VISIBLE | CBRS_ALIGN_BOTTOM;
     statusBar.CreateEx(this, 0, style);
-    UINT IDS[] = {ID_STATUSTEXT, ID_COLROWTEXT};
+    const UINT IDS[] = {ID_STATUSTEXT, ID_COLROWTEXT};
     statusBar.SetIndicators(IDS, 2);
     statusBar.SetPaneInfo(0, ID_STATUSTEXT, SBPS_NOBORDERS | SBPS_STRETCH, 0);
     statusBar.SetPaneInfo(1, ID_COLROWTEXT, 0, 128);
@@ -181,7 +178,7 @@ int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     trackmem(true);
 
     if (blitzIDE.m_lpCmdLine[0]) {
-        string t = string(blitzIDE.m_lpCmdLine);
+        std::string t = std::string(blitzIDE.m_lpCmdLine);
         if (t[0] == '\"') t = t.substr(1, t.size() - 2);
         open(t);
     } else {
@@ -191,16 +188,17 @@ int MainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     return 0;
 }
 
-void MainFrame::OnDropFiles(HDROP hDropInfo) {
+void MainFrame::OnDropFiles(const HDROP hDropInfo) {
     TCHAR szFileName[MAX_PATH + 1] = {};
-    UINT nFiles = DragQueryFile(hDropInfo, 0xFFFFFFFF, szFileName, MAX_PATH);
+    const UINT nFiles = DragQueryFile(hDropInfo, 0xFFFFFFFF, szFileName, MAX_PATH);
     for (int i = 0; i < nFiles; ++i) {
         DragQueryFile(hDropInfo, i, szFileName, MAX_PATH);
         open(szFileName);
     }
 }
 
-void MainFrame::OnDestroy() {
+void MainFrame::OnDestroy()
+{
     trackmem(false);
     WINDOWPLACEMENT wp = {sizeof(wp)};
     if (GetWindowPlacement(&wp)) {
@@ -213,7 +211,7 @@ void MainFrame::OnDestroy() {
     }
 }
 
-void MainFrame::setTitle(const string &s) {
+void MainFrame::setTitle(const std::string &s) {
     SetWindowText(("Blitz3D - " + s).c_str());
 }
 
@@ -230,7 +228,7 @@ BOOL MainFrame::OnEraseBkgnd(CDC *dc) {
     return true;
 }
 
-void MainFrame::OnSize(UINT type, int sw, int sh) {
+void MainFrame::OnSize(const UINT type, const int sw, const int sh) {
     CFrameWnd::OnSize(type, sw, sh);
 
     CRect r, t;
@@ -248,40 +246,40 @@ void MainFrame::OnSize(UINT type, int sw, int sh) {
     tabber.MoveWindow(x, y, w, h);
 }
 
-static char *bbFilter =
+static auto bbFilter =
 
-        "Blitz Basic files (.bb)|*.bb|"
-        "Image files (.bmp,.jpg,.png,.tga,.iff,.pcx)|*.bmp;*.jpg;*.png;*.tga;*.iff;*.pcx|"
-        "Audio files (.wav,.mid,.mod,.mp3,.s3m,.xm,.it,.rmi,.sgt)|*.wav;*.mid;*.mod;*.mp3;*.s3m;*.xm;*.it;*.rmi;*.sgt|"
-        "3D Mesh files (.x,.3ds,.md2)|*.x;*.3ds;*.md2|"
-        "All files|*.*||";
+    "Blitz Basic files (.bb)|*.bb|"
+    "Image files (.bmp,.jpg,.png,.tga,.iff,.pcx)|*.bmp;*.jpg;*.png;*.tga;*.iff;*.pcx|"
+    "Audio files (.wav,.mid,.mod,.mp3,.s3m,.xm,.it,.rmi,.sgt)|*.wav;*.mid;*.mod;*.mp3;*.s3m;*.xm;*.it;*.rmi;*.sgt|"
+    "3D Mesh files (.x,.3ds,.md2)|*.x;*.3ds;*.md2|"
+    "All files|*.*||";
 
 Editor *MainFrame::getEditor() {
     return getEditor(tabber.getCurrent());
 }
 
-Editor *MainFrame::getEditor(int n) {
-    map<CWnd *, Editor *>::iterator it = editors.find(tabber.getTabWnd(n));
+Editor *MainFrame::getEditor(const int n) {
+    const std::map<CWnd *, Editor *>::iterator it = editors.find(tabber.getTabWnd(n));
     return it == editors.end() ? 0 : it->second;
 }
 
-HtmlHelp *MainFrame::getHelp(int n) {
-    map<CWnd *, HtmlHelp *>::iterator it = helps.find(tabber.getTabWnd(n));
+HelpHtml *MainFrame::getHelp(const int n) {
+    const std::map<CWnd *, HelpHtml *>::iterator it = helps.find(tabber.getTabWnd(n));
     return it == helps.end() ? 0 : it->second;
 }
 
-HtmlHelp *MainFrame::getHelp() {
+HelpHtml *MainFrame::getHelp() {
     return getHelp(tabber.getCurrent());
 }
 
-HtmlHelp *MainFrame::findHelp() {
+HelpHtml *MainFrame::findHelp() {
     int n;
-    HtmlHelp *h;
+    HelpHtml *h;
     for (n = 0; n < tabber.size(); ++n) {
         if (h = getHelp(n)) break;
     }
     if (n == tabber.size()) {
-        h = new HtmlHelp(this);
+        h = new HelpHtml(this);
         h->Create(0, "Help", WS_CHILD | WS_BORDER, CRect(0, 0, 0, 0), &tabber, 1);
         helps[h] = h;
         tabber.insert(n, h, "Help");
@@ -294,7 +292,7 @@ void MainFrame::cursorMoved(Editor *editor) {
     if (editor != getEditor()) return;
     int row, col;
     editor->getCursor(&row, &col);
-    char mod = editor->getModified() ? '*' : ' ';
+    const char mod = editor->getModified() ? '*' : ' ';
     char str[64];
     sprintf(str, "Row:%i Col:%i %c", row, col, mod);
     statusBar.SetPaneText(1, str);
@@ -302,11 +300,11 @@ void MainFrame::cursorMoved(Editor *editor) {
 
 void MainFrame::currentSet(Tabber *tabber, int index) {
     if (Editor *e = getEditor()) {
-        string t = e->getName();
+        std::string t = e->getName();
         if (!t.size()) t = "<untitled>";
         setTitle(t);
         cursorMoved(e);
-    } else if (HtmlHelp *h = getHelp()) {
+    } else if (HelpHtml *h = getHelp()) {
         setTitle(h->getTitle());
         statusBar.SetPaneText(1, "");
     } else {
@@ -315,25 +313,26 @@ void MainFrame::currentSet(Tabber *tabber, int index) {
     }
 }
 
-void MainFrame::helpOpen(HtmlHelp *help, const string &file) {
+void MainFrame::helpOpen(HelpHtml *help, const std::string &file) {
     open(file);
 }
 
-void MainFrame::helpTitleChange(HtmlHelp *help, const string &title) {
-    if (HtmlHelp *h = getHelp()) setTitle(h->getTitle());
+void MainFrame::helpTitleChange(HelpHtml *help, const std::string &title) {
+    if (HelpHtml *h = getHelp()) setTitle(h->getTitle());
 }
 
-void MainFrame::insertRecent(const string &file) {
+void MainFrame::insertRecent(const std::string &file) const
+{
     //check recent files
     if (CMenu *list = GetMenu()->GetSubMenu(0)->GetSubMenu(12)) {
-        vector<string>::iterator it;
-        vector<string> &f = prefs.recentFiles;
+        std::vector<std::string>::iterator it;
+        std::vector<std::string> &f = prefs.recentFiles;
         for (it = f.begin(); it != f.end(); ++it) {
             if (tolower(*it) == tolower(file)) break;
         }
         if (it != f.end()) {
             //move to top
-            string t = *it;
+            const std::string t = *it;
             f.erase(it);
             f.insert(f.begin(), t);
         } else {
@@ -352,26 +351,26 @@ void MainFrame::insertRecent(const string &file) {
     }
 }
 
-void MainFrame::newed(const string &t) {
+void MainFrame::newed(const std::string &t) {
 
-    CRect r(0, 0, 0, 0);
+    const CRect r(0, 0, 0, 0);
 
     Editor *e = new Editor(this);
     e->Create(0, "Editor", WS_CHILD, r, &tabber, 1);
     e->setName(t);
     editors[e] = e;
-    int n = tabber.size();
-    string s = t.size() ? getFile(t) : "<untitled>";
+    const int n = tabber.size();
+    const std::string s = t.size() ? getFile(t) : "<untitled>";
     tabber.insert(n, e, s.c_str());
     tabber.setCurrent(n);
 }
 
-bool MainFrame::open(const string &f) {
+bool MainFrame::open(const std::string &f) {
 
-    string file = f, filter = "*.bb";
+    std::string file = f, filter = "*.bb";
 
     int n = f.find("*.");
-    if (n != string::npos) {
+    if (n != std::string::npos) {
         file = f.substr(0, n);
         filter = f.substr(n);
     }
@@ -399,8 +398,8 @@ bool MainFrame::open(const string &f) {
     }
 
     if (isMediaFile(tolower(file))) {
-        string t = prefs.homeDir + "/bin/mediaview.exe";
-        if ((int) ShellExecute(::GetDesktopWindow(), 0, t.c_str(), file.c_str(), 0, SW_SHOW) > 32) {
+        std::string t = prefs.homeDir + "/bin/mediaview.exe";
+        if ((int) ShellExecute(::GetDesktopWindow(), nullptr, t.c_str(), file.c_str(), nullptr, SW_SHOW) > 32) {
         }
         return false;
     }
@@ -416,9 +415,9 @@ bool MainFrame::open(const string &f) {
         }
     }
     //open new file
-    ifstream in(file.c_str());
+    std::ifstream in(file.c_str());
     if (!in.good()) {
-        string e = "Error reading file \"" + f + "\"";
+        std::string e = "Error reading file \"" + f + "\"";
         AfxMessageBox(e.c_str(), MB_ICONWARNING);
         return false;
     }
@@ -433,12 +432,12 @@ bool MainFrame::open(const string &f) {
     return true;
 }
 
-bool MainFrame::close(int n) {
+bool MainFrame::close(const int n) {
     if (Editor *e = getEditor(n)) {
         if (e->getModified()) {
             tabber.setCurrent(n);
-            string t = "File " + e->getName() + " has been modified!\nSave changes before closing?";
-            int rt = AfxMessageBox(t.c_str(), MB_YESNOCANCEL | MB_ICONWARNING);
+            const std::string t = "File " + e->getName() + " has been modified!\nSave changes before closing?";
+            const int rt = AfxMessageBox(t.c_str(), MB_YESNOCANCEL | MB_ICONWARNING);
             if (rt == IDYES) return save(n);
             if (rt == IDCANCEL) return false;
         }
@@ -446,7 +445,7 @@ bool MainFrame::close(int n) {
         e->DestroyWindow();
         editors.erase(e);
         delete e;
-    } else if (HtmlHelp *h = getHelp(n)) {
+    } else if (HelpHtml *h = getHelp(n)) {
     }
     return true;
 }
@@ -455,7 +454,7 @@ bool MainFrame::save(int n) {
 
     Editor *e = getEditor(n);
     if (!e) return true;
-    string t = e->getName();
+    std::string t = e->getName();
     if (!t.size()) {
         tabber.setCurrent(n);
         int df = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_EXPLORER | OFN_OVERWRITEPROMPT;
@@ -474,10 +473,10 @@ bool MainFrame::save(int n) {
         }
         CopyFile(t.c_str(), (t + "_bak1").c_str(), false);
     }
-    int om = ios_base::binary | ios_base::out | ios_base::trunc;
-    ofstream out(t.c_str(), om);
+    int om = std::ios_base::binary | std::ios_base::out | std::ios_base::trunc;
+    std::ofstream out(t.c_str(), om);
     if (!out.good()) {
-        string e = "Error writing file \"" + t + "\"";
+        std::string e = "Error writing file \"" + t + "\"";
         AfxMessageBox(e.c_str(), MB_ICONWARNING);
         return false;
     }
@@ -502,7 +501,7 @@ void MainFrame::fileSave() {
 
 void MainFrame::fileSaveAs() {
     if (Editor *e = getEditor()) {
-        string t = e->getName();
+        const std::string t = e->getName();
         e->setName("");
         if (!save(tabber.getCurrent())) e->setName(t);
         currentSet(&tabber, tabber.getCurrent());
@@ -567,17 +566,17 @@ void MainFrame::editReplace() {
     if (Editor *e = getEditor()) e->replace();
 }
 
-static HANDLE startProc(const string &proc) {
+static HANDLE startProc(const std::string &proc) {
     HANDLE rd, wr;
 
-    SECURITY_ATTRIBUTES sa = {sizeof(sa), 0, true};
+    SECURITY_ATTRIBUTES sa = {sizeof(sa), nullptr, true};
 
     if (CreatePipe(&rd, &wr, &sa, 0)) {
         STARTUPINFO si = {sizeof(si)};
         si.dwFlags = STARTF_USESTDHANDLES;
         si.hStdOutput = si.hStdError = wr;
-        PROCESS_INFORMATION pi = {0};
-        if (CreateProcess(0, (char *) proc.c_str(), 0, 0, true, DETACHED_PROCESS, 0, 0, &si, &pi)) {
+        PROCESS_INFORMATION pi = {nullptr};
+        if (CreateProcess(nullptr, (char *) proc.c_str(), nullptr, nullptr, true, DETACHED_PROCESS, nullptr, nullptr, &si, &pi)) {
             CloseHandle(pi.hProcess);
             CloseHandle(pi.hThread);
             CloseHandle(wr);
@@ -586,17 +585,17 @@ static HANDLE startProc(const string &proc) {
         CloseHandle(rd);
         CloseHandle(wr);
     }
-    return 0;
+    return nullptr;
 }
 
 class PDialog : public CDialog {
 public:
     void OnOk() {}
 
-    void OnCancel() {}
+    void OnCancel() override {}
 };
 
-void MainFrame::compile(const string &cmd) {
+void MainFrame::compile(const std::string &cmd) {
 
     CDialog compiling;
     compiling.Create(IDD_COMPILING);
@@ -615,13 +614,13 @@ void MainFrame::compile(const string &cmd) {
         return;
     }
 
-    string line, err;
+    std::string line, err;
 
     //OK....here we go!
     for (;;) {
         char buff;
         unsigned long sz;
-        int n = ReadFile(rd, &buff, 1, &sz, 0);
+        int n = ReadFile(rd, &buff, 1, &sz, nullptr);
 
         if (n && !sz) break;    //EOF!
         if (!n && GetLastError() == ERROR_BROKEN_PIPE) break;    //PROC END!
@@ -640,24 +639,24 @@ void MainFrame::compile(const string &cmd) {
         if (line[0] == '\"') {
             err = line;
             int n = line.find("\"", 1);
-            if (n == string::npos) break;
+            if (n == std::string::npos) break;
             if (++n == line.size() || line[n] != ':') break;
-            string file = line.substr(1, n - 2);
+            std::string file = line.substr(1, n - 2);
             line = line.substr(n + 1);
             n = line.find(':');
-            if (!n || n == string::npos) break;
+            if (!n || n == std::string::npos) break;
             int row1 = atoi(line.substr(0, n));
             line = line.substr(n + 1);
             n = line.find(':');
-            if (!n || n == string::npos) break;
+            if (!n || n == std::string::npos) break;
             int col1 = atoi(line.substr(0, n));
             line = line.substr(n + 1);
             n = line.find(':');
-            if (!n || n == string::npos) break;
+            if (!n || n == std::string::npos) break;
             int row2 = atoi(line.substr(0, n));
             line = line.substr(n + 1);
             n = line.find(':');
-            if (!n || n == string::npos) break;
+            if (!n || n == std::string::npos) break;
             int col2 = atoi(line.substr(0, n));
             line = line.substr(n + 1);
 
@@ -696,7 +695,7 @@ void MainFrame::build(bool exec, bool publish) {
     Editor *e = getEditor();
     if (!e) return;
 
-    string src_file = e->getName();
+    std::string src_file = e->getName();
 
     for (int k = tabber.size() - 1; k >= 0; --k) {
         if (Editor *e = getEditor(k)) {
@@ -706,39 +705,39 @@ void MainFrame::build(bool exec, bool publish) {
         }
     }
 
-    string opts = " ";
+    std::string opts = " ";
 
     if (prefs.prg_debug) opts += "-d ";
 
     if (publish) {
-        string exe = src_file;
+        std::string exe = src_file;
         if (exe.size()) {
             int n = exe.find('.');
-            if (n != string::npos) exe = exe.substr(0, n);
+            if (n != std::string::npos) exe = exe.substr(0, n);
         } else {
             exe = "untitled";
         }
 
-        static char *exeFilter = "Executable files (*.exe)|*.exe||";
+        static auto exeFilter = "Executable files (*.exe)|*.exe||";
         int t = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
         CFileDialog fd(false, "exe", exe.c_str(), t, exeFilter);
         fd.m_ofn.lpstrTitle = "Select executable filename";
         fd.m_ofn.lpstrInitialDir = "./";
         if (fd.DoModal() == IDCANCEL) return;
 
-        opts += "-o \"" + string(fd.GetPathName()) + "\" ";
+        opts += "-o \"" + std::string(fd.GetPathName()) + "\" ";
     } else if (!exec) {
         opts += "-c ";
     }
 
-    string src = src_file;
+    std::string src = src_file;
 
     if (!src.size()) {
         src = prefs.homeDir + "\\tmp\\tmp.bb";
-        int om = ios_base::binary | ios_base::out | ios_base::trunc;
-        ofstream out(src.c_str(), om);
+        int om = std::ios_base::binary | std::ios_base::out | std::ios_base::trunc;
+        std::ofstream out(src.c_str(), om);
         if (!out.good()) {
-            string e = "Error writing file \"" + src + "\"";
+            std::string e = "Error writing file \"" + src + "\"";
             AfxMessageBox(e.c_str(), MB_ICONWARNING);
             return;
         }
@@ -769,10 +768,10 @@ void MainFrame::programCompile() {
 }
 
 void MainFrame::programPublish() {
-    Editor *e = getEditor();
+    const Editor *e = getEditor();
     if (!e) return;
     if (prefs.prg_debug) {
-        string t =
+        const std::string t =
                 "You currently have the debugging feature enabled!\n\n"
                 "This will result in slower executables - continue anyway?";
         if (MessageBox(t.c_str(), 0, MB_OKCANCEL) == IDCANCEL) return;
@@ -784,13 +783,15 @@ struct CmdLineDialog : public CDialog {
     CmdLineDialog() : CDialog(IDD_COMMANDLINE) {
     }
 
-    BOOL OnInitDialog() {
+    BOOL OnInitDialog() override
+    {
         CDialog::OnInitDialog();
         SetDlgItemText(IDC_CMDLINE, prefs.cmd_line.c_str());
         return TRUE;
     }
 
-    void OnOK() {
+    void OnOK() override
+    {
         CString c_str;
         GetDlgItemText(IDC_CMDLINE, c_str);
         prefs.cmd_line = c_str;
@@ -808,23 +809,22 @@ void MainFrame::programDebug() {
 }
 
 void MainFrame::helpHome() {
-    HtmlHelp *h = findHelp();
-    string t;
-    t = "index.html";
+    HelpHtml *h = findHelp();
+    std::string t = "index.html";
     h->Navigate((prefs.homeDir + "/help/" + t).c_str());
 }
 
 void MainFrame::helpAutodoc() {
-    HtmlHelp *h = findHelp();
+    HelpHtml *h = findHelp();
     h->Navigate((prefs.homeDir + "/help/autodoc.html").c_str());
 }
 
 void MainFrame::helpBack() {
-    if (HtmlHelp *h = findHelp()) h->GoBack();
+    if (HelpHtml *h = findHelp()) h->GoBack();
 }
 
 void MainFrame::helpForward() {
-    if (HtmlHelp *h = findHelp()) h->GoForward();
+    if (HelpHtml *h = findHelp()) h->GoForward();
 }
 
 void MainFrame::helpAbout() {
@@ -856,12 +856,12 @@ void MainFrame::escape() {
     RECT r;
     GetClientRect(&r);
     int w = r.right - r.left, h = r.bottom - r.top;
-    int n = prefs.win_maximized ? SIZE_MAXIMIZED : SIZE_RESTORED;
+    const int n = prefs.win_maximized ? SIZE_MAXIMIZED : SIZE_RESTORED;
     PostMessage(WM_SIZE, n, (h << 16) | w);
 }
 
 void MainFrame::updateCmdUIRange(CCmdUI *ui) {
-    int n = ui->m_nID - 333;
+    const int n = ui->m_nID - 333;
     if (n >= 0 && n < prefs.recentFiles.size()) {
         ui->Enable(true);
     } else {
@@ -929,7 +929,7 @@ void MainFrame::updateCmdUI(CCmdUI *ui) {
             break;
         case ID_BACK:
         case ID_FORWARD:
-            ui->Enable(getHelp() != 0);
+            ui->Enable(getHelp() != nullptr);
             break;
         case ID_ESCAPE:
             ui->SetCheck(!prefs.win_notoolbar);
@@ -939,20 +939,20 @@ void MainFrame::updateCmdUI(CCmdUI *ui) {
     }
 }
 
-static string commandURL(const string &t) {
+static std::string commandURL(const std::string &t) {
 
-    static char *dirs[] = {
+    static const char *dirs[] = {
             "help\\commands\\2d_commands\\",
             "help\\commands\\3d_commands\\",
-            0
+            nullptr
     };
 
-    char **dir_p = dirs;
+    const char **dir_p = dirs;
 
-    while (char *dir = *dir_p++) {
+    while (const char *dir = *dir_p++) {
         WIN32_FIND_DATA fd;
-        string path = prefs.homeDir + "/" + dir + t + ".htm";
-        HANDLE h = FindFirstFile(path.c_str(), &fd);
+        std::string path = prefs.homeDir + "/" + dir + t + ".htm";
+        const HANDLE h = FindFirstFile(path.c_str(), &fd);
         if (h == INVALID_HANDLE_VALUE) continue;
         FindClose(h);
         return path;
@@ -963,26 +963,26 @@ static string commandURL(const string &t) {
 void MainFrame::quick_Help() {
     if (Editor *e = getEditor()) {
         //look for keyword at cursor...
-        string t = e->getKeyword();
+        const std::string t = e->getKeyword();
         if (!t.size()) return;
         statusBar.SetPaneText(0, quickHelp(t).c_str());
         if (t != last_quick_help) {
             last_quick_help = t;
             return;
         }
-        string url = commandURL(t);
+        const std::string url = commandURL(t);
         if (!url.size()) {
-            string ex = "Unable to open help file for \"" + t + "\"";
+            const std::string ex = "Unable to open help file for \"" + t + "\"";
             AfxMessageBox(ex.c_str(), MB_ICONWARNING);
             return;
         }
-        if (HtmlHelp *h = findHelp()) {
+        if (HelpHtml *h = findHelp()) {
             h->Navigate(url.c_str(), 0, 0);
         }
     }
 }
 
-void MainFrame::OnActivate(UINT state, CWnd *other, BOOL min) {
+void MainFrame::OnActivate(const UINT state, CWnd *other, const BOOL min) {
     CFrameWnd::OnActivate(state, other, min);
 
     if (Editor *e = getEditor()) {

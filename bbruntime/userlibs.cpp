@@ -1,10 +1,10 @@
-#include "std.h"
-#include "bbsys.h"
 #include "userlibs.h"
+#include "bbsys.h"
+#include "std.h"
 
 #include <windows.h>
 
-static vector<HMODULE> _mods;
+static std::vector<HMODULE> _mods;
 
 struct Str {
     char *p;
@@ -23,7 +23,7 @@ static void procNotFound() {
 }
 
 void _bbLoadLibs(char *p) {
-    string home;
+    std::string home;
 
     if (const char *t = getenv("blitzpath")) home = t;
 
@@ -57,7 +57,7 @@ void _bbLoadLibs(char *p) {
 const char *_bbStrToCStr(BBStr *str) {
     Str &t = _strs[_nextStr++ & 255];
 
-    int size = str->size();
+    const int size = str->size();
 
     if (!t.p || t.size < size) {
         delete[] t.p;

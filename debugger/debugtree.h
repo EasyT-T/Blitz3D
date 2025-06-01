@@ -2,19 +2,20 @@
 #ifndef DEBUGTREE_H
 #define DEBUGTREE_H
 
-#include "../linker/linker.h"
+#include "stdafx.h"
 #include "../compiler/environ.h"
+#include "../linker/linker.h"
 
 class DebugTree : public CTreeCtrl {
     int st_nest;
 protected:
 
-    HTREEITEM insertVar(void *var, Decl *d, const string &name, HTREEITEM it, HTREEITEM parent);
+    HTREEITEM insertVar(void *var, Decl *d, const std::string &name, HTREEITEM it, HTREEITEM parent);
 
 public:
     DebugTree();
 
-    ~DebugTree();
+    ~DebugTree() override;
 
 DECLARE_DYNAMIC(DebugTree)
 
@@ -54,7 +55,7 @@ class LocalsTree : public DebugTree {
         Frame(void *f, Environ *e, const char *fn) : frame(f), env(e), func(fn), item(0) {}
     };
 
-    vector<Frame> frames;
+    std::vector<Frame> frames;
 
     void refreshFrame(const Frame &f);
 

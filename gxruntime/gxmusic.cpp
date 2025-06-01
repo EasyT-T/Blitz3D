@@ -1,5 +1,5 @@
-#include "std.h"
 #include "gxmusic.h"
+#include "std.h"
 
 gxMusic::gxMusic(gxAudio* a, FMUSIC_MODULE* m, FSOUND_STREAM* s):
     audio(a), module(m), stream(s), stream_channel(-1)
@@ -37,7 +37,7 @@ void gxMusic::stop()
     }
 }
 
-void gxMusic::setVolume(float volume)
+void gxMusic::setVolume(const float volume)
 {
     if (module)
     {

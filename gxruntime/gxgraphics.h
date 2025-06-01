@@ -1,17 +1,17 @@
 #ifndef GXGRAPHICS_H
 #define GXGRAPHICS_H
 
+#include <d3d.h>
 #include <set>
 #include <string>
-#include <d3d.h>
 
 #include "ddutil.h"
 
-#include "gxfont.h"
 #include "gxcanvas.h"
-#include "gxscene.h"
+#include "gxfont.h"
 #include "gxmesh.h"
 #include "gxmovie.h"
+#include "gxscene.h"
 
 class gxRuntime;
 
@@ -68,15 +68,15 @@ public:
     };
 
     //MANIPULATORS
-    void vwait();
-    void flip(bool vwait);
+    void vwait() const;
+    void flip(bool vwait) const;
 
     //SPECIAL!
     void copy(gxCanvas* dest, int dx, int dy, int dw, int dh, gxCanvas* src, int sx, int sy, int sw, int sh);
 
     //NEW! Gamma control!
     void setGamma(int r, int g, int b, float dr, float dg, float db);
-    void getGamma(int r, int g, int b, float* dr, float* dg, float* db);
+    void getGamma(int r, int g, int b, float* dr, float* dg, float* db) const;
     void updateGamma(bool calibrate);
 
     //ACCESSORS
@@ -94,23 +94,23 @@ public:
     //OBJECTS
     gxCanvas* createCanvas(int width, int height, int flags);
     gxCanvas* loadCanvas(const std::string& file, int flags);
-    gxCanvas* verifyCanvas(gxCanvas* canvas);
+    gxCanvas* verifyCanvas(gxCanvas* canvas) const;
     void freeCanvas(gxCanvas* canvas);
 
     gxMovie* openMovie(const std::string& file, int flags);
-    gxMovie* verifyMovie(gxMovie* movie);
+    gxMovie* verifyMovie(gxMovie* movie) const;
     void closeMovie(gxMovie* movie);
 
     gxFont* loadFont(const std::string& font, int height, int flags);
-    gxFont* verifyFont(gxFont* font);
+    gxFont* verifyFont(gxFont* font) const;
     void freeFont(gxFont* font);
 
     gxScene* createScene(int flags);
-    gxScene* verifyScene(gxScene* scene);
+    gxScene* verifyScene(gxScene* scene) const;
     void freeScene(gxScene* scene);
 
     gxMesh* createMesh(int max_verts, int max_tris, int flags);
-    gxMesh* verifyMesh(gxMesh* mesh);
+    gxMesh* verifyMesh(gxMesh* mesh) const;
     void freeMesh(gxMesh* mesh);
 };
 

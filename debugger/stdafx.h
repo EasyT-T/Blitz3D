@@ -6,34 +6,32 @@
 
 #define _WIN32_WINNT 0x601
 
-#include <afxwin.h>         // Core
 #include <afxcmn.h>            // Common Controls
 #include <afxrich.h>        // CRich edit
+#include <afxwin.h>         // Core
 
-#include <map>
 #include <list>
-#include <vector>
+#include <map>
 #include <string>
-
-using namespace std;
+#include <vector>
 
 //some stuff that should be in std libs
-int atoi(const string &s);
+int atoi(const std::string &s);
 
-double atof(const string &s);
+double atof(const std::string &s);
 
-string itoa(int n);
+std::string itoa(int n);
 
-string ftoa(float n);
+std::string ftoa(float n);
 
-string tolower(const string &s);
+std::string tolower(const std::string &s);
 
-string toupper(const string &s);
+std::string toupper(const std::string &s);
 
-string fullfilename(const string &t);
+std::string fullfilename(const std::string &t);
 
-string filenamepath(const string &t);
+std::string filenamepath(const std::string &t);
 
-string filenamefile(const string &t);
+std::string filenamefile(const std::string &t);
 
 #endif

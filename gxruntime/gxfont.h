@@ -8,6 +8,8 @@ class gxGraphics;
 
 typedef IDirectDrawSurface7 ddSurf;
 
+#include "std.h"
+
 class gxFont
 {
 public:

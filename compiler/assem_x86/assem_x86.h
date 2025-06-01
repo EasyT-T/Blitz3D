@@ -4,44 +4,42 @@
 
 #include "../assem.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "insts.h"
 #include "operand.h"
 
-using namespace std;
-
 class Assem_x86 : public Assem {
 public:
-    Assem_x86(istream &in, Module *mod);
+    Assem_x86(std::istream &in, Module *mod);
 
-    virtual void assemble();
+    void assemble() override;
 
 private:
 
-    void align(int n);
+    void align(int n) const;
 
-    void emit(int n);
+    void emit(int n) const;
 
     void emitw(int n);
 
     void emitd(int n);
 
-    void emitImm(const string &s, int size);
+    void emitImm(const std::string &s, int size);
 
     void emitImm(const Operand &o, int size);
 
-    void r_reloc(const string &dest);
+    void r_reloc(const std::string &dest);
 
-    void a_reloc(const string &dest);
+    void a_reloc(const std::string &dest);
 
-    void assemDir(const string &name, const string &op);
+    void assemDir(const std::string &name, const std::string &op);
 
-    void assemInst(const string &name, const string &lhs, const string &rhs);
+    void assemInst(const std::string &name, const std::string &lhs, const std::string &rhs);
 
-    void assemLine(const string &line);
+    void assemLine(const std::string &line);
 };
 
 #endif
