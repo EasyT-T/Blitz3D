@@ -25,7 +25,7 @@ class PixelFormat
     Plot plot;
     Point point;
 
-    char *plot_code, *point_code;
+    char* plot_code,* point_code;
 
 public:
     PixelFormat(): plot_code(nullptr)

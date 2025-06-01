@@ -138,7 +138,8 @@ void gxGraphics::flip(const bool v) const
     runtime->flip(v);
 }
 
-void gxGraphics::copy(gxCanvas* dest, const int dx, const int dy, const int dw, const int dh, gxCanvas* src, const int sx, const int sy, const int sw, const int sh)
+void gxGraphics::copy(gxCanvas* dest, const int dx, const int dy, const int dw, const int dh, gxCanvas* src,
+                      const int sx, const int sy, const int sw, const int sh)
 {
     const RECT r = {dx, dy, dx + dw, dy + dh};
     ddUtil::copy(dest->getSurface(), dx, dy, dw, dh, src->getSurface(), sx, sy, sw, sh);

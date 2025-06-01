@@ -2,23 +2,27 @@
 #include "bbsys.h"
 #include "std.h"
 
-void bbEnd() {
+void bbEnd()
+{
     RTEX(0);
 }
 
-void bbStop() {
+void bbStop()
+{
     gx_runtime->debugStop();
     if (!gx_runtime->idle())
         RTEX(0);
 }
 
-void bbAppTitle(BBStr *ti, BBStr *cp) {
+void bbAppTitle(BBStr* ti, BBStr* cp)
+{
     gx_runtime->setTitle(*ti, *cp);
     delete ti;
     delete cp;
 }
 
-void bbRuntimeError(BBStr *str) {
+void bbRuntimeError(BBStr* str)
+{
     std::string t = *str;
     delete str;
     if (t.size() > 255) t[255] = 0;
@@ -27,7 +31,8 @@ void bbRuntimeError(BBStr *str) {
     RTEX(err);
 }
 
-int bbExecFile(BBStr *f) {
+int bbExecFile(BBStr* f)
+{
     const std::string t = *f;
     delete f;
     const int n = gx_runtime->execute(t);
@@ -36,71 +41,84 @@ int bbExecFile(BBStr *f) {
     return n;
 }
 
-void bbDelay(const int ms) {
+void bbDelay(const int ms)
+{
     if (!gx_runtime->delay(ms))
         RTEX(0);
 }
 
-int bbMilliSecs() {
+int bbMilliSecs()
+{
     return gx_runtime->getMilliSecs();
 }
 
-BBStr *bbCommandLine() {
+BBStr* bbCommandLine()
+{
     return d_new BBStr(gx_runtime->commandLine());
 }
 
-BBStr *bbSystemProperty(BBStr *p) {
+BBStr* bbSystemProperty(BBStr* p)
+{
     const std::string t = gx_runtime->systemProperty(*p);
     delete p;
     return d_new BBStr(t);
 }
 
-BBStr *bbGetEnv(BBStr *env_var) {
-    const char *p = getenv(env_var->c_str());
-    BBStr *val = d_new BBStr(p ? p : "");
+BBStr* bbGetEnv(BBStr* env_var)
+{
+    const char* p = getenv(env_var->c_str());
+    BBStr* val = d_new BBStr(p ? p : "");
     delete env_var;
     return val;
 }
 
-void bbSetEnv(BBStr *env_var, BBStr *val) {
+void bbSetEnv(BBStr* env_var, BBStr* val)
+{
     const std::string t = *env_var + "=" + *val;
     putenv(t.c_str());
     delete env_var;
     delete val;
 }
 
-gxTimer *bbCreateTimer(const int hertz) {
-    gxTimer *t = gx_runtime->createTimer(hertz);
+gxTimer* bbCreateTimer(const int hertz)
+{
+    gxTimer* t = gx_runtime->createTimer(hertz);
     return t;
 }
 
-int bbWaitTimer(gxTimer *t) {
+int bbWaitTimer(gxTimer* t)
+{
     const int n = t->wait();
     if (!gx_runtime->idle())
         RTEX(0);
     return n;
 }
 
-void bbFreeTimer(gxTimer *t) {
+void bbFreeTimer(gxTimer* t)
+{
     gx_runtime->freeTimer(t);
 }
 
-void bbDebugLog(BBStr *t) {
+void bbDebugLog(BBStr* t)
+{
     gx_runtime->debugLog(t->c_str());
     delete t;
 }
 
-void _bbDebugStmt(const int pos, const char *file) {
+void _bbDebugStmt(const int pos, const char* file)
+{
     gx_runtime->debugStmt(pos, file);
     if (!gx_runtime->idle())
         RTEX(0);
 }
 
-void _bbDebugEnter(void *frame, void *env, const char *func) {
+void _bbDebugEnter(void* frame, void* env, const char* func)
+{
     gx_runtime->debugEnter(frame, env, func);
 }
 
-void _bbDebugLeave() {
+void _bbDebugLeave()
+{
     gx_runtime->debugLeave();
 }
 
@@ -108,75 +126,76 @@ bool basic_create();
 
 bool basic_destroy();
 
-void basic_link(void (*rtSym)(const char *sym, void *pc));
+void basic_link(void (*rtSym)(const char* sym, void* pc));
 
 bool math_create();
 
 bool math_destroy();
 
-void math_link(void (*rtSym)(const char *sym, void *pc));
+void math_link(void (*rtSym)(const char* sym, void* pc));
 
 bool string_create();
 
 bool string_destroy();
 
-void string_link(void (*rtSym)(const char *sym, void *pc));
+void string_link(void (*rtSym)(const char* sym, void* pc));
 
 bool stream_create();
 
 bool stream_destroy();
 
-void stream_link(void (*rtSym)(const char *sym, void *pc));
+void stream_link(void (*rtSym)(const char* sym, void* pc));
 
 bool sockets_create();
 
 bool sockets_destroy();
 
-void sockets_link(void (*rtSym)(const char *sym, void *pc));
+void sockets_link(void (*rtSym)(const char* sym, void* pc));
 
 bool filesystem_create();
 
 bool filesystem_destroy();
 
-void filesystem_link(void (*rtSym)(const char *sym, void *pc));
+void filesystem_link(void (*rtSym)(const char* sym, void* pc));
 
 bool bank_create();
 
 bool bank_destroy();
 
-void bank_link(void (*rtSym)(const char *sym, void *pc));
+void bank_link(void (*rtSym)(const char* sym, void* pc));
 
 bool userlibs_create();
 
 void userlibs_destroy();
 
-void userlibs_link(void (*rtSym)(const char *sym, void *pc));
+void userlibs_link(void (*rtSym)(const char* sym, void* pc));
 
 bool input_create();
 
 bool input_destroy();
 
-void input_link(void (*rtSym)(const char *sym, void *pc));
+void input_link(void (*rtSym)(const char* sym, void* pc));
 
 bool graphics_create();
 
 bool graphics_destroy();
 
-void graphics_link(void (*rtSym)(const char *sym, void *pc));
+void graphics_link(void (*rtSym)(const char* sym, void* pc));
 
 bool audio_create();
 
 bool audio_destroy();
 
-void audio_link(void (*rtSym)(const char *sym, void *pc));
+void audio_link(void (*rtSym)(const char* sym, void* pc));
 
 bool blitz3d_create();
 
 bool blitz3d_destroy();
 
-void blitz3d_link(void (*rtSym)(const char *sym, void *pc));
+void blitz3d_link(void (*rtSym)(const char* sym, void* pc));
 
-void bbruntime_link(void (*rtSym)(const char *sym, void *pc)) {
+void bbruntime_link(void (*rtSym)(const char* sym, void* pc))
+{
     rtSym("End", bbEnd);
     rtSym("Stop", bbStop);
     rtSym("AppTitle$title$close_prompt=\"\"", bbAppTitle);
@@ -213,52 +232,79 @@ void bbruntime_link(void (*rtSym)(const char *sym, void *pc)) {
 }
 
 //start up error
-static void sue(const char *t) {
+static void sue(const char* t)
+{
     const std::string p = std::string("Startup Error: ") + t;
     gx_runtime->debugInfo(p.c_str());
 }
 
-bool bbruntime_create() {
-    if (basic_create()) {
-        if (math_create()) {
-            if (string_create()) {
-                if (stream_create()) {
-                    if (sockets_create()) {
-                        if (filesystem_create()) {
-                            if (bank_create()) {
-                                if (userlibs_create()) {
-                                    if (graphics_create()) {
-                                        if (input_create()) {
-                                            if (audio_create()) {
-                                                if (blitz3d_create()) {
+bool bbruntime_create()
+{
+    if (basic_create())
+    {
+        if (math_create())
+        {
+            if (string_create())
+            {
+                if (stream_create())
+                {
+                    if (sockets_create())
+                    {
+                        if (filesystem_create())
+                        {
+                            if (bank_create())
+                            {
+                                if (userlibs_create())
+                                {
+                                    if (graphics_create())
+                                    {
+                                        if (input_create())
+                                        {
+                                            if (audio_create())
+                                            {
+                                                if (blitz3d_create())
+                                                {
                                                     return true;
-                                                } else sue("blitz3d_create failed");
+                                                }
+                                                else sue("blitz3d_create failed");
                                                 audio_destroy();
-                                            } else sue("audio_create failed");
+                                            }
+                                            else sue("audio_create failed");
                                             input_destroy();
-                                        } else sue("input_create failed");
+                                        }
+                                        else sue("input_create failed");
                                         graphics_destroy();
-                                    } else sue("graphics_create failed");
+                                    }
+                                    else sue("graphics_create failed");
                                     userlibs_destroy();
-                                } else sue("userlibs_create failed");
+                                }
+                                else sue("userlibs_create failed");
                                 bank_destroy();
-                            } else sue("bank_create failed");
+                            }
+                            else sue("bank_create failed");
                             filesystem_destroy();
-                        } else sue("filesystem_create failed");
+                        }
+                        else sue("filesystem_create failed");
                         sockets_destroy();
-                    } else sue("sockets_create failed");
+                    }
+                    else sue("sockets_create failed");
                     stream_destroy();
-                } else sue("stream_create failed");
+                }
+                else sue("stream_create failed");
                 string_destroy();
-            } else sue("string_create failed");
+            }
+            else sue("string_create failed");
             math_destroy();
-        } else sue("math_create failed");
+        }
+        else sue("math_create failed");
         basic_destroy();
-    } else sue("basic_create failed");
+    }
+    else sue("basic_create failed");
     return false;
 }
 
-bool bbruntime_destroy() {
+bool bbruntime_destroy()
+{
     userlibs_destroy();
     blitz3d_destroy();
     audio_destroy();
@@ -274,25 +320,29 @@ bool bbruntime_destroy() {
     return true;
 }
 
-const char *bbruntime_run(gxRuntime *rt, void (*pc)(), const bool dbg) {
+const char* bbruntime_run(gxRuntime* rt, void (*pc)(), const bool dbg)
+{
     debug = dbg;
     gx_runtime = rt;
 
     if (!bbruntime_create()) return "Unable to start program";
-    const char *t = nullptr;
-    try {
+    const char* t = nullptr;
+    try
+    {
         if (!gx_runtime->idle())
             RTEX(0);
         pc();
         gx_runtime->debugInfo("Program has ended");
     }
-    catch (bbEx x) {
+    catch (bbEx x)
+    {
         t = x.err;
     }
     bbruntime_destroy();
     return t;
 }
 
-void bbruntime_panic(const char *err) {
+void bbruntime_panic(const char* err)
+{
     RTEX(err);
 }

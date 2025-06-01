@@ -1,4 +1,3 @@
-
 #ifndef EDITOR_H
 #define EDITOR_H
 
@@ -10,22 +9,26 @@
 
 class Editor;
 
-class EditorListener {
+class EditorListener
+{
 public:
-    virtual void cursorMoved(Editor *e) {}
+    virtual void cursorMoved(Editor* e)
+    {
+    }
 };
 
-class Editor : public CWnd, FuncListListener, TabberListener {
+class Editor : public CWnd, FuncListListener, TabberListener
+{
 public:
-    Editor(EditorListener *l);
+    Editor(EditorListener* l);
 
     ~Editor() override;
 
-    void setName(const std::string &f);
+    void setName(const std::string& f);
 
     void setModified(bool n);
 
-    bool setText(std::istream &in);
+    bool setText(std::istream& in);
 
     void setCursor(int pos);
 
@@ -61,27 +64,27 @@ public:
 
     bool getModified() const;
 
-    bool getText(std::ostream &out);
+    bool getText(std::ostream& out);
 
-    void getCursor(int *row, int *col) const;
+    void getCursor(int* row, int* col) const;
 
     bool canCutCopy();
 
     bool canPaste() const;
 
-    static void addKeyword(const std::string &s);
+    static void addKeyword(const std::string& s);
 
-DECLARE_DYNAMIC(Editor)
+    DECLARE_DYNAMIC(Editor)
 
-DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 
     afx_msg void OnSize(UINT type, int w, int h);
 
-    afx_msg void OnSetFocus(CWnd *wnd);
+    afx_msg void OnSetFocus(CWnd* wnd);
 
-    afx_msg void OnKillFocus(CWnd *wnd);
+    afx_msg void OnKillFocus(CWnd* wnd);
 
     afx_msg void OnPaint();
 
@@ -95,20 +98,20 @@ DECLARE_MESSAGE_MAP()
 
     afx_msg void en_update();
 
-    afx_msg void en_selchange(NMHDR *nmhdr, LRESULT *result);
+    afx_msg void en_selchange(NMHDR* nmhdr, LRESULT* result);
 
-    afx_msg void en_protected(NMHDR *nmhdr, LRESULT *result);
+    afx_msg void en_protected(NMHDR* nmhdr, LRESULT* result);
 
-    afx_msg void en_msgfilter(NMHDR *nmhdr, LRESULT *result);
+    afx_msg void en_msgfilter(NMHDR* nmhdr, LRESULT* result);
 
     afx_msg LRESULT onFind(WPARAM w, LPARAM l);
 
 private:
-    EditorListener *listener;
+    EditorListener* listener;
 
     std::string name;
     bool findOnly, found;
-    CFindReplaceDialog *finder;
+    CFindReplaceDialog* finder;
     char findBuff[256], replaceBuff[256];
     long selStart, selEnd;
     int findFlags, d_c;
@@ -119,7 +122,7 @@ private:
 
     //streaming
     std::string is_line;
-    std::istream *is_stream;
+    std::istream* is_stream;
     int is_curs, is_linenum;
 
     //sizing
@@ -131,11 +134,11 @@ private:
     Tabber tabber;
     FuncList funcList, typeList, labsList;
     CRichEditCtrl editCtrl;
-    ITextDocument *tomDoc;
+    ITextDocument* tomDoc;
 
     void funcSelected(int line) override;
 
-    void currentSet(Tabber *tabber, int index) override;
+    void currentSet(Tabber* tabber, int index) override;
 
     void resized();
 
@@ -151,7 +154,7 @@ private:
 
     void fixFmt(bool fmt);
 
-    void setFormat(int from, int to, int color, const std::string &s = "");
+    void setFormat(int from, int to, int color, const std::string& s = "");
 
     void formatLine(int line);
 
@@ -163,11 +166,11 @@ private:
 
     void formatStreamLine();
 
-    DWORD streamIn(LPBYTE buff, LONG cnt, LONG *done);
+    DWORD streamIn(LPBYTE buff, LONG cnt, LONG* done);
 
-    static DWORD CALLBACK streamIn(DWORD cookie, LPBYTE buff, LONG cnt, LONG *done);
+    static DWORD CALLBACK streamIn(DWORD cookie, LPBYTE buff, LONG cnt, LONG* done);
 
-    static DWORD CALLBACK streamOut(DWORD cookie, LPBYTE buff, LONG cnt, LONG *done);
+    static DWORD CALLBACK streamOut(DWORD cookie, LPBYTE buff, LONG cnt, LONG* done);
 };
 
 #endif

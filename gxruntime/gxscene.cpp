@@ -703,12 +703,14 @@ bool gxScene::begin(const std::vector<gxLight*>& lights)
     return true;
 }
 
-void gxScene::clear(const float rgb[3], const float alpha, const float z, const bool clear_argb, const bool clear_z) const
+void gxScene::clear(const float rgb[3], const float alpha, const float z, const bool clear_argb,
+                    const bool clear_z) const
 {
     if (!clear_argb && !clear_z) return;
     const int flags = (clear_argb ? D3DCLEAR_TARGET : 0) | (clear_z ? D3DCLEAR_ZBUFFER : 0);
-    const unsigned argb = (int(alpha * 255.0f) << 24) | (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(
-        rgb[2] * 255.0f);
+    const unsigned argb = (int(alpha * 255.0f) << 24) | (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) |
+        int(
+            rgb[2] * 255.0f);
     dir3dDev->Clear(0, nullptr, flags, argb, z, 0);
 }
 

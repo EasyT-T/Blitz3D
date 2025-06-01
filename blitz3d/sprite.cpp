@@ -1,4 +1,3 @@
-
 #include "sprite.h"
 #include "std.h"
 
@@ -6,26 +5,37 @@ extern float stats3d[];
 
 static float null[] = {0, 0, 0};
 
-static float tex_coords0[2][2] = {{0, 0},
-                                  {0, 0}};
-static float tex_coords1[2][2] = {{1, 0},
-                                  {1, 0}};
-static float tex_coords2[2][2] = {{1, 1},
-                                  {1, 1}};
-static float tex_coords3[2][2] = {{0, 1},
-                                  {0, 1}};
+static float tex_coords0[2][2] = {
+    {0, 0},
+    {0, 0}
+};
+static float tex_coords1[2][2] = {
+    {1, 0},
+    {1, 0}
+};
+static float tex_coords2[2][2] = {
+    {1, 1},
+    {1, 1}
+};
+static float tex_coords3[2][2] = {
+    {0, 1},
+    {0, 1}
+};
 
-extern gxRuntime *gx_runtime;
-extern gxGraphics *gx_graphics;
+extern gxRuntime* gx_runtime;
+extern gxGraphics* gx_graphics;
 
-static gxMesh *mesh;
+static gxMesh* mesh;
 static int mesh_size;
 static std::vector<int> mesh_indices;
 
-static int allocIndex() {
-    if (!mesh_indices.size()) {
+static int allocIndex()
+{
+    if (!mesh_indices.size())
+    {
         if (mesh_size) gx_graphics->freeMesh(mesh);
-        for (int k = 0; k < 256; ++k) {
+        for (int k = 0; k < 256; ++k)
+        {
             mesh_indices.push_back(mesh_size++);
         }
         mesh = gx_graphics->createMesh(mesh_size * 4, mesh_size * 2, 0);
@@ -35,7 +45,8 @@ static int allocIndex() {
     return n;
 }
 
-static void freeIndex(const int n) {
+static void freeIndex(const int n)
+{
     mesh_indices.push_back(n);
     if (mesh_indices.size() != mesh_size) return;
     gx_graphics->freeMesh(mesh);
@@ -44,44 +55,52 @@ static void freeIndex(const int n) {
 }
 
 Sprite::Sprite() :
-        view_mode(VIEW_MODE_FREE),
-        xhandle(0), yhandle(0),
-        rot(0), xscale(1), yscale(1), captured(false) {
+    view_mode(VIEW_MODE_FREE),
+    xhandle(0), yhandle(0),
+    rot(0), xscale(1), yscale(1), captured(false)
+{
     setRenderSpace(RENDER_SPACE_WORLD);
     mesh_index = allocIndex();
 }
 
-Sprite::Sprite(const Sprite &t) :
-        Model(t),
-        view_mode(t.view_mode),
-        xhandle(t.xhandle), yhandle(t.yhandle),
-        rot(t.rot), xscale(t.xscale), yscale(t.yscale), captured(false) {
+Sprite::Sprite(const Sprite& t) :
+    Model(t),
+    view_mode(t.view_mode),
+    xhandle(t.xhandle), yhandle(t.yhandle),
+    rot(t.rot), xscale(t.xscale), yscale(t.yscale), captured(false)
+{
     mesh_index = allocIndex();
 }
 
-Sprite::~Sprite() {
+Sprite::~Sprite()
+{
     freeIndex(mesh_index);
 }
 
-void Sprite::setRotation(const float angle) {
+void Sprite::setRotation(const float angle)
+{
     rot = angle;
 }
 
-void Sprite::setScale(const float x, const float y) {
+void Sprite::setScale(const float x, const float y)
+{
     xscale = x;
     yscale = y;
 }
 
-void Sprite::setHandle(const float x, const float y) {
+void Sprite::setHandle(const float x, const float y)
+{
     xhandle = x;
     yhandle = y;
 }
 
-void Sprite::setViewmode(const int mode) {
+void Sprite::setViewmode(const int mode)
+{
     view_mode = mode;
 }
 
-void Sprite::capture() {
+void Sprite::capture()
+{
     Model::capture();
     r_rot = rot;
     r_xscale = xscale;
@@ -89,13 +108,17 @@ void Sprite::capture() {
     captured = true;
 }
 
-bool Sprite::beginRender(const float tween) {
+bool Sprite::beginRender(const float tween)
+{
     Model::beginRender(tween);
-    if (tween == 1 || !captured) {
+    if (tween == 1 || !captured)
+    {
         r_rot = rot;
         r_xscale = xscale;
         r_yscale = yscale;
-    } else {
+    }
+    else
+    {
         r_rot = (rot - r_rot) * tween + r_rot;
         r_xscale = (xscale - r_xscale) * tween + r_xscale;
         r_yscale = (yscale - r_yscale) * tween + r_yscale;
@@ -103,16 +126,21 @@ bool Sprite::beginRender(const float tween) {
     return true;
 }
 
-bool Sprite::render(const RenderContext &rc) {
-
+bool Sprite::render(const RenderContext& rc)
+{
     Transform t = getRenderTform();
 
-    if (view_mode == VIEW_MODE_FREE) {
+    if (view_mode == VIEW_MODE_FREE)
+    {
         t.m = rc.getCameraTform().m;
-    } else if (view_mode == VIEW_MODE_UPRIGHT) {
+    }
+    else if (view_mode == VIEW_MODE_UPRIGHT)
+    {
         t.m.k = rc.getCameraTform().m.k;
         t.m.orthogonalize();
-    } else if (view_mode == VIEW_MODE_UPRIGHT2) {
+    }
+    else if (view_mode == VIEW_MODE_UPRIGHT2)
+    {
         t.m = yawMatrix(matrixYaw(rc.getCameraTform().m)) * t.m;
     }
 
@@ -132,10 +160,13 @@ bool Sprite::render(const RenderContext &rc) {
     mesh->setVertex(fv + 1, &verts[1].x, null, tex_coords1);
     mesh->setVertex(fv + 2, &verts[2].x, null, tex_coords2);
     mesh->setVertex(fv + 3, &verts[3].x, null, tex_coords3);
-    if (rc.isReflected()) {
+    if (rc.isReflected())
+    {
         mesh->setTriangle(ft + 0, 0, 2, 1);
         mesh->setTriangle(ft + 1, 0, 3, 2);
-    } else {
+    }
+    else
+    {
         mesh->setTriangle(ft + 0, 0, 1, 2);
         mesh->setTriangle(ft + 1, 0, 2, 3);
     }

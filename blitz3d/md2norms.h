@@ -1,4 +1,3 @@
-
 #ifndef MD2NORMS_H
 #define MD2NORMS_H
 

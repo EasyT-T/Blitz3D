@@ -1,4 +1,3 @@
-
 /*
 
   The Toker converts an inout stream into tokens for use by the parser.
@@ -10,7 +9,8 @@
 
 #include "std.h"
 
-enum {
+enum
+{
     DIM = 0x8000, GOTO, GOSUB, EXIT, RETURN,
     IF, THEN, ELSE, ENDIF, ELSEIF,
     WHILE, WEND,
@@ -34,9 +34,10 @@ enum {
     IDENT, INTCONST, BINCONST, HEXCONST, FLOATCONST, STRINGCONST
 };
 
-class Toker {
+class Toker
+{
 public:
-    Toker(std::istream &in);
+    Toker(std::istream& in);
 
     int pos();
 
@@ -50,16 +51,19 @@ public:
 
     static int chars_toked;
 
-    static std::map<std::string, int> &getKeywords();
+    static std::map<std::string, int>& getKeywords();
 
 private:
-    struct Toke {
+    struct Toke
+    {
         int n, from, to;
 
-        Toke(const int n, const int f, const int t) : n(n), from(f), to(t) {}
+        Toke(const int n, const int f, const int t) : n(n), from(f), to(t)
+        {
+        }
     };
 
-    std::istream &in;
+    std::istream& in;
     std::string line;
     std::vector<Toke> tokes;
 

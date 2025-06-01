@@ -58,7 +58,8 @@ public:
         memcpy(t->tex_coords, tex_coords, 16);
     }
 
-    void setVertex(const int n, const float coords[3], const float normal[3], const unsigned argb, const float tex_coords[2][2]) const
+    void setVertex(const int n, const float coords[3], const float normal[3], const unsigned argb,
+                   const float tex_coords[2][2]) const
     {
         dxVertex* t = locked_verts + n;
         memcpy(t->coords, coords, 12);

@@ -1,4 +1,3 @@
-
 #include "blitzide.h"
 #include "about.h"
 #include "libs.h"
@@ -9,8 +8,8 @@
 
 BlitzIDE blitzIDE;
 
-BOOL BlitzIDE::InitInstance() {
-
+BOOL BlitzIDE::InitInstance()
+{
 #ifdef _DEBUG
     AfxEnableMemoryTracking(true);
 #endif
@@ -34,8 +33,8 @@ BOOL BlitzIDE::InitInstance() {
     return TRUE;
 }
 
-int BlitzIDE::ExitInstance() {
-
+int BlitzIDE::ExitInstance()
+{
     prefs.close();
 
     return 0;

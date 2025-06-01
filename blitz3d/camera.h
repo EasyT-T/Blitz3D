@@ -1,4 +1,3 @@
-
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -6,15 +5,17 @@
 #include "mirror.h"
 #include "model.h"
 
-class Camera : public Object {
+class Camera : public Object
+{
 public:
-    enum {
+    enum
+    {
         PROJ_NONE = 0, PROJ_PERSP = 1, PROJ_ORTHO = 2
     };
 
     Camera();
 
-    Camera *getCamera() override { return this; }
+    Camera* getCamera() override { return this; }
 
     //called by user
     void setZoom(float z);
@@ -23,13 +24,13 @@ public:
 
     void setViewport(int x, int y, int w, int h);
 
-    void setClsColor(const Vector &v);
+    void setClsColor(const Vector& v);
 
     void setClsMode(bool cls_argb, bool cls_z);
 
     void setProjMode(int mode);
 
-    void setFogColor(const Vector &v);
+    void setFogColor(const Vector& v);
 
     void setFogRange(float nr, float fr);
 
@@ -47,9 +48,9 @@ public:
 
     float getFrustumHeight() const;
 
-    const Frustum &getFrustum() const;
+    const Frustum& getFrustum() const;
 
-    void getViewport(int *x, int *y, int *w, int *h) const;
+    void getViewport(int* x, int* y, int* w, int* h) const;
 
     int getProjMode() const { return proj_mode; }
 

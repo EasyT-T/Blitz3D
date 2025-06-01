@@ -189,7 +189,7 @@ void ddUtil::buildMipMaps(ddSurf* surf)
     caps.dwCaps = DDSCAPS_TEXTURE;
     caps.dwCaps2 = DDSCAPS2_MIPMAPSUBLEVEL;
 
-    IDirectDrawSurface7 *src = surf, *dest;
+    IDirectDrawSurface7* src = surf,* dest;
 
     while (src->GetAttachedSurface(&caps, &dest) >= 0)
     {

@@ -5,12 +5,14 @@
 #include "../gxruntime/gxruntime.h"
 
 extern bool debug;
-extern gxRuntime *gx_runtime;
+extern gxRuntime* gx_runtime;
 
-struct bbEx : std::exception {
-    const char *err;
+struct bbEx : std::exception
+{
+    const char* err;
 
-    explicit bbEx(const char *e) : err(e) {
+    explicit bbEx(const char* e) : err(e)
+    {
         if (e) gx_runtime->debugError(e);
     }
 };

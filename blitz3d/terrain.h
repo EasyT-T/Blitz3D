@@ -1,4 +1,3 @@
-
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
@@ -6,13 +5,14 @@
 
 struct TerrainRep;
 
-class Terrain : public Model {
+class Terrain : public Model
+{
 public:
     Terrain(int size_shift);
 
     ~Terrain() override;
 
-    Terrain *getTerrain() override { return this; }
+    Terrain* getTerrain() override { return this; }
 
     void setDetail(int n, bool morph) const;
 
@@ -25,13 +25,13 @@ public:
     float getHeight(int x, int z) const;
 
     //model interface
-    bool render(const RenderContext &rc) override;
+    bool render(const RenderContext& rc) override;
 
     //object interface
-    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &tf) override;
+    bool collide(const Line& line, float radius, Collision* curr_coll, const Transform& tf) override;
 
 private:
-    TerrainRep *rep;
+    TerrainRep* rep;
 };
 
 #endif

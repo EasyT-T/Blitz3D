@@ -111,7 +111,8 @@ static bool clip(const RECT& viewport, RECT* d, RECT* s)
 }
 
 gxCanvas::gxCanvas(gxGraphics* g, IDirectDrawSurface7* s, int f):
-    graphics(g), main_surf(s), surf(nullptr), z_surf(nullptr), flags(f), cube_mode(CUBEMODE_REFLECTION | CUBESPACE_WORLD),
+    graphics(g), main_surf(s), surf(nullptr), z_surf(nullptr), flags(f),
+    cube_mode(CUBEMODE_REFLECTION | CUBESPACE_WORLD),
     t_surf(nullptr), cm_mask(nullptr), locked_cnt(0), mod_cnt(0), remip_cnt(0)
 {
     if (flags & CANVAS_TEX_CUBE)
@@ -647,7 +648,8 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
     damage(dest);
 }
 
-void gxCanvas::blit(int x, int y, gxCanvas* src, const int src_x, const int src_y, const int src_w, const int src_h, const bool solid) const
+void gxCanvas::blit(int x, int y, gxCanvas* src, const int src_x, const int src_y, const int src_w, const int src_h,
+                    const bool solid) const
 {
     x += origin_x - src->handle_x;
     y += origin_y - src->handle_y;
@@ -790,7 +792,7 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const
     ir.top = r1.top > r2.top ? r1.top : r2.top;
     ir.bottom = r1.bottom < r2.bottom ? r1.bottom : r2.bottom;
 
-    unsigned *s1 = i1->cm_mask, *s2 = i2->cm_mask;
+    unsigned* s1 = i1->cm_mask,* s2 = i2->cm_mask;
     int i1_pitch = i1->cm_pitch, i2_pitch = i2->cm_pitch;
     s1 += (ir.top - r1.top) * i1_pitch;
     s2 += (ir.top - r2.top) * i2_pitch;
@@ -811,7 +813,7 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const
     for (int y = ir.top; y < ir.bottom; ++y)
     {
         unsigned p = 0;
-        unsigned *row1 = s1, *row2 = s2;
+        unsigned* row1 = s1,* row2 = s2;
         for (int x = 0; x < cnt; ++x)
         {
 #ifdef DEBUG_BITMASK
@@ -845,7 +847,8 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const
     return false;
 }
 
-bool gxCanvas::rect_collide(int x1, int y1, const int x2, const int y2, const int w2, const int h2, const bool solid) const
+bool gxCanvas::rect_collide(int x1, int y1, const int x2, const int y2, const int w2, const int h2,
+                            const bool solid) const
 {
     x1 -= handle_x;
     if (x1 + clip_rect.right <= x2 || x1 >= x2 + w2) return false;

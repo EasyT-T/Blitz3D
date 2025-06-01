@@ -1,4 +1,3 @@
-
 #ifndef Q3BSPREP_H
 #define Q3BSPREP_H
 
@@ -10,37 +9,38 @@ struct Q3BSPFace;
 struct Q3BSPLeaf;
 struct Q3BSPNode;
 
-class Q3BSPRep {
+class Q3BSPRep
+{
 public:
     //constructor
-    Q3BSPRep(const std::string &f, float gamma_adj);
+    Q3BSPRep(const std::string& f, float gamma_adj);
 
     ~Q3BSPRep();
 
-    void render(Model *model, const RenderContext &rc);
+    void render(Model* model, const RenderContext& rc);
 
-    bool collide(const Line &line, float radius, Collision *curr_coll, const Transform &t) const;
+    bool collide(const Line& line, float radius, Collision* curr_coll, const Transform& t) const;
 
-    void setAmbient(const Vector &t);
+    void setAmbient(const Vector& t);
 
     void setLighting(bool use_lmap);
 
     bool isValid() const { return root_node != nullptr; }
 
 private:
-    Q3BSPNode *root_node;
+    Q3BSPNode* root_node;
 
     Vector ambient;
 
-    std::vector<Q3BSPFace *> faces;
-    std::vector<Q3BSPSurf *> surfs, r_surfs;
+    std::vector<Q3BSPFace*> faces;
+    std::vector<Q3BSPSurf*> surfs, r_surfs;
     std::vector<Texture> textures, light_maps;
 
     int vis_sz;
-    char *vis_data;
+    char* vis_data;
     bool use_lmap;
 
-    MeshCollider *collider;
+    MeshCollider* collider;
 
     void createVis();
 
@@ -52,15 +52,15 @@ private:
 
     void createLightMaps();
 
-    Q3BSPLeaf *createLeaf(int n);
+    Q3BSPLeaf* createLeaf(int n);
 
-    Q3BSPNode *createNode(int n);
+    Q3BSPNode* createNode(int n);
 
-    void vis(Q3BSPNode *node);
+    void vis(Q3BSPNode* node);
 
-    void render(Q3BSPLeaf *l, int clip);
+    void render(Q3BSPLeaf* l, int clip);
 
-    void render(Q3BSPNode *n, int clip);
+    void render(Q3BSPNode* n, int clip);
 };
 
 #endif

@@ -1,21 +1,26 @@
 #include "bbsys.h"
 #include "std.h"
 
-gxInput *gx_input;
-gxDevice *gx_mouse;
-gxDevice *gx_keyboard;
-std::vector<gxDevice *> gx_joysticks;
+gxInput* gx_input;
+gxDevice* gx_mouse;
+gxDevice* gx_keyboard;
+std::vector<gxDevice*> gx_joysticks;
 
 static int mouse_x, mouse_y, mouse_z;
 static const float JLT = -1.0f / 3.0f;
 static const float JHT = 1.0f / 3.0f;
 
-bool input_create() {
-    if (gx_input = gx_runtime->openInput(0)) {
-        if (gx_keyboard = gx_input->getKeyboard()) {
-            if (gx_mouse = gx_input->getMouse()) {
+bool input_create()
+{
+    if (gx_input = gx_runtime->openInput(0))
+    {
+        if (gx_keyboard = gx_input->getKeyboard())
+        {
+            if (gx_mouse = gx_input->getMouse())
+            {
                 gx_joysticks.clear();
-                for (int k = 0; k < gx_input->numJoysticks(); ++k) {
+                for (int k = 0; k < gx_input->numJoysticks(); ++k)
+                {
                     gx_joysticks.push_back(gx_input->getJoystick(k));
                 }
                 mouse_x = mouse_y = mouse_z = 0;
@@ -28,54 +33,67 @@ bool input_create() {
     return false;
 }
 
-bool input_destroy() {
+bool input_destroy()
+{
     gx_joysticks.clear();
     gx_runtime->closeInput(gx_input);
     gx_input = nullptr;
     return true;
 }
 
-int bbKeyDown(const int n) {
+int bbKeyDown(const int n)
+{
     return gx_keyboard->keyDown(n);
 }
 
-int bbKeyHit(const int n) {
+int bbKeyHit(const int n)
+{
     return gx_keyboard->keyHit(n);
 }
 
-int bbGetKey() {
+int bbGetKey()
+{
     return gx_input->toAscii(gx_keyboard->getKey());
 }
 
-int bbWaitKey() {
-    for (;;) {
+int bbWaitKey()
+{
+    for (;;)
+    {
         if (!gx_runtime->idle())
             RTEX(0);
-        if (int key = gx_keyboard->getKey()) {
+        if (int key = gx_keyboard->getKey())
+        {
             if (key = gx_input->toAscii(key)) return key;
         }
         gx_runtime->delay(20);
     }
 }
 
-void bbFlushKeys() {
+void bbFlushKeys()
+{
     gx_keyboard->flush();
 }
 
-int bbMouseDown(const int n) {
+int bbMouseDown(const int n)
+{
     return gx_mouse->keyDown(n);
 }
 
-int bbMouseHit(const int n) {
+int bbMouseHit(const int n)
+{
     return gx_mouse->keyHit(n);
 }
 
-int bbGetMouse() {
+int bbGetMouse()
+{
     return gx_mouse->getKey();
 }
 
-int bbWaitMouse() {
-    for (;;) {
+int bbWaitMouse()
+{
+    for (;;)
+    {
         if (!gx_runtime->idle())
             RTEX(0);
         if (const int key = gx_mouse->getKey()) return key;
@@ -83,70 +101,85 @@ int bbWaitMouse() {
     }
 }
 
-int bbMouseWait() {
+int bbMouseWait()
+{
     return bbWaitMouse();
 }
 
-int bbMouseX() {
+int bbMouseX()
+{
     return gx_mouse->getAxisState(0);
 }
 
-int bbMouseY() {
+int bbMouseY()
+{
     return gx_mouse->getAxisState(1);
 }
 
-int bbMouseZ() {
+int bbMouseZ()
+{
     return gx_mouse->getAxisState(2) / 120;
 }
 
-int bbMouseXSpeed() {
+int bbMouseXSpeed()
+{
     const int dx = bbMouseX() - mouse_x;
     mouse_x += dx;
     return dx;
 }
 
-int bbMouseYSpeed() {
+int bbMouseYSpeed()
+{
     const int dy = bbMouseY() - mouse_y;
     mouse_y += dy;
     return dy;
 }
 
-int bbMouseZSpeed() {
+int bbMouseZSpeed()
+{
     const int dz = bbMouseZ() - mouse_z;
     mouse_z += dz;
     return dz;
 }
 
-void bbFlushMouse() {
+void bbFlushMouse()
+{
     gx_mouse->flush();
 }
 
-void bbMoveMouse(const int x, const int y) {
+void bbMoveMouse(const int x, const int y)
+{
     gx_input->moveMouse(mouse_x = x, mouse_y = y);
 }
 
-int bbJoyType(const int port) {
+int bbJoyType(const int port)
+{
     return gx_input->getJoystickType(port);
 }
 
-int bbJoyDown(const int n, const int port) {
+int bbJoyDown(const int n, const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->keyDown(n);
 }
 
-int bbJoyHit(const int n, const int port) {
+int bbJoyHit(const int n, const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->keyHit(n);
 }
 
-int bbGetJoy(const int port) {
+int bbGetJoy(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getKey();
 }
 
-int bbWaitJoy(const int port) {
+int bbWaitJoy(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
-    for (;;) {
+    for (;;)
+    {
         if (!gx_runtime->idle())
             RTEX(0);
         if (const int key = gx_joysticks[port]->getKey()) return key;
@@ -154,94 +187,112 @@ int bbWaitJoy(const int port) {
     }
 }
 
-float bbJoyX(const int port) {
+float bbJoyX(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(0);
 }
 
-float bbJoyY(const int port) {
+float bbJoyY(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(1);
 }
 
-float bbJoyZ(const int port) {
+float bbJoyZ(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(2);
 }
 
-float bbJoyU(const int port) {
+float bbJoyU(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(3);
 }
 
-float bbJoyV(const int port) {
+float bbJoyV(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(4);
 }
 
-float bbJoyPitch(const int port) {
+float bbJoyPitch(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(5) * 180;
 }
 
-float bbJoyYaw(const int port) {
+float bbJoyYaw(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(6) * 180;
 }
 
-float bbJoyRoll(const int port) {
+float bbJoyRoll(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(7) * 180;
 }
 
-int bbJoyHat(const int port) {
+int bbJoyHat(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     return gx_joysticks[port]->getAxisState(8);
 }
 
-int bbJoyXDir(const int port) {
+int bbJoyXDir(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     const float t = gx_joysticks[port]->getAxisState(0);
     return t < JLT ? -1 : (t > JHT ? 1 : 0);
 }
 
-int bbJoyYDir(const int port) {
+int bbJoyYDir(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     const float t = gx_joysticks[port]->getAxisState(1);
     return t < JLT ? -1 : (t > JHT ? 1 : 0);
 }
 
-int bbJoyZDir(const int port) {
+int bbJoyZDir(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     const float t = gx_joysticks[port]->getAxisState(2);
     return t < JLT ? -1 : (t > JHT ? 1 : 0);
 }
 
-int bbJoyUDir(const int port) {
+int bbJoyUDir(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     const float t = gx_joysticks[port]->getAxisState(3);
     return t < JLT ? -1 : (t > JHT ? 1 : 0);
 }
 
-int bbJoyVDir(const int port) {
+int bbJoyVDir(const int port)
+{
     if (port < 0 || port >= gx_joysticks.size()) return 0;
     const float t = gx_joysticks[port]->getAxisState(4);
     return t < JLT ? -1 : (t > JHT ? 1 : 0);
 }
 
-void bbFlushJoy() {
+void bbFlushJoy()
+{
     for (int k = 0; k < gx_joysticks.size(); ++k) gx_joysticks[k]->flush();
 }
 
-void bbEnableDirectInput(const int enable) {
+void bbEnableDirectInput(const int enable)
+{
     gx_runtime->enableDirectInput(!!enable);
 }
 
-int bbDirectInputEnabled() {
+int bbDirectInputEnabled()
+{
     return gx_runtime->directInputEnabled();
 }
 
-void input_link(void (*rtSym)(const char *sym, void *pc)) {
+void input_link(void (*rtSym)(const char* sym, void* pc))
+{
     rtSym("%KeyDown%key", bbKeyDown);
     rtSym("%KeyHit%key", bbKeyHit);
     rtSym("%GetKey", bbGetKey);

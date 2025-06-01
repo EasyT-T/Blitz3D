@@ -1,4 +1,3 @@
-
 #ifndef OBJECT_H
 #define OBJECT_H
 
@@ -10,38 +9,40 @@
 
 struct Sound;
 
-struct ObjCollision {
-    Object *with;
+struct ObjCollision
+{
+    Object* with;
     Vector coords;
     Collision collision;
 };
 
-class Object : public Entity {
+class Object : public Entity
+{
 public:
-    typedef std::vector<const ObjCollision *> Collisions;
+    typedef std::vector<const ObjCollision*> Collisions;
 
     Object();
 
-    Object(const Object &object);
+    Object(const Object& object);
 
     ~Object() override;
 
     //Entity interface
-    Object *getObject() override { return this; }
+    Object* getObject() override { return this; }
 
-    Entity *clone() override { return d_new Object(*this); }
+    Entity* clone() override { return d_new Object(*this); }
 
     //deep object copy!
-    Object *copy();
+    Object* copy();
 
     //called by user
     void reset();
 
     void setCollisionType(int type);
 
-    void setCollisionRadii(const Vector &radii);
+    void setCollisionRadii(const Vector& radii);
 
-    void setCollisionBox(const Box &box);
+    void setCollisionBox(const Box& box);
 
     void setOrder(const int n) { order = n; }
 
@@ -49,14 +50,14 @@ public:
 
     void setObscurer(const bool t) { obscurer = t; }
 
-    void setAnimation(const Animation &t) { anim = t; }
+    void setAnimation(const Animation& t) { anim = t; }
 
-    void setAnimator(Animator *t);
+    void setAnimator(Animator* t);
 
-    uint32_t emitSound(Sound *sound);
+    uint32_t emitSound(Sound* sound);
 
     //overridables!
-    virtual bool collide(const Line &line, float radius, ::Collision *curr_coll, const Transform &t) { return false; }
+    virtual bool collide(const Line& line, float radius, ::Collision* curr_coll, const Transform& t) { return false; }
 
     virtual void capture();
 
@@ -69,26 +70,26 @@ public:
     //for use by world
     void beginUpdate(float elapsed);
 
-    void addCollision(const ObjCollision *c);
+    void addCollision(const ObjCollision* c);
 
     void endUpdate();
 
     //accessors
     int getCollisionType() const;
 
-    const Vector &getCollisionRadii() const;
+    const Vector& getCollisionRadii() const;
 
-    const Box &getCollisionBox() const;
+    const Box& getCollisionBox() const;
 
     int getOrder() const { return order; }
 
-    const Vector &getVelocity() const;
+    const Vector& getVelocity() const;
 
-    const Collisions &getCollisions() const;
+    const Collisions& getCollisions() const;
 
-    const Transform &getRenderTform() const;
+    const Transform& getRenderTform() const;
 
-    const Transform &getPrevWorldTform() const;
+    const Transform& getPrevWorldTform() const;
 
     int getPickGeometry() const { return pick_geom; }
 
@@ -96,9 +97,9 @@ public:
 
     Animation getAnimation() const { return anim; }
 
-    Animator *getAnimator() const { return animator; }
+    Animator* getAnimator() const { return animator; }
 
-    Object *getLastCopy() const { return last_copy; }
+    Object* getLastCopy() const { return last_copy; }
 
 private:
     int coll_type;
@@ -114,7 +115,7 @@ private:
     std::vector<uint32_t> channels;
     Vector capt_pos, capt_scl;
     Quat capt_rot;
-    mutable Object *last_copy;
+    mutable Object* last_copy;
 
     Transform prev_tform;
     Transform captured_tform, tween_tform;
@@ -122,7 +123,7 @@ private:
     mutable bool render_tform_valid;
 
     Animation anim;
-    Animator *animator;
+    Animator* animator;
 
     void updateSounds();
 };

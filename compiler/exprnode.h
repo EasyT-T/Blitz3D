@@ -1,93 +1,108 @@
-
 #ifndef EXPRNODE_H
 #define EXPRNODE_H
 
 #include "node.h"
 #include "std.h"
 
-struct ConstNode;    //is constant int,float or string
+struct ConstNode; //is constant int,float or string
 
-struct ExprNode : public Node {
-    Type *sem_type;
+struct ExprNode : public Node
+{
+    Type* sem_type;
 
-    ExprNode() : sem_type(nullptr) {}
+    ExprNode() : sem_type(nullptr)
+    {
+    }
 
-    ExprNode(Type *t) : sem_type(t) {}
+    ExprNode(Type* t) : sem_type(t)
+    {
+    }
 
-    ExprNode *castTo(Type *ty, Environ *e);
+    ExprNode* castTo(Type* ty, Environ* e);
 
-    ExprNode *semant(Environ *e, Type *ty);
+    ExprNode* semant(Environ* e, Type* ty);
 
-    virtual ExprNode *semant(Environ *e) = 0;
+    virtual ExprNode* semant(Environ* e) = 0;
 
-    virtual TNode *translate(Codegen *g) = 0;
+    virtual TNode* translate(Codegen* g) = 0;
 
-    virtual ConstNode *constNode() { return nullptr; }
+    virtual ConstNode* constNode() { return nullptr; }
 };
 
-struct ExprSeqNode : public Node {
-    std::vector<ExprNode *> exprs;
+struct ExprSeqNode : public Node
+{
+    std::vector<ExprNode*> exprs;
 
     ~ExprSeqNode() override { for (; exprs.size(); exprs.pop_back()) delete exprs.back(); }
 
-    void push_back(ExprNode *e) { exprs.push_back(e); }
+    void push_back(ExprNode* e) { exprs.push_back(e); }
 
     int size() { return exprs.size(); }
 
-    void semant(Environ *e);
+    void semant(Environ* e);
 
-    TNode *translate(Codegen *g, bool userlib);
+    TNode* translate(Codegen* g, bool userlib);
 
-    void castTo(DeclSeq *ds, Environ *e, bool userlib);
+    void castTo(DeclSeq* ds, Environ* e, bool userlib);
 
-    void castTo(Type *t, Environ *e);
+    void castTo(Type* t, Environ* e);
 };
 
 #include "varnode.h"
 
-struct CastNode : public ExprNode {
-    ExprNode *expr;
-    Type *type;
+struct CastNode : public ExprNode
+{
+    ExprNode* expr;
+    Type* type;
 
-    CastNode(ExprNode *ex, Type *ty) : expr(ex), type(ty) {}
+    CastNode(ExprNode* ex, Type* ty) : expr(ex), type(ty)
+    {
+    }
 
     ~CastNode() override { delete expr; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct CallNode : public ExprNode {
+struct CallNode : public ExprNode
+{
     std::string ident, tag;
-    ExprSeqNode *exprs;
-    Decl *sem_decl;
+    ExprSeqNode* exprs;
+    Decl* sem_decl;
 
-    CallNode(const std::string &i, const std::string &t, ExprSeqNode *e) : ident(i), tag(t), exprs(e) {}
+    CallNode(const std::string& i, const std::string& t, ExprSeqNode* e) : ident(i), tag(t), exprs(e)
+    {
+    }
 
     ~CallNode() override { delete exprs; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct VarExprNode : public ExprNode {
-    VarNode *var;
+struct VarExprNode : public ExprNode
+{
+    VarNode* var;
 
-    VarExprNode(VarNode *v) : var(v) {}
+    VarExprNode(VarNode* v) : var(v)
+    {
+    }
 
     ~VarExprNode() override { delete var; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct ConstNode : public ExprNode {
-    ExprNode *semant(Environ *e) override { return this; }
+struct ConstNode : public ExprNode
+{
+    ExprNode* semant(Environ* e) override { return this; }
 
-    ConstNode *constNode() override { return this; }
+    ConstNode* constNode() override { return this; }
 
     virtual int intValue() = 0;
 
@@ -96,12 +111,13 @@ struct ConstNode : public ExprNode {
     virtual std::string stringValue() = 0;
 };
 
-struct IntConstNode : public ConstNode {
+struct IntConstNode : public ConstNode
+{
     int value;
 
     IntConstNode(int n);
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 
     int intValue() override;
 
@@ -110,12 +126,13 @@ struct IntConstNode : public ConstNode {
     std::string stringValue() override;
 };
 
-struct FloatConstNode : public ConstNode {
+struct FloatConstNode : public ConstNode
+{
     float value;
 
     FloatConstNode(float f);
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 
     int intValue() override;
 
@@ -124,12 +141,13 @@ struct FloatConstNode : public ConstNode {
     std::string stringValue() override;
 };
 
-struct StringConstNode : public ConstNode {
+struct StringConstNode : public ConstNode
+{
     std::string value;
 
-    StringConstNode(const std::string &s);
+    StringConstNode(const std::string& s);
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 
     int intValue() override;
 
@@ -138,27 +156,33 @@ struct StringConstNode : public ConstNode {
     std::string stringValue() override;
 };
 
-struct UniExprNode : public ExprNode {
+struct UniExprNode : public ExprNode
+{
     int op;
-    ExprNode *expr;
+    ExprNode* expr;
 
-    UniExprNode(const int op, ExprNode *expr) : op(op), expr(expr) {}
+    UniExprNode(const int op, ExprNode* expr) : op(op), expr(expr)
+    {
+    }
 
     ~UniExprNode() override { delete expr; }
 
-    ExprNode *constize();
+    ExprNode* constize();
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
 // and, or, eor, lsl, lsr, asr
-struct BinExprNode : public ExprNode {
+struct BinExprNode : public ExprNode
+{
     int op;
-    ExprNode *lhs, *rhs;
+    ExprNode* lhs,* rhs;
 
-    BinExprNode(const int op, ExprNode *lhs, ExprNode *rhs) : op(op), lhs(lhs), rhs(rhs) {}
+    BinExprNode(const int op, ExprNode* lhs, ExprNode* rhs) : op(op), lhs(lhs), rhs(rhs)
+    {
+    }
 
     ~BinExprNode() override
     {
@@ -166,17 +190,20 @@ struct BinExprNode : public ExprNode {
         delete rhs;
     }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
 // *,/,Mod,+,-
-struct ArithExprNode : public ExprNode {
+struct ArithExprNode : public ExprNode
+{
     int op;
-    ExprNode *lhs, *rhs;
+    ExprNode* lhs,* rhs;
 
-    ArithExprNode(const int op, ExprNode *lhs, ExprNode *rhs) : op(op), lhs(lhs), rhs(rhs) {}
+    ArithExprNode(const int op, ExprNode* lhs, ExprNode* rhs) : op(op), lhs(lhs), rhs(rhs)
+    {
+    }
 
     ~ArithExprNode() override
     {
@@ -184,18 +211,21 @@ struct ArithExprNode : public ExprNode {
         delete rhs;
     }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
 //<,=,>,<=,<>,>=
-struct RelExprNode : public ExprNode {
+struct RelExprNode : public ExprNode
+{
     int op;
-    ExprNode *lhs, *rhs;
-    Type *opType;
+    ExprNode* lhs,* rhs;
+    Type* opType;
 
-    RelExprNode(const int op, ExprNode *lhs, ExprNode *rhs) : op(op), lhs(lhs), rhs(rhs) {}
+    RelExprNode(const int op, ExprNode* lhs, ExprNode* rhs) : op(op), lhs(lhs), rhs(rhs)
+    {
+    }
 
     ~RelExprNode() override
     {
@@ -203,94 +233,116 @@ struct RelExprNode : public ExprNode {
         delete rhs;
     }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct NewNode : public ExprNode {
+struct NewNode : public ExprNode
+{
     std::string ident;
 
-    NewNode(const std::string &i) : ident(i) {}
+    NewNode(const std::string& i) : ident(i)
+    {
+    }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct FirstNode : public ExprNode {
+struct FirstNode : public ExprNode
+{
     std::string ident;
 
-    FirstNode(const std::string &i) : ident(i) {}
+    FirstNode(const std::string& i) : ident(i)
+    {
+    }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct LastNode : public ExprNode {
+struct LastNode : public ExprNode
+{
     std::string ident;
 
-    LastNode(const std::string &i) : ident(i) {}
+    LastNode(const std::string& i) : ident(i)
+    {
+    }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct AfterNode : public ExprNode {
-    ExprNode *expr;
+struct AfterNode : public ExprNode
+{
+    ExprNode* expr;
 
-    AfterNode(ExprNode *e) : expr(e) {}
+    AfterNode(ExprNode* e) : expr(e)
+    {
+    }
 
     ~AfterNode() override { delete expr; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct BeforeNode : public ExprNode {
-    ExprNode *expr;
+struct BeforeNode : public ExprNode
+{
+    ExprNode* expr;
 
-    BeforeNode(ExprNode *e) : expr(e) {}
+    BeforeNode(ExprNode* e) : expr(e)
+    {
+    }
 
     ~BeforeNode() override { delete expr; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct NullNode : public ExprNode {
-    ExprNode *semant(Environ *e) override;
+struct NullNode : public ExprNode
+{
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct ObjectCastNode : public ExprNode {
-    ExprNode *expr;
+struct ObjectCastNode : public ExprNode
+{
+    ExprNode* expr;
     std::string type_ident;
 
-    ObjectCastNode(ExprNode *e, const std::string &t) : expr(e), type_ident(t) {}
+    ObjectCastNode(ExprNode* e, const std::string& t) : expr(e), type_ident(t)
+    {
+    }
 
     ~ObjectCastNode() override { delete expr; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
-struct ObjectHandleNode : public ExprNode {
-    ExprNode *expr;
+struct ObjectHandleNode : public ExprNode
+{
+    ExprNode* expr;
 
-    ObjectHandleNode(ExprNode *e) : expr(e) {}
+    ObjectHandleNode(ExprNode* e) : expr(e)
+    {
+    }
 
     ~ObjectHandleNode() override { delete expr; }
 
-    ExprNode *semant(Environ *e) override;
+    ExprNode* semant(Environ* e) override;
 
-    TNode *translate(Codegen *g) override;
+    TNode* translate(Codegen* g) override;
 };
 
 #endif

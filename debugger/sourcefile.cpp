@@ -1,4 +1,3 @@
-
 #include "sourcefile.h"
 #include "../blitzide/prefs.h"
 
@@ -7,16 +6,19 @@
 IMPLEMENT_DYNAMIC(SourceFile, CRichEditCtrl)
 
 BEGIN_MESSAGE_MAP(SourceFile, CRichEditCtrl)
-                    ON_WM_CREATE()
+    ON_WM_CREATE()
 END_MESSAGE_MAP()
 
-SourceFile::SourceFile() {
+SourceFile::SourceFile()
+{
 }
 
-SourceFile::~SourceFile() {
+SourceFile::~SourceFile()
+{
 }
 
-int SourceFile::OnCreate(const LPCREATESTRUCT lpCreateStruct) {
+int SourceFile::OnCreate(const LPCREATESTRUCT lpCreateStruct)
+{
     CRichEditCtrl::OnCreate(lpCreateStruct);
 
     SetReadOnly(true);
@@ -35,12 +37,14 @@ int SourceFile::OnCreate(const LPCREATESTRUCT lpCreateStruct) {
     return 0;
 }
 
-void SourceFile::highLight(const int row, const int col) {
+void SourceFile::highLight(const int row, const int col)
+{
     const int pos = LineIndex(row) + col;
     HideSelection(true, false);
     bool quote = false;
     int end = pos, len = GetTextLength();
-    while (end < len) {
+    while (end < len)
+    {
         char temp[8];
         SetSel(end, end + 1);
         GetSelText(temp);
@@ -52,23 +56,28 @@ void SourceFile::highLight(const int row, const int col) {
     SetSel(pos, end);
 }
 
-void SourceFile::formatStreamLine() {
+void SourceFile::formatStreamLine()
+{
     is_line += "\\line ";
 }
 
-DWORD SourceFile::streamIn(const LPBYTE buff, const LONG cnt, LONG *done) {
+DWORD SourceFile::streamIn(const LPBYTE buff, const LONG cnt, LONG* done)
+{
     int n = 0;
-    while (n < cnt) {
-        if (is_curs == is_line.size()) {
+    while (n < cnt)
+    {
+        if (is_curs == is_line.size())
+        {
             if (is_stream->peek() == EOF) break;
             is_curs = 0;
             is_line = "";
             int c = 0;
-            for (;;) {
+            for (;;)
+            {
                 c = is_stream->get();
                 if (c == '\r' || c == '\n' || c == EOF) break;
                 if (c == '\\' || c == '{' || c == '}') is_line += '\\';
-                is_line += (char) c;
+                is_line += (char)c;
             }
             formatStreamLine();
             ++is_linenum;
@@ -85,20 +94,23 @@ DWORD SourceFile::streamIn(const LPBYTE buff, const LONG cnt, LONG *done) {
     return 0;
 }
 
-static std::string rtfbgr(const int bgr) {
+static std::string rtfbgr(const int bgr)
+{
     return "\\red" + itoa(bgr & 0xff) + "\\green" + itoa((bgr >> 8) & 0xff) + "\\blue" + itoa((bgr >> 16) & 0xff) + ';';
 }
 
-void SourceFile::setText(std::istream &in) {
+void SourceFile::setText(std::istream& in)
+{
     EDITSTREAM es;
-    es.dwCookie = (DWORD) this;
+    es.dwCookie = (DWORD)this;
     es.dwError = 0;
-    es.pfnCallback = [](const DWORD_PTR cookie, const LPBYTE buff, const LONG cnt, LONG *done) {
+    es.pfnCallback = [](const DWORD_PTR cookie, const LPBYTE buff, const LONG cnt, LONG* done)
+    {
         return reinterpret_cast<SourceFile*>(cookie)->streamIn(buff, cnt, done);
     };
     is_line = "{\\rtf1{\\colortbl;" + rtfbgr(prefs.rgb_string) + rtfbgr(prefs.rgb_ident) +
-              rtfbgr(prefs.rgb_keyword) + rtfbgr(prefs.rgb_comment) + rtfbgr(prefs.rgb_digit) +
-              rtfbgr(prefs.rgb_default) + "}";
+        rtfbgr(prefs.rgb_keyword) + rtfbgr(prefs.rgb_comment) + rtfbgr(prefs.rgb_digit) +
+        rtfbgr(prefs.rgb_default) + "}";
     const int tabTwips = 1440 * 8 / GetDeviceCaps(::GetDC(nullptr), LOGPIXELSX) * prefs.edit_tabs;
     for (int k = 0; k < MAX_TAB_STOPS; ++k) is_line += "\\tx" + itoa(k * tabTwips) + ' ';
     is_stream = &in;

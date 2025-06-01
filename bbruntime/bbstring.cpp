@@ -5,20 +5,23 @@
 #define CHKPOS(x) if( (x)<0 ) RTEX( "parameter must be positive" );
 #define CHKOFF(x) if( (x)<=0 ) RTEX( "parameter must be greater than 0" );
 
-BBStr *bbString(BBStr *s, int n) {
-    BBStr *t = d_new BBStr();
+BBStr* bbString(BBStr* s, int n)
+{
+    BBStr* t = d_new BBStr();
     while (n-- > 0) *t += *s;
     delete s;
     return t;
 }
 
-BBStr *bbLeft(BBStr *s, const int n) {
+BBStr* bbLeft(BBStr* s, const int n)
+{
     CHKPOS(n);
     *s = s->substr(0, n);
     return s;
 }
 
-BBStr *bbRight(BBStr *s, int n) {
+BBStr* bbRight(BBStr* s, int n)
+{
     CHKPOS(n);
     n = s->size() - n;
     if (n < 0) n = 0;
@@ -26,9 +29,11 @@ BBStr *bbRight(BBStr *s, int n) {
     return s;
 }
 
-BBStr *bbReplace(BBStr *s, BBStr *from, BBStr *to) {
+BBStr* bbReplace(BBStr* s, BBStr* from, BBStr* to)
+{
     int n = 0, from_sz = from->size(), to_sz = to->size();
-    while (n < s->size() && (n = s->find(*from, n)) != std::string::npos) {
+    while (n < s->size() && (n = s->find(*from, n)) != std::string::npos)
+    {
         s->replace(n, from_sz, *to);
         n += to_sz;
     }
@@ -37,7 +42,8 @@ BBStr *bbReplace(BBStr *s, BBStr *from, BBStr *to) {
     return s;
 }
 
-int bbInstr(BBStr *s, BBStr *t, int from) {
+int bbInstr(BBStr* s, BBStr* t, int from)
+{
     CHKOFF(from);
     --from;
     const int n = s->find(*t, from);
@@ -46,7 +52,8 @@ int bbInstr(BBStr *s, BBStr *t, int from) {
     return n == std::string::npos ? 0 : n + 1;
 }
 
-BBStr *bbMid(BBStr *s, int o, const int n) {
+BBStr* bbMid(BBStr* s, int o, const int n)
+{
     CHKOFF(o);
     --o;
     if (o > s->size()) o = s->size();
@@ -55,17 +62,20 @@ BBStr *bbMid(BBStr *s, int o, const int n) {
     return s;
 }
 
-BBStr *bbUpper(BBStr *s) {
+BBStr* bbUpper(BBStr* s)
+{
     for (int k = 0; k < s->size(); ++k) (*s)[k] = toupper((*s)[k]);
     return s;
 }
 
-BBStr *bbLower(BBStr *s) {
+BBStr* bbLower(BBStr* s)
+{
     for (int k = 0; k < s->size(); ++k) (*s)[k] = tolower((*s)[k]);
     return s;
 }
 
-BBStr *bbTrim(BBStr *s) {
+BBStr* bbTrim(BBStr* s)
+{
     int n = 0, p = s->size();
     while (n < s->size() && !isgraph((*s)[n])) ++n;
     while (p > n && !isgraph((*s)[p - 1])) --p;
@@ -73,33 +83,40 @@ BBStr *bbTrim(BBStr *s) {
     return s;
 }
 
-BBStr *bbLSet(BBStr *s, const int n) {
+BBStr* bbLSet(BBStr* s, const int n)
+{
     CHKPOS(n);
     if (s->size() > n) *s = s->substr(0, n);
-    else {
+    else
+    {
         while (s->size() < n) *s += ' ';
     }
     return s;
 }
 
-BBStr *bbRSet(BBStr *s, const int n) {
+BBStr* bbRSet(BBStr* s, const int n)
+{
     CHKPOS(n);
     if (s->size() > n) *s = s->substr(s->size() - n);
-    else {
+    else
+    {
         while (s->size() < n) *s = ' ' + *s;
     }
     return s;
 }
 
-BBStr *bbChr(const int n) {
-    BBStr *t = d_new BBStr();
-    *t += (char) n;
+BBStr* bbChr(const int n)
+{
+    BBStr* t = d_new BBStr();
+    *t += (char)n;
     return t;
 }
 
-BBStr *bbHex(int n) {
+BBStr* bbHex(int n)
+{
     char buff[12];
-    for (int k = 7; k >= 0; n >>= 4, --k) {
+    for (int k = 7; k >= 0; n >>= 4, --k)
+    {
         int t = (n & 15) + '0';
         buff[k] = t > '9' ? t += 'A' - '9' - 1 : t;
     }
@@ -107,28 +124,33 @@ BBStr *bbHex(int n) {
     return d_new BBStr(buff);
 }
 
-BBStr *bbBin(int n) {
+BBStr* bbBin(int n)
+{
     char buff[36];
-    for (int k = 31; k >= 0; n >>= 1, --k) {
+    for (int k = 31; k >= 0; n >>= 1, --k)
+    {
         buff[k] = n & 1 ? '1' : '0';
     }
     buff[32] = 0;
     return d_new BBStr(buff);
 }
 
-int bbAsc(BBStr *s) {
+int bbAsc(BBStr* s)
+{
     const int n = s->size() ? (*s)[0] & 255 : -1;
     delete s;
     return n;
 }
 
-int bbLen(BBStr *s) {
+int bbLen(BBStr* s)
+{
     const int n = s->size();
     delete s;
     return n;
 }
 
-BBStr *bbCurrentDate() {
+BBStr* bbCurrentDate()
+{
     time_t t;
     time(&t);
     char buff[256];
@@ -136,7 +158,8 @@ BBStr *bbCurrentDate() {
     return d_new BBStr(buff);
 }
 
-BBStr *bbCurrentTime() {
+BBStr* bbCurrentTime()
+{
     time_t t;
     time(&t);
     char buff[256];
@@ -144,15 +167,18 @@ BBStr *bbCurrentTime() {
     return d_new BBStr(buff);
 }
 
-bool string_create() {
+bool string_create()
+{
     return true;
 }
 
-bool string_destroy() {
+bool string_destroy()
+{
     return true;
 }
 
-void string_link(void (*rtSym)(const char *, void *)) {
+void string_link(void (*rtSym)(const char*, void*))
+{
     rtSym("$String$string%repeat", bbString);
     rtSym("$Left$string%count", bbLeft);
     rtSym("$Right$string%count", bbRight);

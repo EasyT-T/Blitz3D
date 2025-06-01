@@ -4,7 +4,8 @@ gxTimer::gxTimer(gxRuntime* rt, const int hertz):
     runtime(rt), ticks_get(0), ticks_put(0)
 {
     event = CreateEvent(nullptr, false, false, nullptr);
-    timerID = timeSetEvent(1000 / hertz, 0, reinterpret_cast<LPTIMECALLBACK>(timerCallback), reinterpret_cast<DWORD>(this),TIME_PERIODIC);
+    timerID = timeSetEvent(1000 / hertz, 0, reinterpret_cast<LPTIMECALLBACK>(timerCallback),
+                           reinterpret_cast<DWORD>(this),TIME_PERIODIC);
 }
 
 gxTimer::~gxTimer()

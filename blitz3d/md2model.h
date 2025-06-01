@@ -1,28 +1,28 @@
-
 #ifndef MD2MODEL_H
 #define MD2MODEL_H
 
 #include "md2rep.h"
 #include "model.h"
 
-class MD2Model : public Model {
+class MD2Model : public Model
+{
 public:
-    MD2Model(const std::string &filename);
+    MD2Model(const std::string& filename);
 
-    MD2Model(const MD2Model &t);
+    MD2Model(const MD2Model& t);
 
     ~MD2Model() override;
 
     //Entity interface
-    Entity *clone() override { return d_new MD2Model(*this); }
+    Entity* clone() override { return d_new MD2Model(*this); }
 
-    MD2Model *getMD2Model() override { return this; }
+    MD2Model* getMD2Model() override { return this; }
 
     //Object interface
     void animate(float elapsed) override;
 
     //Model interface
-    bool render(const RenderContext &rc) override;
+    bool render(const RenderContext& rc) override;
 
     //MD2 interface
     void startMD2Anim(int first, int last, int mode, float speed, float trans);
@@ -37,7 +37,7 @@ public:
 
 private:
     struct Rep;
-    Rep *rep;
+    Rep* rep;
 
     int anim_mode;
     float anim_time, anim_speed;
@@ -47,10 +47,10 @@ private:
     int render_a, render_b;
 
     float trans_time, trans_speed;
-    MD2Rep::Vert *trans_verts;
+    MD2Rep::Vert* trans_verts;
 
     //Unimplemented
-    MD2Model &operator=(const MD2Model &);
+    MD2Model& operator=(const MD2Model&);
 };
 
 #endif

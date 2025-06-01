@@ -1,4 +1,3 @@
-
 #ifndef STD_LINKER_H
 #define STD_LINKER_H
 

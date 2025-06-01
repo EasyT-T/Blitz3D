@@ -10,67 +10,75 @@ static const int RND_R = 3399;
 static const float dtor = 0.0174532925199432957692369076848861f;
 static const float rtod = 57.2957795130823208767981548141052f;
 
-float bbSin(const float n) { return (float) sin(n * dtor); }
+float bbSin(const float n) { return (float)sin(n * dtor); }
 
-float bbCos(const float n) { return (float) cos(n * dtor); }
+float bbCos(const float n) { return (float)cos(n * dtor); }
 
-float bbTan(const float n) { return (float) tan(n * dtor); }
+float bbTan(const float n) { return (float)tan(n * dtor); }
 
-float bbASin(const float n) { return (float) asin(n) * rtod; }
+float bbASin(const float n) { return (float)asin(n) * rtod; }
 
-float bbACos(const float n) { return (float) acos(n) * rtod; }
+float bbACos(const float n) { return (float)acos(n) * rtod; }
 
-float bbATan(const float n) { return (float) atan(n) * rtod; }
+float bbATan(const float n) { return (float)atan(n) * rtod; }
 
-float bbATan2(const float n, const float t) { return (float) atan2(n, t) * rtod; }
+float bbATan2(const float n, const float t) { return (float)atan2(n, t) * rtod; }
 
-float bbSqr(const float n) { return (float) sqrt(n); }
+float bbSqr(const float n) { return (float)sqrt(n); }
 
-float bbFloor(const float n) { return (float) floor(n); }
+float bbFloor(const float n) { return (float)floor(n); }
 
-float bbCeil(const float n) { return (float) ceil(n); }
+float bbCeil(const float n) { return (float)ceil(n); }
 
-float bbExp(const float n) { return (float) exp(n); }
+float bbExp(const float n) { return (float)exp(n); }
 
-float bbLog(const float n) { return (float) log(n); }
+float bbLog(const float n) { return (float)log(n); }
 
-float bbLog10(const float n) { return (float) log10(n); }
+float bbLog10(const float n) { return (float)log10(n); }
 
 //return rand float from 0...1
-static inline float rnd() {
+static inline float rnd()
+{
     rnd_state = RND_A * (rnd_state % RND_Q) - RND_R * (rnd_state / RND_Q);
     if (rnd_state < 0) rnd_state += RND_M;
     return (rnd_state & 65535) / 65536.0f + (.5f / 65536.0f);
 }
 
-float bbRnd(const float from, const float to) {
+float bbRnd(const float from, const float to)
+{
     return rnd() * (to - from) + from;
 }
 
-int bbRand(int from, int to) {
+int bbRand(int from, int to)
+{
     if (to < from) std::swap(from, to);
     return int(rnd() * (to - from + 1)) + from;
 }
 
-void bbSeedRnd(int seed) {
+void bbSeedRnd(int seed)
+{
     seed &= 0x7fffffff;
     rnd_state = seed ? seed : 1;
 }
 
-int bbRndSeed() {
+int bbRndSeed()
+{
     return rnd_state;
 }
 
-bool math_create() {
+bool math_create()
+{
     bbSeedRnd(0x1234);
     return true;
 }
 
-bool math_destroy() {
+bool math_destroy()
+{
     return true;
 }
 
-void math_link(void (*rtSym)(const char *sym, void *pc)) {
+void math_link(void (*rtSym)(const char* sym, void* pc))
+{
     rtSym("#Sin#degrees", bbSin);
     rtSym("#Cos#degrees", bbCos);
     rtSym("#Tan#degrees", bbTan);

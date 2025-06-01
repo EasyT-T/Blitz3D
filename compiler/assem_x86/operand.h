@@ -1,12 +1,11 @@
-
 #ifndef OPERAND_H
 #define OPERAND_H
 
 #include <iostream>
 #include <string>
 
-struct Operand {
-
+struct Operand
+{
     int mode;
     int reg, imm, offset;
     std::string immLabel, baseLabel;
@@ -14,24 +13,24 @@ struct Operand {
 
     Operand();
 
-    Operand(const std::string &s);
+    Operand(const std::string& s);
 
     void parse();
 
 private:
     std::string s;
 
-    bool parseSize(int *sz);
+    bool parseSize(int* sz);
 
     bool parseChar(char c);
 
-    bool parseReg(int *reg);
+    bool parseReg(int* reg);
 
-    bool parseFPReg(int *reg);
+    bool parseFPReg(int* reg);
 
-    bool parseLabel(std::string *t);
+    bool parseLabel(std::string* t);
 
-    bool parseConst(int *iconst);
+    bool parseConst(int* iconst);
 };
 
 #endif

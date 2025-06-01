@@ -1,4 +1,3 @@
-
 #include "libs.h"
 #include "prefs.h"
 #include "resource.h"
@@ -7,27 +6,34 @@
 #include <mmsystem.h>
 
 char _credits[] =
-        "\r\n"
-        "Programming and design: Mark Sibly\r\n\r\n"
-        "Documentation: Mark Sibly, Simon Harrison, Paul Gerfen, Shane Monroe and the Blitz Doc Team\r\n\r\n"
-        "Testing and support: James Boyd, Simon Armstrong and the Blitz Dev Team\r\n\r\n"
-        "FreeImage Image loader courtesy of Floris van den berg\r\n\r\n";
+    "\r\n"
+    "Programming and design: Mark Sibly\r\n\r\n"
+    "Documentation: Mark Sibly, Simon Harrison, Paul Gerfen, Shane Monroe and the Blitz Doc Team\r\n\r\n"
+    "Testing and support: James Boyd, Simon Armstrong and the Blitz Dev Team\r\n\r\n"
+    "FreeImage Image loader courtesy of Floris van den berg\r\n\r\n";
 
-class Dialog : public CDialog {
+class Dialog : public CDialog
+{
     bool _quit;
+
 public:
-    Dialog() : _quit(false) {}
+    Dialog() : _quit(false)
+    {
+    }
 
     afx_msg void OnOK() override
     {
         _quit = true;
     }
 
-    void wait() {
+    void wait()
+    {
         _quit = false;
         MSG msg;
-        while (!_quit && GetMessage(&msg, nullptr, 0, 0)) {
-            if (!AfxGetApp()->PreTranslateMessage(&msg)) {
+        while (!_quit && GetMessage(&msg, nullptr, 0, 0))
+        {
+            if (!AfxGetApp()->PreTranslateMessage(&msg))
+            {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
@@ -35,16 +41,20 @@ public:
         EndDialog(0);
     }
 
-    void wait(const int n) {
-        const int _expire = (int) timeGetTime() + n;
-        for (;;) {
-            int tm = _expire - (int) timeGetTime();
+    void wait(const int n)
+    {
+        const int _expire = (int)timeGetTime() + n;
+        for (;;)
+        {
+            int tm = _expire - (int)timeGetTime();
             if (tm < 0) tm = 0;
             MsgWaitForMultipleObjects(0, nullptr, false, tm, QS_ALLEVENTS);
 
             MSG msg;
-            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-                if (!AfxGetApp()->PreTranslateMessage(&msg)) {
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            {
+                if (!AfxGetApp()->PreTranslateMessage(&msg))
+                {
                     TranslateMessage(&msg);
                     DispatchMessage(&msg);
                 }
@@ -54,8 +64,8 @@ public:
     }
 };
 
-void aboutBlitz(bool delay) {
-
+void aboutBlitz(bool delay)
+{
     AfxGetMainWnd()->EnableWindow(0);
 
     Dialog about;

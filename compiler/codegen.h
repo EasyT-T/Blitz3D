@@ -1,10 +1,10 @@
-
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
 #include "std.h"
 
-enum {
+enum
+{
     IR_JUMP, IR_JUMPT, IR_JUMPF, IR_JUMPGE,
 
     IR_SEQ, IR_MOVE, IR_MEM, IR_LOCAL, IR_GLOBAL, IR_ARG, IR_CONST,
@@ -20,20 +20,27 @@ enum {
     IR_FSETEQ, IR_FSETNE, IR_FSETLT, IR_FSETGT, IR_FSETLE, IR_FSETGE,
 };
 
-struct TNode {
+struct TNode
+{
+    int op; //opcode
+    TNode* l,* r; //args
+    int iconst; //for CONST type_int
+    std::string sconst; //for CONST type_string
 
-    int op;                //opcode
-    TNode *l, *r;        //args
-    int iconst;            //for CONST type_int
-    std::string sconst;        //for CONST type_string
+    TNode(const int op, TNode* l = nullptr, TNode* r = nullptr) : op(op), l(l), r(r), iconst(0)
+    {
+    }
 
-    TNode(const int op, TNode *l = nullptr, TNode *r = nullptr) : op(op), l(l), r(r), iconst(0) {}
+    TNode(const int op, TNode* l, TNode* r, const int i) : op(op), l(l), r(r), iconst(i)
+    {
+    }
 
-    TNode(const int op, TNode *l, TNode *r, const int i) : op(op), l(l), r(r), iconst(i) {}
+    TNode(const int op, TNode* l, TNode* r, const std::string& s) : op(op), l(l), r(r), iconst(0), sconst(s)
+    {
+    }
 
-    TNode(const int op, TNode *l, TNode *r, const std::string &s) : op(op), l(l), r(r), iconst(0), sconst(s) {}
-
-    ~TNode() {
+    ~TNode()
+    {
         delete l;
         delete r;
     }
@@ -41,26 +48,29 @@ struct TNode {
     void log();
 };
 
-class Codegen {
+class Codegen
+{
 public:
-    std::ostream &out;
+    std::ostream& out;
     bool debug;
 
-    Codegen(std::ostream &out, const bool debug) : out(out), debug(debug) {}
+    Codegen(std::ostream& out, const bool debug) : out(out), debug(debug)
+    {
+    }
 
-    virtual void enter(const std::string &l, int frameSize) = 0;
+    virtual void enter(const std::string& l, int frameSize) = 0;
 
-    virtual void code(TNode *code) = 0;
+    virtual void code(TNode* code) = 0;
 
-    virtual void leave(TNode *cleanup, int pop_sz) = 0;
+    virtual void leave(TNode* cleanup, int pop_sz) = 0;
 
-    virtual void label(const std::string &l) = 0;
+    virtual void label(const std::string& l) = 0;
 
-    virtual void i_data(int i, const std::string &l = "") = 0;
+    virtual void i_data(int i, const std::string& l = "") = 0;
 
-    virtual void s_data(const std::string &s, const std::string &l = "") = 0;
+    virtual void s_data(const std::string& s, const std::string& l = "") = 0;
 
-    virtual void p_data(const std::string &p, const std::string &l = "") = 0;
+    virtual void p_data(const std::string& p, const std::string& l = "") = 0;
 
     virtual void align_data(int n) = 0;
 

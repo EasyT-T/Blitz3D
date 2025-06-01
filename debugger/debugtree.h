@@ -1,4 +1,3 @@
-
 #ifndef DEBUGTREE_H
 #define DEBUGTREE_H
 
@@ -6,67 +5,75 @@
 #include "../compiler/environ.h"
 #include "../linker/linker.h"
 
-class DebugTree : public CTreeCtrl {
+class DebugTree : public CTreeCtrl
+{
     int st_nest;
-protected:
 
-    HTREEITEM insertVar(void *var, Decl *d, const std::string &name, HTREEITEM it, HTREEITEM parent);
+protected:
+    HTREEITEM insertVar(void* var, Decl* d, const std::string& name, HTREEITEM it, HTREEITEM parent);
 
 public:
     DebugTree();
 
     ~DebugTree() override;
 
-DECLARE_DYNAMIC(DebugTree)
+    DECLARE_DYNAMIC(DebugTree)
 
-DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
-class ConstsTree : public DebugTree {
+class ConstsTree : public DebugTree
+{
 public:
     ConstsTree();
 
-    void reset(Environ *env);
+    void reset(Environ* env);
 };
 
-class GlobalsTree : public DebugTree {
-    Module *module;
-    Environ *envron;
+class GlobalsTree : public DebugTree
+{
+    Module* module;
+    Environ* envron;
+
 public:
     GlobalsTree();
 
-    void reset(Module *mod, Environ *env);
+    void reset(Module* mod, Environ* env);
 
     void refresh();
 };
 
-class LocalsTree : public DebugTree {
-    Module *module;
-    Environ *envron;
+class LocalsTree : public DebugTree
+{
+    Module* module;
+    Environ* envron;
 
-    struct Frame {
-        void *frame;
-        Environ *env;
-        const char *func;
+    struct Frame
+    {
+        void* frame;
+        Environ* env;
+        const char* func;
         HTREEITEM item;
 
-        Frame(void *f, Environ *e, const char *fn) : frame(f), env(e), func(fn), item(0) {}
+        Frame(void* f, Environ* e, const char* fn) : frame(f), env(e), func(fn), item(0)
+        {
+        }
     };
 
     std::vector<Frame> frames;
 
-    void refreshFrame(const Frame &f);
+    void refreshFrame(const Frame& f);
 
 public:
     LocalsTree();
 
-    void reset(Environ *env);
+    void reset(Environ* env);
 
     void refresh();
 
-    void pushFrame(void *frame, void *env, const char *func);
+    void pushFrame(void* frame, void* env, const char* func);
 
     void popFrame();
 

@@ -1,4 +1,3 @@
-
 #ifndef STD_COMPILER_H
 #define STD_COMPILER_H
 

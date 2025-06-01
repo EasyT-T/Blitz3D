@@ -2,7 +2,8 @@
 #include "gxcanvas.h"
 #include "gxgraphics.h"
 
-gxFont::gxFont(gxGraphics* g, gxCanvas* c, const int w, const int h, const int b, const int e, const int d, int* os, int* ws):
+gxFont::gxFont(gxGraphics* g, gxCanvas* c, const int w, const int h, const int b, const int e, const int d, int* os,
+               int* ws):
     graphics(g), canvas(c),
     width(w), height(h), begin_char(b), end_char(e), def_char(d),
     offs(os), widths(ws)

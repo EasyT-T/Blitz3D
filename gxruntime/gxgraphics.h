@@ -38,7 +38,7 @@ public:
     gxRuntime* runtime;
 
 private:
-    gxCanvas *front_canvas, *back_canvas;
+    gxCanvas* front_canvas,* back_canvas;
     gxFont* def_font;
     bool gfx_lost;
     gxMesh* dummy_mesh;

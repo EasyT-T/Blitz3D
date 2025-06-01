@@ -1,15 +1,16 @@
-
 #include "image_util.h"
 #include "std.h"
 
 #pragma pack( push, 1 )
-struct Head {
+struct Head
+{
     short machine, num_sects;
     int timedata, sym_table, num_syms;
     short opt_size, chars;
 };
 
-struct Opts {
+struct Opts
+{
     short magic;
     char major, minor;
     int code_size, data_size, udata_size;
@@ -28,93 +29,111 @@ struct Opts {
     int dir_entries;
 };
 
-struct DDir {
+struct DDir
+{
     int rva, size;
 };
 
-struct Sect {
+struct Sect
+{
     char name[8];
-    int virt_size, virt_addr;    //in mem
-    int data_size, data_addr;    //on disk
-    int relocs, lines;            //file ptrs
+    int virt_size, virt_addr; //in mem
+    int data_size, data_addr; //on disk
+    int relocs, lines; //file ptrs
     short num_relocs, num_lines;
     int chars;
 };
 
-struct Rdir {
+struct Rdir
+{
     int chars, timedata;
     short major, minor, num_names, num_ids;
 };
 
-struct Rent {
+struct Rent
+{
     int id, data;
 };
 
-struct Rdat {
+struct Rdat
+{
     int addr, size, cp, zero;
 };
 
 #pragma pack( pop )
 
-struct Rsrc {
+struct Rsrc
+{
     int id;
-    void *data;
+    void* data;
     int data_sz;
-    std::vector<Rsrc *> kids;
+    std::vector<Rsrc*> kids;
 
-    Rsrc(const int id, Rsrc *p) : id(id), data(nullptr), data_sz(0) {
+    Rsrc(const int id, Rsrc* p) : id(id), data(nullptr), data_sz(0)
+    {
         if (p) p->kids.push_back(this);
-//		cout<<"res id:"<<dec<<id<<hex<<endl;
+        //		cout<<"res id:"<<dec<<id<<hex<<endl;
     }
 
-    ~Rsrc() {
+    ~Rsrc()
+    {
         for (; kids.size(); kids.pop_back()) delete kids.back();
         delete data;
     }
 };
 
-struct Section {
+struct Section
+{
     Sect sect;
-    char *data;
+    char* data;
 
-    Section() : data(nullptr) {}
+    Section() : data(nullptr)
+    {
+    }
 
     ~Section() { delete[] data; }
 };
 
-static char *stub;
+static char* stub;
 static int stub_sz;
 
-static Head *head;
+static Head* head;
 static int head_sz;
 
-static Opts *opts;
+static Opts* opts;
 static int opts_sz;
 
-static DDir *ddir;
+static DDir* ddir;
 static int ddir_sz;
 
-static std::vector<Section *> sections;
+static std::vector<Section*> sections;
 
-static Rsrc *rsrc_root;
+static Rsrc* rsrc_root;
 
-static const char *img_file;
+static const char* img_file;
 
-static void openRsrcDir(Section *s, const int off, Rsrc *p) {
-    char *data = (char *) s->data;
+static void openRsrcDir(Section* s, const int off, Rsrc* p)
+{
+    char* data = (char*)s->data;
 
-    Rdir *dir = (Rdir *) (data + off);
-    Rent *ent = (Rent *) (dir + 1);
-    for (int k = 0; k < dir->num_ids; ++ent, ++k) {
-        Rsrc *r = d_new Rsrc(ent->id, p);
-        if (ent->data < 0) {    //a node - offset is another dir
+    Rdir* dir = (Rdir*)(data + off);
+    Rent* ent = (Rent*)(dir + 1);
+    for (int k = 0; k < dir->num_ids; ++ent, ++k)
+    {
+        Rsrc* r = d_new Rsrc(ent->id, p);
+        if (ent->data < 0)
+        {
+            //a node - offset is another dir
             openRsrcDir(s, ent->data & 0x7fffffff, r);
-        } else {                //a leaf
-            const Rdat *dat = (Rdat *) (data + ent->data);
-//			cout<<"dat addr:"<<dat->addr<<" size:"<<dat->size<<endl;
+        }
+        else
+        {
+            //a leaf
+            const Rdat* dat = (Rdat*)(data + ent->data);
+            //			cout<<"dat addr:"<<dat->addr<<" size:"<<dat->size<<endl;
             const int sz = dat->size;
-            const void *src = dat->addr - s->sect.virt_addr + data;
-            void *dest = d_new char[sz];
+            const void* src = dat->addr - s->sect.virt_addr + data;
+            void* dest = d_new char[sz];
             memcpy(dest, src, sz);
             r->data = dest;
             r->data_sz = sz;
@@ -122,30 +141,33 @@ static void openRsrcDir(Section *s, const int off, Rsrc *p) {
     }
 }
 
-static void openRsrcTree(Section *s) {
+static void openRsrcTree(Section* s)
+{
     rsrc_root = d_new Rsrc(0, nullptr);
     openRsrcDir(s, 0, rsrc_root);
 }
 
-static int rsrcSize(Rsrc *r) {
+static int rsrcSize(Rsrc* r)
+{
     if (r->data) return (sizeof(Rdat) + r->data_sz + 7) & ~7;
     int sz = sizeof(Rdir);
-    for (int k = 0; k < r->kids.size(); ++k) {
+    for (int k = 0; k < r->kids.size(); ++k)
+    {
         sz += sizeof(Rent) + rsrcSize(r->kids[k]);
     }
     return sz;
 }
 
-static void closeRsrcDir(Section *s, int off, Rsrc *p) {
-
+static void closeRsrcDir(Section* s, int off, Rsrc* p)
+{
     int k;
 
-    char *data = (char *) s->data;
+    char* data = (char*)s->data;
 
-    Rdir *dir = (Rdir *) (data + off);
+    Rdir* dir = (Rdir*)(data + off);
     memset(dir, 0, sizeof(Rdir));
     dir->num_ids = p->kids.size();
-    Rent *ent = (Rent *) (dir + 1);
+    Rent* ent = (Rent*)(dir + 1);
 
     //to end of dir...
     off += sizeof(Rdir) + sizeof(Rent) * p->kids.size();
@@ -153,8 +175,9 @@ static void closeRsrcDir(Section *s, int off, Rsrc *p) {
     int t = off;
 
     //write entries
-    for (k = 0; k < p->kids.size(); ++ent, ++k) {
-        Rsrc *r = p->kids[k];
+    for (k = 0; k < p->kids.size(); ++ent, ++k)
+    {
+        Rsrc* r = p->kids[k];
         ent->id = r->id;
         ent->data = t;
         if (!r->data) ent->data |= 0x80000000;
@@ -164,12 +187,16 @@ static void closeRsrcDir(Section *s, int off, Rsrc *p) {
     t = off;
 
     //write kids...
-    for (k = 0; k < p->kids.size(); ++k) {
-        Rsrc *r = p->kids[k];
-        if (!r->data) {
+    for (k = 0; k < p->kids.size(); ++k)
+    {
+        Rsrc* r = p->kids[k];
+        if (!r->data)
+        {
             closeRsrcDir(s, t, r);
-        } else {
-            Rdat *dat = (Rdat *) (data + t);
+        }
+        else
+        {
+            Rdat* dat = (Rdat*)(data + t);
             dat->addr = s->sect.virt_addr + t + sizeof(Rdat);
             dat->size = r->data_sz;
             dat->zero = dat->cp = 0;
@@ -179,16 +206,18 @@ static void closeRsrcDir(Section *s, int off, Rsrc *p) {
     }
 }
 
-static int fileAlign(const int n) {
+static int fileAlign(const int n)
+{
     return (n + (opts->file_align - 1)) & ~(opts->file_align - 1);
 }
 
-static int sectAlign(const int n) {
+static int sectAlign(const int n)
+{
     return (n + (opts->sect_align - 1)) & ~(opts->sect_align - 1);
 }
 
-static void closeRsrcTree(Section *s) {
-
+static void closeRsrcTree(Section* s)
+{
     const int virt_sz = rsrcSize(rsrc_root);
     const int data_sz = fileAlign(virt_sz);
 
@@ -196,15 +225,19 @@ static void closeRsrcTree(Section *s) {
     const int data_delta = fileAlign(virt_sz) - fileAlign(s->sect.virt_size);
 
 
-    for (int k = 0; k < sections.size(); ++k) {
-        Section *t = sections[k];
-        if (t->sect.virt_addr > s->sect.virt_addr) {
+    for (int k = 0; k < sections.size(); ++k)
+    {
+        Section* t = sections[k];
+        if (t->sect.virt_addr > s->sect.virt_addr)
+        {
             t->sect.virt_addr += virt_delta;
-            if (!strcmp(t->sect.name, ".reloc")) {
+            if (!strcmp(t->sect.name, ".reloc"))
+            {
                 ddir[5].rva = t->sect.virt_addr;
             }
         }
-        if (t->sect.data_addr > s->sect.data_addr) {
+        if (t->sect.data_addr > s->sect.data_addr)
+        {
             t->sect.data_addr += data_delta;
         }
     }
@@ -223,28 +256,31 @@ static void closeRsrcTree(Section *s) {
     rsrc_root = nullptr;
 }
 
-static Rsrc *findRsrc(const int id, Rsrc *p) {
-    for (int k = 0; k < p->kids.size(); ++k) {
+static Rsrc* findRsrc(const int id, Rsrc* p)
+{
+    for (int k = 0; k < p->kids.size(); ++k)
+    {
         if (p->kids[k]->id == id) return p->kids[k];
     }
     return nullptr;
 }
 
-static Rsrc *findRsrc(const int type, const int id, const int lang) {
-    Rsrc *r = findRsrc(type, rsrc_root);
+static Rsrc* findRsrc(const int type, const int id, const int lang)
+{
+    Rsrc* r = findRsrc(type, rsrc_root);
     if (!r) return nullptr;
     r = findRsrc(id, r);
     if (!r) return nullptr;
     return findRsrc(lang, r);
 }
 
-static void loadImage(std::istream &in) {
-
+static void loadImage(std::istream& in)
+{
     int k;
 
     //read stub
     in.seekg(0x3c);
-    in.read((char *) &stub_sz, 4);
+    in.read((char*)&stub_sz, 4);
     stub_sz += 4;
     stub = d_new char[stub_sz];
     in.seekg(0);
@@ -253,55 +289,59 @@ static void loadImage(std::istream &in) {
     //read head
     head = d_new Head;
     head_sz = sizeof(Head);
-    in.read((char *) head, head_sz);
+    in.read((char*)head, head_sz);
 
     //read opts
     opts = d_new Opts;
     opts_sz = sizeof(Opts);
-    in.read((char *) opts, opts_sz);
+    in.read((char*)opts, opts_sz);
 
     //read data dirs
     ddir_sz = opts->dir_entries * sizeof(DDir);
-    ddir = (DDir *) d_new char[ddir_sz];
-    in.read((char *) ddir, ddir_sz);
+    ddir = (DDir*)d_new char[ddir_sz];
+    in.read((char*)ddir, ddir_sz);
 
     //read sects...
-    for (k = 0; k < head->num_sects; ++k) {
-        Section *s = d_new Section;
-        in.read((char *) &s->sect, sizeof(Sect));
+    for (k = 0; k < head->num_sects; ++k)
+    {
+        Section* s = d_new Section;
+        in.read((char*)&s->sect, sizeof(Sect));
         sections.push_back(s);
     }
 
-    for (k = 0; k < head->num_sects; ++k) {
-        Section *s = sections[k];
+    for (k = 0; k < head->num_sects; ++k)
+    {
+        Section* s = sections[k];
         if (!s->sect.data_addr) continue;
         const int data_sz = s->sect.data_size;
-        s->data = d_new char[data_sz];//char[s->sect.virt_size];
+        s->data = d_new char[data_sz]; //char[s->sect.virt_size];
         //memset( s->data,0,s->sect.virt_size );
         in.seekg(s->sect.data_addr);
         in.read(s->data, data_sz);
     }
 }
 
-static void saveImage(std::ostream &out) {
-
+static void saveImage(std::ostream& out)
+{
     int k;
 
-    out.write((char *) stub, stub_sz);
-    out.write((char *) head, head_sz);
-    out.write((char *) opts, opts_sz);
-    out.write((char *) ddir, ddir_sz);
+    out.write((char*)stub, stub_sz);
+    out.write((char*)head, head_sz);
+    out.write((char*)opts, opts_sz);
+    out.write((char*)ddir, ddir_sz);
 
-    for (k = 0; k < head->num_sects; ++k) {
-        Section *s = sections[k];
-        out.write((char *) &s->sect, sizeof(Sect));
+    for (k = 0; k < head->num_sects; ++k)
+    {
+        Section* s = sections[k];
+        out.write((char*)&s->sect, sizeof(Sect));
     }
 
-    for (k = 0; k < head->num_sects; ++k) {
-        const Section *s = sections[k];
+    for (k = 0; k < head->num_sects; ++k)
+    {
+        const Section* s = sections[k];
         if (!s->sect.data_addr) continue;
         //assumes sect data is in order!!!!!
-        while (out.tellp() < s->sect.data_addr) out.put((char) 0xbb);
+        while (out.tellp() < s->sect.data_addr) out.put((char)0xbb);
         out.seekp(s->sect.data_addr);
         out.write(s->data, s->sect.data_size);
     }
@@ -309,7 +349,8 @@ static void saveImage(std::ostream &out) {
 
 /********************** PUBLIC STUFF ***********************/
 
-bool openImage(const char *img) {
+bool openImage(const char* img)
+{
     img_file = img;
 
     std::fstream in(img_file, std::ios_base::binary | std::ios_base::in);
@@ -318,25 +359,29 @@ bool openImage(const char *img) {
     return true;
 }
 
-bool makeExe(const int entry) {
+bool makeExe(const int entry)
+{
     if (!img_file) return false;
 
-    head->chars |= 0x0002;        //executable
-    head->chars &= ~0x2000;        //not Dll
+    head->chars |= 0x0002; //executable
+    head->chars &= ~0x2000; //not Dll
     opts->entry = entry;
-//	opts->image_base=0x400000;	//have to deal to fix-ups to do this properly.
+    //	opts->image_base=0x400000;	//have to deal to fix-ups to do this properly.
     return true;
 }
 
-bool replaceRsrc(const int type, const int id, const int lang, void *data, const int data_sz) {
+bool replaceRsrc(const int type, const int id, const int lang, void* data, const int data_sz)
+{
     if (!img_file) return false;
 
-    for (int k = 0; k < sections.size(); ++k) {
-        Section *s = sections[k];
+    for (int k = 0; k < sections.size(); ++k)
+    {
+        Section* s = sections[k];
         if (strcmp(s->sect.name, ".rsrc")) continue;
 
         openRsrcTree(s);
-        if (Rsrc *r = findRsrc(type, id, lang)) {
+        if (Rsrc* r = findRsrc(type, id, lang))
+        {
             delete[] r->data;
             r->data_sz = data_sz;
             r->data = d_new char[data_sz];
@@ -349,7 +394,8 @@ bool replaceRsrc(const int type, const int id, const int lang, void *data, const
     return false;
 }
 
-void closeImage() {
+void closeImage()
+{
     if (!img_file) return;
 
     std::fstream out(img_file, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
@@ -363,4 +409,3 @@ void closeImage() {
     delete[] stub;
     img_file = nullptr;
 }
-

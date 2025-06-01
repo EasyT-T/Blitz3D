@@ -1,26 +1,26 @@
-
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
 #include "geom.h"
 
-class Animation {
+class Animation
+{
 public:
     Animation();
 
-    Animation(const Animation &t);
+    Animation(const Animation& t);
 
-    Animation(const Animation &t, int first, int last);
+    Animation(const Animation& t, int first, int last);
 
     ~Animation();
 
-    Animation &operator=(const Animation &t);
+    Animation& operator=(const Animation& t);
 
-    void setScaleKey(int frame, const Vector &q);
+    void setScaleKey(int frame, const Vector& q);
 
-    void setPositionKey(int frame, const Vector &p);
+    void setPositionKey(int frame, const Vector& p);
 
-    void setRotationKey(int frame, const Quat &q);
+    void setRotationKey(int frame, const Quat& q);
 
     int numScaleKeys() const;
 
@@ -36,9 +36,9 @@ public:
 
 private:
     struct Rep;
-    Rep *rep;
+    Rep* rep;
 
-    Rep *write();
+    Rep* write();
 };
 
 #endif

@@ -1,17 +1,19 @@
-
 #include "stmtnode.h"
 
 static std::string fileLabel;
 static std::map<std::string, std::string> fileMap;
 
-void StmtNode::debug(const int pos, Codegen *g) {
-    if (g->debug) {
-        TNode *t = fileLabel.size() ? global(fileLabel) : iconst(0);
+void StmtNode::debug(const int pos, Codegen* g)
+{
+    if (g->debug)
+    {
+        TNode* t = fileLabel.size() ? global(fileLabel) : iconst(0);
         g->code(call("__bbDebugStmt", iconst(pos), t));
     }
 }
 
-void StmtSeqNode::reset(const std::string &file, const std::string &lab) {
+void StmtSeqNode::reset(const std::string& file, const std::string& lab)
+{
     fileLabel = "";
     fileMap.clear();
 
@@ -21,10 +23,13 @@ void StmtSeqNode::reset(const std::string &file, const std::string &lab) {
 ////////////////////////
 // Statement Sequence //
 ////////////////////////
-void StmtSeqNode::semant(Environ *e) {
-    for (int k = 0; k < stmts.size(); ++k) {
+void StmtSeqNode::semant(Environ* e)
+{
+    for (int k = 0; k < stmts.size(); ++k)
+    {
         try { stmts[k]->semant(e); }
-        catch (Ex &x) {
+        catch (Ex& x)
+        {
             if (x.pos < 0) x.pos = stmts[k]->pos;
             if (!x.file.size()) x.file = file;
             throw;
@@ -32,17 +37,20 @@ void StmtSeqNode::semant(Environ *e) {
     }
 }
 
-void StmtSeqNode::translate(Codegen *g) {
-
+void StmtSeqNode::translate(Codegen* g)
+{
     const std::string t = fileLabel;
     fileLabel = file.size() ? fileMap[file] : "";
-    for (int k = 0; k < stmts.size(); ++k) {
-        StmtNode *stmt = stmts[k];
+    for (int k = 0; k < stmts.size(); ++k)
+    {
+        StmtNode* stmt = stmts[k];
         stmt->debug(stmts[k]->pos, g);
-        try {
+        try
+        {
             stmt->translate(g);
         }
-        catch (Ex &x) {
+        catch (Ex& x)
+        {
             if (x.pos < 0) x.pos = stmts[k]->pos;
             if (!x.file.size()) x.file = file;
             throw;
@@ -54,16 +62,16 @@ void StmtSeqNode::translate(Codegen *g) {
 /////////////////
 // An Include! //
 /////////////////
-void IncludeNode::semant(Environ *e) {
-
+void IncludeNode::semant(Environ* e)
+{
     label = genLabel();
     fileMap[file] = label;
 
     stmts->semant(e);
 }
 
-void IncludeNode::translate(Codegen *g) {
-
+void IncludeNode::translate(Codegen* g)
+{
     if (g->debug) g->s_data(file, label);
 
     stmts->translate(g);
@@ -72,28 +80,35 @@ void IncludeNode::translate(Codegen *g) {
 ///////////////////
 // a declaration //
 ///////////////////
-void DeclStmtNode::semant(Environ *e) {
+void DeclStmtNode::semant(Environ* e)
+{
     decl->proto(e->decls, e);
     decl->semant(e);
 }
 
-void DeclStmtNode::translate(Codegen *g) {
+void DeclStmtNode::translate(Codegen* g)
+{
     decl->translate(g);
 }
 
 //////////////////////////////
 // Dim AND declare an Array //
 //////////////////////////////
-void DimNode::semant(Environ *e) {
-    Type *t = tagType(tag, e);
-    if (const Decl *d = e->findDecl(ident)) {
-        ArrayType *a = d->type->arrayType();
-        if (!a || a->dims != exprs->size() || (t && a->elementType != t)) {
+void DimNode::semant(Environ* e)
+{
+    Type* t = tagType(tag, e);
+    if (const Decl* d = e->findDecl(ident))
+    {
+        ArrayType* a = d->type->arrayType();
+        if (!a || a->dims != exprs->size() || (t && a->elementType != t))
+        {
             ex("Duplicate identifier");
         }
         sem_type = a;
         sem_decl = nullptr;
-    } else {
+    }
+    else
+    {
         if (e->level > 0) ex("Array not found in main program");
         if (!t) t = Type::int_type;
         sem_type = d_new ArrayType(t, exprs->size());
@@ -104,9 +119,11 @@ void DimNode::semant(Environ *e) {
     exprs->castTo(Type::int_type, e);
 }
 
-void DimNode::translate(Codegen *g) {
+void DimNode::translate(Codegen* g)
+{
     g->code(call("__bbUndimArray", global("_a" + ident)));
-    for (int k = 0; k < exprs->size(); ++k) {
+    for (int k = 0; k < exprs->size(); ++k)
+    {
         TNode* t = add(global("_a" + ident), iconst(k * 4 + 12));
         t = move(exprs->exprs[k]->translate(g), mem(t));
         g->code(t);
@@ -116,7 +133,7 @@ void DimNode::translate(Codegen *g) {
     if (!sem_decl) return;
 
     int et;
-    const Type *ty = sem_type->arrayType()->elementType;
+    const Type* ty = sem_type->arrayType()->elementType;
     if (ty == Type::int_type) et = 1;
     else if (ty == Type::float_type) et = 2;
     else if (ty == Type::string_type) et = 3;
@@ -132,7 +149,8 @@ void DimNode::translate(Codegen *g) {
 ////////////////
 // Assignment //
 ////////////////
-void AssNode::semant(Environ *e) {
+void AssNode::semant(Environ* e)
+{
     var->semant(e);
     if (var->sem_type->constType()) ex("Constants can not be assigned to");
     if (var->sem_type->vectorType()) ex("Blitz arrays can not be assigned to");
@@ -140,19 +158,22 @@ void AssNode::semant(Environ *e) {
     expr = expr->castTo(var->sem_type, e);
 }
 
-void AssNode::translate(Codegen *g) {
+void AssNode::translate(Codegen* g)
+{
     g->code(var->store(g, expr->translate(g)));
 }
 
 //////////////////////////
 // Expression statement //
 //////////////////////////
-void ExprStmtNode::semant(Environ *e) {
+void ExprStmtNode::semant(Environ* e)
+{
     expr = expr->semant(e);
 }
 
-void ExprStmtNode::translate(Codegen *g) {
-    TNode *t = expr->translate(g);
+void ExprStmtNode::translate(Codegen* g)
+{
+    TNode* t = expr->translate(g);
     if (expr->sem_type == Type::string_type) t = call("__bbStrRelease", t);
     g->code(t);
 }
@@ -160,34 +181,41 @@ void ExprStmtNode::translate(Codegen *g) {
 ////////////////
 // user label //
 ////////////////
-void LabelNode::semant(Environ *e) {
-    if (Label *l = e->findLabel(ident)) {
+void LabelNode::semant(Environ* e)
+{
+    if (Label* l = e->findLabel(ident))
+    {
         if (l->def >= 0) ex("duplicate label");
         l->def = pos;
         l->data_sz = data_sz;
-    } else e->insertLabel(ident, pos, -1, data_sz);
+    }
+    else e->insertLabel(ident, pos, -1, data_sz);
     ident = e->funcLabel + ident;
 }
 
-void LabelNode::translate(Codegen *g) {
+void LabelNode::translate(Codegen* g)
+{
     g->label("_l" + ident);
 }
 
 //////////////////
 // Restore data //
 //////////////////
-void RestoreNode::semant(Environ *e) {
+void RestoreNode::semant(Environ* e)
+{
     if (e->level > 0) e = e->globals;
 
     if (ident.size() == 0) sem_label = nullptr;
-    else {
+    else
+    {
         sem_label = e->findLabel(ident);
         if (!sem_label) sem_label = e->insertLabel(ident, -1, pos, -1);
     }
 }
 
-void RestoreNode::translate(Codegen *g) {
-    TNode *t = global("__DATA");
+void RestoreNode::translate(Codegen* g)
+{
+    TNode* t = global("__DATA");
     if (sem_label) t = add(t, iconst(sem_label->data_sz * 8));
     g->code(call("__bbRestore", t));
 }
@@ -195,49 +223,60 @@ void RestoreNode::translate(Codegen *g) {
 ////////////////////
 // Goto statement //
 ////////////////////
-void GotoNode::semant(Environ *e) {
-    if (!e->findLabel(ident)) {
+void GotoNode::semant(Environ* e)
+{
+    if (!e->findLabel(ident))
+    {
         e->insertLabel(ident, -1, pos, -1);
     }
     ident = e->funcLabel + ident;
 }
 
-void GotoNode::translate(Codegen *g) {
+void GotoNode::translate(Codegen* g)
+{
     g->code(jump("_l" + ident));
 }
 
 /////////////////////
 // Gosub statement //
 /////////////////////
-void GosubNode::semant(Environ *e) {
+void GosubNode::semant(Environ* e)
+{
     if (e->level > 0) ex("'Gosub' may not be used inside a function");
     if (!e->findLabel(ident)) e->insertLabel(ident, -1, pos, -1);
     ident = e->funcLabel + ident;
 }
 
-void GosubNode::translate(Codegen *g) {
+void GosubNode::translate(Codegen* g)
+{
     g->code(jsr("_l" + ident));
 }
 
 //////////////////
 // If statement //
 //////////////////
-void IfNode::semant(Environ *e) {
+void IfNode::semant(Environ* e)
+{
     expr = expr->semant(e);
     expr = expr->castTo(Type::int_type, e);
     stmts->semant(e);
     if (elseOpt) elseOpt->semant(e);
 }
 
-void IfNode::translate(Codegen *g) {
-    if (ConstNode *c = expr->constNode()) {
+void IfNode::translate(Codegen* g)
+{
+    if (ConstNode* c = expr->constNode())
+    {
         if (c->intValue()) stmts->translate(g);
         else if (elseOpt) elseOpt->translate(g);
-    } else {
+    }
+    else
+    {
         std::string _else = genLabel();
         g->code(jumpf(expr->translate(g), _else));
         stmts->translate(g);
-        if (elseOpt) {
+        if (elseOpt)
+        {
             const std::string _else2 = genLabel();
             g->code(jump(_else2));
             g->label(_else);
@@ -251,19 +290,22 @@ void IfNode::translate(Codegen *g) {
 ///////////
 // Break //
 ///////////
-void ExitNode::semant(Environ *e) {
+void ExitNode::semant(Environ* e)
+{
     sem_brk = e->breakLabel;
     if (!sem_brk.size()) ex("break must appear inside a loop");
 }
 
-void ExitNode::translate(Codegen *g) {
+void ExitNode::translate(Codegen* g)
+{
     g->code(d_new TNode(IR_JUMP, 0, 0, sem_brk));
 }
 
 /////////////////////
 // While statement //
 /////////////////////
-void WhileNode::semant(Environ *e) {
+void WhileNode::semant(Environ* e)
+{
     expr = expr->semant(e);
     expr = expr->castTo(Type::int_type, e);
     const std::string brk = e->setBreak(sem_brk = genLabel());
@@ -271,14 +313,18 @@ void WhileNode::semant(Environ *e) {
     e->setBreak(brk);
 }
 
-void WhileNode::translate(Codegen *g) {
+void WhileNode::translate(Codegen* g)
+{
     const std::string loop = genLabel();
-    if (ConstNode *c = expr->constNode()) {
+    if (ConstNode* c = expr->constNode())
+    {
         if (!c->intValue()) return;
         g->label(loop);
         stmts->translate(g);
         g->code(jump(loop));
-    } else {
+    }
+    else
+    {
         const std::string cond = genLabel();
         g->code(jump(cond));
         g->label(loop);
@@ -293,11 +339,13 @@ void WhileNode::translate(Codegen *g) {
 ///////////////////
 // For/Next loop //
 ///////////////////
-ForNode::ForNode(VarNode *var, ExprNode *from, ExprNode *to, ExprNode *step, StmtSeqNode *ss, const int np)
-        : var(var), fromExpr(from), toExpr(to), stepExpr(step), stmts(ss), nextPos(np) {
+ForNode::ForNode(VarNode* var, ExprNode* from, ExprNode* to, ExprNode* step, StmtSeqNode* ss, const int np)
+    : var(var), fromExpr(from), toExpr(to), stepExpr(step), stmts(ss), nextPos(np)
+{
 }
 
-ForNode::~ForNode() {
+ForNode::~ForNode()
+{
     delete stmts;
     delete stepExpr;
     delete toExpr;
@@ -305,11 +353,13 @@ ForNode::~ForNode() {
     delete var;
 }
 
-void ForNode::semant(Environ *e) {
+void ForNode::semant(Environ* e)
+{
     var->semant(e);
-    Type *ty = var->sem_type;
+    Type* ty = var->sem_type;
     if (ty->constType()) ex("Index variable can not be constant");
-    if (ty != Type::int_type && ty != Type::float_type) {
+    if (ty != Type::int_type && ty != Type::float_type)
+    {
         ex("index variable must be integer or real");
     }
     fromExpr = fromExpr->semant(e);
@@ -326,8 +376,9 @@ void ForNode::semant(Environ *e) {
     e->setBreak(brk);
 }
 
-void ForNode::translate(Codegen *g) {
-    Type *ty = var->sem_type;
+void ForNode::translate(Codegen* g)
+{
+    Type* ty = var->sem_type;
 
     //initial assignment
     g->code(var->store(g, fromExpr->translate(g)));
@@ -356,12 +407,13 @@ void ForNode::translate(Codegen *g) {
 ///////////////////////////////
 // For each object of a type //
 ///////////////////////////////
-void ForEachNode::semant(Environ *e) {
+void ForEachNode::semant(Environ* e)
+{
     var->semant(e);
-    Type *ty = var->sem_type;
+    Type* ty = var->sem_type;
 
     if (ty->structType() == nullptr) ex("Index variable is not a NewType");
-    const Type *t = e->findType(typeIdent);
+    const Type* t = e->findType(typeIdent);
     if (!t) ex("Type name not found");
     if (t != ty) ex("Type mismatch");
 
@@ -370,15 +422,19 @@ void ForEachNode::semant(Environ *e) {
     e->setBreak(brk);
 }
 
-void ForEachNode::translate(Codegen *g) {
+void ForEachNode::translate(Codegen* g)
+{
     const std::string _loop = genLabel();
 
     std::string objFirst, objNext;
 
-    if (var->isObjParam()) {
+    if (var->isObjParam())
+    {
         objFirst = "__bbObjEachFirst2";
         objNext = "__bbObjEachNext2";
-    } else {
+    }
+    else
+    {
         objFirst = "__bbObjEachFirst";
         objNext = "__bbObjEachNext";
     }
@@ -401,19 +457,30 @@ void ForEachNode::translate(Codegen *g) {
 ////////////////////////////
 // Return from a function //
 ////////////////////////////
-void ReturnNode::semant(Environ *e) {
-    if (e->level <= 0 && expr) {
+void ReturnNode::semant(Environ* e)
+{
+    if (e->level <= 0 && expr)
+    {
         ex("Main program cannot return a value");
     }
-    if (e->level > 0) {
-        if (!expr) {
-            if (e->returnType == Type::float_type) {
+    if (e->level > 0)
+    {
+        if (!expr)
+        {
+            if (e->returnType == Type::float_type)
+            {
                 expr = d_new FloatConstNode(0);
-            } else if (e->returnType == Type::string_type) {
+            }
+            else if (e->returnType == Type::string_type)
+            {
                 expr = d_new StringConstNode("");
-            } else if (e->returnType->structType()) {
+            }
+            else if (e->returnType->structType())
+            {
                 expr = d_new NullNode();
-            } else {
+            }
+            else
+            {
                 expr = d_new IntConstNode(0);
             }
         }
@@ -423,17 +490,22 @@ void ReturnNode::semant(Environ *e) {
     }
 }
 
-void ReturnNode::translate(Codegen *g) {
-    if (!expr) {
+void ReturnNode::translate(Codegen* g)
+{
+    if (!expr)
+    {
         g->code(d_new TNode(IR_RET, nullptr, nullptr));
         return;
     }
 
-    TNode *t = expr->translate(g);
+    TNode* t = expr->translate(g);
 
-    if (expr->sem_type == Type::float_type) {
+    if (expr->sem_type == Type::float_type)
+    {
         g->code(d_new TNode(IR_FRETURN, t, 0, returnLabel));
-    } else {
+    }
+    else
+    {
         g->code(d_new TNode(IR_RETURN, t, 0, returnLabel));
     }
 }
@@ -441,44 +513,50 @@ void ReturnNode::translate(Codegen *g) {
 //////////////////////
 // Delete statement //
 //////////////////////
-void DeleteNode::semant(Environ *e) {
+void DeleteNode::semant(Environ* e)
+{
     expr = expr->semant(e);
     if (expr->sem_type->structType() == nullptr) ex("Can't delete non-Newtype");
 }
 
-void DeleteNode::translate(Codegen *g) {
-    TNode *t = expr->translate(g);
+void DeleteNode::translate(Codegen* g)
+{
+    TNode* t = expr->translate(g);
     g->code(call("__bbObjDelete", t));
 }
 
 ///////////////////////////
 // Delete each of a type //
 ///////////////////////////
-void DeleteEachNode::semant(Environ *e) {
-    Type *t = e->findType(typeIdent);
+void DeleteEachNode::semant(Environ* e)
+{
+    Type* t = e->findType(typeIdent);
     if (!t || t->structType() == nullptr) ex("Specified name is not a NewType name");
 }
 
-void DeleteEachNode::translate(Codegen *g) {
+void DeleteEachNode::translate(Codegen* g)
+{
     g->code(call("__bbObjDeleteEach", global("_t" + typeIdent)));
 }
 
 ///////////////////////////
 // Insert object in list //
 ///////////////////////////
-void InsertNode::semant(Environ *e) {
+void InsertNode::semant(Environ* e)
+{
     expr1 = expr1->semant(e);
     expr2 = expr2->semant(e);
-    const StructType *t1 = expr1->sem_type->structType();
-    const StructType *t2 = expr2->sem_type->structType();
+    const StructType* t1 = expr1->sem_type->structType();
+    const StructType* t2 = expr2->sem_type->structType();
     if (!t1 || !t2) ex("Illegal expression type");
     if (t1 != t2) ex("Objects types are differnt");
 }
 
-void InsertNode::translate(Codegen *g) {
-    TNode *t1 = expr1->translate(g);
+void InsertNode::translate(Codegen* g)
+{
+    TNode* t1 = expr1->translate(g);
     if (g->debug) t1 = jumpf(t1, "__bbNullObjEx");
-    TNode *t2 = expr2->translate(g);
+    TNode* t2 = expr2->translate(g);
     if (g->debug) t2 = jumpf(t2, "__bbNullObjEx");
     const std::string s = before ? "__bbObjInsBefore" : "__bbObjInsAfter";
     g->code(call(s, t1, t2));
@@ -487,17 +565,19 @@ void InsertNode::translate(Codegen *g) {
 ////////////////////////
 // A select statement //
 ////////////////////////
-void SelectNode::semant(Environ *e) {
+void SelectNode::semant(Environ* e)
+{
     expr = expr->semant(e);
-    Type *ty = expr->sem_type;
+    Type* ty = expr->sem_type;
     if (ty->structType()) ex("Select cannot be used with objects");
 
     //we need a temp var
-    Decl *d = e->decls->insertDecl(genLabel(), expr->sem_type, DECL_LOCAL);
+    Decl* d = e->decls->insertDecl(genLabel(), expr->sem_type, DECL_LOCAL);
     sem_temp = d_new DeclVarNode(d);
 
-    for (int k = 0; k < cases.size(); ++k) {
-        const CaseNode *c = cases[k];
+    for (int k = 0; k < cases.size(); ++k)
+    {
+        const CaseNode* c = cases[k];
         c->exprs->semant(e);
         c->exprs->castTo(ty, e);
         c->stmts->semant(e);
@@ -505,28 +585,31 @@ void SelectNode::semant(Environ *e) {
     if (defStmts) defStmts->semant(e);
 }
 
-void SelectNode::translate(Codegen *g) {
-
-    Type *ty = expr->sem_type;
+void SelectNode::translate(Codegen* g)
+{
+    Type* ty = expr->sem_type;
 
     g->code(sem_temp->store(g, expr->translate(g)));
 
     std::vector<std::string> labs;
     const std::string brk = genLabel();
 
-    for (int k = 0; k < cases.size(); ++k) {
-        const CaseNode *c = cases[k];
+    for (int k = 0; k < cases.size(); ++k)
+    {
+        const CaseNode* c = cases[k];
         labs.push_back(genLabel());
-        for (int j = 0; j < c->exprs->size(); ++j) {
-            ExprNode *e = c->exprs->exprs[j];
-            TNode *t = compare('=', sem_temp->load(g), e->translate(g), ty);
+        for (int j = 0; j < c->exprs->size(); ++j)
+        {
+            ExprNode* e = c->exprs->exprs[j];
+            TNode* t = compare('=', sem_temp->load(g), e->translate(g), ty);
             g->code(jumpt(t, labs.back()));
         }
     }
     if (defStmts) defStmts->translate(g);
     g->code(jump(brk));
-    for (int k = 0; k < cases.size(); ++k) {
-        const CaseNode *c = cases[k];
+    for (int k = 0; k < cases.size(); ++k)
+    {
+        const CaseNode* c = cases[k];
         g->label(labs[k]);
         c->stmts->translate(g);
         g->code(jump(brk));
@@ -538,27 +621,32 @@ void SelectNode::translate(Codegen *g) {
 ////////////////////////////
 // Repeat...Until/Forever //
 ////////////////////////////
-void RepeatNode::semant(Environ *e) {
+void RepeatNode::semant(Environ* e)
+{
     sem_brk = genLabel();
     const std::string brk = e->setBreak(sem_brk);
     stmts->semant(e);
     e->setBreak(brk);
-    if (expr) {
+    if (expr)
+    {
         expr = expr->semant(e);
         expr = expr->castTo(Type::int_type, e);
     }
 }
 
-void RepeatNode::translate(Codegen *g) {
-
+void RepeatNode::translate(Codegen* g)
+{
     const std::string loop = genLabel();
     g->label(loop);
     stmts->translate(g);
     debug(untilPos, g);
 
-    if (ConstNode *c = expr ? expr->constNode() : nullptr) {
+    if (ConstNode* c = expr ? expr->constNode() : nullptr)
+    {
         if (!c->intValue()) g->code(jump(loop));
-    } else {
+    }
+    else
+    {
         if (expr) g->code(jumpf(expr->translate(g), loop));
         else g->code(jump(loop));
     }
@@ -568,17 +656,18 @@ void RepeatNode::translate(Codegen *g) {
 ///////////////
 // Read data //
 ///////////////
-void ReadNode::semant(Environ *e) {
+void ReadNode::semant(Environ* e)
+{
     var->semant(e);
     if (var->sem_type->constType()) ex("Constants can not be modified");
     if (var->sem_type->structType()) ex("Data can not be read into an object");
 }
 
-void ReadNode::translate(Codegen *g) {
-    TNode *t;
+void ReadNode::translate(Codegen* g)
+{
+    TNode* t;
     if (var->sem_type == Type::int_type) t = call("__bbReadInt");
     else if (var->sem_type == Type::float_type) t = fcall("__bbReadFloat");
     else t = call("__bbReadStr");
     g->code(var->store(g, t));
 }
-

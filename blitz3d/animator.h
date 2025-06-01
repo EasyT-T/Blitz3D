@@ -1,4 +1,3 @@
-
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
@@ -7,23 +6,25 @@
 
 class Object;
 
-class Animator {
+class Animator
+{
 public:
-    enum {
+    enum
+    {
         ANIM_MODE_LOOP = 1,
         ANIM_MODE_PINGPONG = 2,
         ANIM_MODE_ONESHOT = 3
     };
 
-    Animator(Animator *animator);
+    Animator(Animator* animator);
 
-    Animator(Object *tree, int frames);
+    Animator(Object* tree, int frames);
 
-    Animator(const std::vector<Object *> &objs, int frames);
+    Animator(const std::vector<Object*>& objs, int frames);
 
     void addSeq(int frames);
 
-    void addSeqs(Animator *t);
+    void addSeqs(Animator* t);
 
     void extractSeq(int first, int last, int seq);
 
@@ -43,14 +44,16 @@ public:
 
     int numSeqs() const { return _seqs.size(); }
 
-    const std::vector<Object *> &getObjects() const { return _objs; }
+    const std::vector<Object*>& getObjects() const { return _objs; }
 
 private:
-    struct Seq {
+    struct Seq
+    {
         int frames;
     };
 
-    struct Anim {
+    struct Anim
+    {
         //anim keys
         std::vector<Animation> keys;
         //for transitions...
@@ -59,20 +62,22 @@ private:
         Vector src_scl, dest_scl;
         Quat src_rot, dest_rot;
 
-        Anim() : pos(false), scl(false), rot(false) {}
+        Anim() : pos(false), scl(false), rot(false)
+        {
+        }
     };
 
     std::vector<Seq> _seqs;
 
     std::vector<Anim> _anims;
-    std::vector<Object *> _objs;
+    std::vector<Object*> _objs;
 
     int _seq, _mode, _seq_len;
     float _time, _speed, _trans_time, _trans_speed;
 
     void reset();
 
-    void addObjs(Object *obj);
+    void addObjs(Object* obj);
 
     void updateAnim() const;
 

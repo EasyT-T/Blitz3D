@@ -1,4 +1,3 @@
-
 #ifndef LIGHT_H
 #define LIGHT_H
 
@@ -8,28 +7,29 @@
 
 class World;
 
-class Light : public Object {
+class Light : public Object
+{
 public:
     Light(int type);
 
     ~Light() override;
 
-    Light *getLight() override { return this; }
+    Light* getLight() override { return this; }
 
     void setRange(float r) const;
 
-    void setColor(const Vector &v) const;
+    void setColor(const Vector& v) const;
 
     void setConeAngles(float inner, float outer) const;
 
     bool beginRender(float tween) override;
 
-    gxLight *getGxLight() const { return light; }
+    gxLight* getGxLight() const { return light; }
 
 private:
     friend class World;
 
-    gxLight *light;
+    gxLight* light;
 };
 
 #endif

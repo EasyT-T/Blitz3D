@@ -1,11 +1,11 @@
-
 #ifndef DEBUGGERAPP_H
 #define DEBUGGERAPP_H
 
 #include "mainframe.h"
 
-class DebuggerApp final : public CWinApp {
-    MainFrame * main_frame = nullptr;
+class DebuggerApp final : public CWinApp
+{
+    MainFrame* main_frame = nullptr;
 
 public:
     ~DebuggerApp() override;
@@ -14,7 +14,7 @@ public:
 
     int ExitInstance() override;
 
-    MainFrame *mainFrame();
+    MainFrame* mainFrame();
 };
 
 extern DebuggerApp debuggerApp;

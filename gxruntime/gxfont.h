@@ -24,9 +24,9 @@ public:
 
 private:
     gxGraphics* graphics;
-    gxCanvas *canvas, *t_canvas;
+    gxCanvas* canvas,* t_canvas;
     int width, height, begin_char, end_char, def_char;
-    int *offs, *widths;
+    int* offs,* widths;
 
     /***** GX INTERFACE *****/
 public:

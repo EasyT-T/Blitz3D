@@ -1,4 +1,3 @@
-
 #include "prefs.h"
 
 #include <fstream>
@@ -8,10 +7,11 @@
 
 Prefs prefs;
 
-void Prefs::open() {
-
-    const char *p = getenv("blitzpath");
-    if (!p) {
+void Prefs::open()
+{
+    const char* p = getenv("blitzpath");
+    if (!p)
+    {
         AfxMessageBox("blitzpath environment variable not found!", MB_TOPMOST | MB_SETFOREGROUND | MB_ICONINFORMATION);
         ExitProcess(0);
     }
@@ -27,7 +27,8 @@ void Prefs::open() {
     std::ifstream in((homeDir + "/cfg/blitzide.prefs").c_str());
     if (!in.good()) return;
 
-    while (!in.eof()) {
+    while (!in.eof())
+    {
         std::string t;
         in >> t;
         if (!t.size()) continue;
@@ -37,43 +38,59 @@ void Prefs::open() {
         else if (t == "prg_windowed") in >> prg_windowed;
         else if (t == "win_maximized") in >> win_maximized;
         else if (t == "win_notoolbar") in >> win_notoolbar;
-        else if (t == "win_rect") {
+        else if (t == "win_rect")
+        {
             in >> win_rect.left;
             in >> win_rect.top;
             in >> win_rect.right;
             in >> win_rect.bottom;
-        } else if (t.substr(0, 5) == "font_") {
+        }
+        else if (t.substr(0, 5) == "font_")
+        {
             std::string s;
-            if (in.peek() == '\"') {
+            if (in.peek() == '\"')
+            {
                 in.ignore();
-                while (in.peek() != '\"') s += (char) in.get();
+                while (in.peek() != '\"') s += (char)in.get();
                 in.ignore();
-            } else {
+            }
+            else
+            {
                 in >> s;
             }
             int h;
             in >> h;
             //AfxMessageBox((s+" "+std::to_string(h)).c_str());
             t = t.substr(5);
-            if (t == "editor") {
+            if (t == "editor")
+            {
                 font_editor = s;
                 font_editor_height = h;
-            } else if (t == "tabs") {
+            }
+            else if (t == "tabs")
+            {
                 font_tabs = s;
                 font_tabs_height = h;
-            } else if (t == "debug") {
+            }
+            else if (t == "debug")
+            {
                 font_debug = s;
                 font_debug_height = h;
-            } else if (t == "window") {
+            }
+            else if (t == "window")
+            {
                 font_window = s;
                 font_window_height = h;
             }
-        } else if (t.substr(0, 4) == "rgb_") {
+        }
+        else if (t.substr(0, 4) == "rgb_")
+        {
             t = t.substr(4);
             std::string s;
             in >> s;
             int rgb = 0;
-            for (int k = 0; k < s.size(); ++k) {
+            for (int k = 0; k < s.size(); ++k)
+            {
                 const int n = s[k];
                 rgb = (rgb << 4) | (n <= '9' ? n - '0' : (n & 31) + 9);
             }
@@ -86,21 +103,35 @@ void Prefs::open() {
             else if (t == "comment") rgb_comment = rgb;
             else if (t == "digit") rgb_digit = rgb;
             else if (t == "default") rgb_default = rgb;
-        } else if (t == "edit_tabs") {
+        }
+        else if (t == "edit_tabs")
+        {
             in >> edit_tabs;
-        } else if (t == "edit_blkcursor") {
+        }
+        else if (t == "edit_blkcursor")
+        {
             in >> edit_blkcursor;
-        } else if (t == "edit_backup") {
+        }
+        else if (t == "edit_backup")
+        {
             in >> edit_backup;
-        } else if (t == "img_toolbar") {
+        }
+        else if (t == "img_toolbar")
+        {
             getline(in, img_toolbar);
-        } else if (t == "cmd_line") {
+        }
+        else if (t == "cmd_line")
+        {
             getline(in, cmd_line);
-        } else if (t == "file_recent") {
+        }
+        else if (t == "file_recent")
+        {
             std::string l;
             getline(in, l);
             if (recentFiles.size() < 10) recentFiles.push_back(l);
-        } else {
+        }
+        else
+        {
             std::string s = "Unrecognized option '" + t + "' in blitzide.prefs";
             AfxMessageBox("Error in preferences file");
             setDefault();
@@ -139,14 +170,16 @@ void Prefs::close() const
     out << "edit_backup\t" << edit_backup << std::endl;
     out << "img_toolbar\t" << img_toolbar << std::endl;
     out << "cmd_line\t" << cmd_line << std::endl;
-    for (int k = 0; k < recentFiles.size(); ++k) {
+    for (int k = 0; k < recentFiles.size(); ++k)
+    {
         out << "file_recent\t" << recentFiles[k] << std::endl;
     }
 
     RemoveFontResource((homeDir + "/cfg/blitz.fon").c_str());
 }
 
-void Prefs::setDefault() {
+void Prefs::setDefault()
+{
     RECT r;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
     const auto dw = r.right - r.left;
@@ -190,8 +223,8 @@ void Prefs::setDefault() {
     createFonts();
 }
 
-void Prefs::createFonts() {
-
+void Prefs::createFonts()
+{
     editFont.Detach();
     tabsFont.Detach();
     debugFont.Detach();

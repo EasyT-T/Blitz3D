@@ -32,7 +32,7 @@ private:
     int flags, cube_mode;
     gxGraphics* graphics;
 
-    ddSurf *main_surf, *surf, *z_surf, *cube_surfs[6];
+    ddSurf* main_surf,* surf,* z_surf,* cube_surfs[6];
 
     mutable int mod_cnt;
     mutable ddSurf* t_surf;

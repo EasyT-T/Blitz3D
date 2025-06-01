@@ -1,45 +1,53 @@
-
 #include "meshloader.h"
 #include "meshmodel.h"
 #include "std.h"
 
-struct Surf {
+struct Surf
+{
     vector<Surface::Triangle> tris;
 };
 
-static map<Brush, Surf *> brush_map;
+static map<Brush, Surf*> brush_map;
 static vector<Surface::Vertex> verts;
 
-void MeshLoader::clear() {
-    for (map<Brush, Surf*>::const_iterator it = brush_map.begin(); it != brush_map.end(); ++it) {
+void MeshLoader::clear()
+{
+    for (map<Brush, Surf*>::const_iterator it = brush_map.begin(); it != brush_map.end(); ++it)
+    {
         delete it->second;
     }
     brush_map.clear();
     verts.clear();
 }
 
-int MeshLoader::numVertices() {
+int MeshLoader::numVertices()
+{
     return verts.size();
 }
 
-void MeshLoader::addVertex(const Surface::Vertex &v) {
+void MeshLoader::addVertex(const Surface::Vertex& v)
+{
     verts.push_back(v);
 }
 
-Surface::Vertex &refVertex(const int n) {
+Surface::Vertex& refVertex(const int n)
+{
     return verts[n];
 }
 
-void MeshLoader::addTriangle(const int verts[3], const Brush &b) {
+void MeshLoader::addTriangle(const int verts[3], const Brush& b)
+{
     addTriangle(verts[0], verts[1], verts[2], b);
 }
 
-void MeshLoader::addTriangle(const int v0, const int v1, const int v2, const Brush &b) {
+void MeshLoader::addTriangle(const int v0, const int v1, const int v2, const Brush& b)
+{
     //find surface
-    Surf *surf;
-    const map<Brush, Surf *>::const_iterator it = brush_map.find(b);
+    Surf* surf;
+    const map<Brush, Surf*>::const_iterator it = brush_map.find(b);
     if (it != brush_map.end()) surf = it->second;
-    else {
+    else
+    {
         surf = d_new Surf;
         brush_map.insert(make_pair(b, surf));
     }
@@ -51,20 +59,25 @@ void MeshLoader::addTriangle(const int v0, const int v1, const int v2, const Bru
     surf->tris.push_back(tri);
 }
 
-void MeshLoader::updateMesh(MeshModel *mesh) {
+void MeshLoader::updateMesh(MeshModel* mesh)
+{
     map<int, int> vert_map;
-    for (map<Brush, Surf*>::iterator it = brush_map.begin(); it != brush_map.end(); ++it) {
+    for (map<Brush, Surf*>::iterator it = brush_map.begin(); it != brush_map.end(); ++it)
+    {
         vert_map.clear();
         Brush b = it->first;
-        Surf *t = it->second;
-        Surface *surf = mesh->findSurface(b);
+        Surf* t = it->second;
+        Surface* surf = mesh->findSurface(b);
         if (!surf) surf = mesh->createSurface(b);
-        for (int k = 0; k < t->tris.size(); ++k) {
-            for (int j = 0; j < 3; ++j) {
+        for (int k = 0; k < t->tris.size(); ++k)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
                 int n = t->tris[k].verts[j], id;
                 map<int, int>::const_iterator it = vert_map.find(n);
                 if (it != vert_map.end()) id = it->second;
-                else {
+                else
+                {
                     id = surf->numVertices();
                     surf->addVertex(verts[n]);
                     vert_map.insert(make_pair(n, id));

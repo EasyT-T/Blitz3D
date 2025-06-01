@@ -1,13 +1,13 @@
-
 #ifndef BLITZIDE_H
 #define BLITZIDE_H
 
 #include "mainframe.h"
 #include "prefs.h"
 
-class BlitzIDE : public CWinApp {
+class BlitzIDE : public CWinApp
+{
 public:
-    MainFrame *mainFrame;
+    MainFrame* mainFrame;
 
     BOOL InitInstance() override;
 

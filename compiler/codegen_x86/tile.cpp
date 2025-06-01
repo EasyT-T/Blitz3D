@@ -1,4 +1,3 @@
-
 #include "tile.h"
 #include "codegen_x86.h"
 
@@ -6,7 +5,7 @@
 static const int NUM_REGS = 6;
 
 static const std::string regs[] =
-        {"???", "eax", "ecx", "edx", "edi", "esi", "ebx"};
+    {"???", "eax", "ecx", "edx", "edi", "esi", "ebx"};
 
 //array of 'used' flags
 static bool regUsed[NUM_REGS + 1];
@@ -20,24 +19,31 @@ static std::vector<std::string> codeFrags, dataFrags;
 //name of function
 static std::string funcLabel;
 
-static void resetRegs() {
+static void resetRegs()
+{
     for (int n = 1; n <= NUM_REGS; ++n) regUsed[n] = false;
 }
 
-static int allocReg(int n) {
-    if (!n || regUsed[n]) {
-        for (n = NUM_REGS; n >= 1 && regUsed[n]; --n) {}
+static int allocReg(int n)
+{
+    if (!n || regUsed[n])
+    {
+        for (n = NUM_REGS; n >= 1 && regUsed[n]; --n)
+        {
+        }
         if (!n) return 0;
     }
     regUsed[n] = true;
     return n;
 }
 
-static void freeReg(const int n) {
+static void freeReg(const int n)
+{
     regUsed[n] = false;
 }
 
-static void pushReg(const int n) {
+static void pushReg(const int n)
+{
     frameSize += 4;
     if (frameSize > maxFrameSize) maxFrameSize = frameSize;
     char buff[32];
@@ -50,7 +56,8 @@ static void pushReg(const int n) {
     codeFrags.push_back(s);
 }
 
-static void popReg(const int n) {
+static void popReg(const int n)
+{
     char buff[32];
     itoa(frameSize, buff, 10);
     std::string s = "\tmov\t";
@@ -62,36 +69,47 @@ static void popReg(const int n) {
     frameSize -= 4;
 }
 
-static void moveReg(const int d, const int s) {
+static void moveReg(const int d, const int s)
+{
     const std::string t = "\tmov\t" + regs[d] + ',' + regs[s] + '\n';
     codeFrags.push_back(t);
 }
 
-static void swapRegs(const int d, const int s) {
+static void swapRegs(const int d, const int s)
+{
     const std::string t = "\txchg\t" + regs[d] + ',' + regs[s] + '\n';
     codeFrags.push_back(t);
 }
 
-Tile::Tile(const std::string &a, Tile *l, Tile *r)
-        : assem(a), l(l), r(r), want_l(0), want_r(0), hits(0), need(0), argFrame(0) {
+Tile::Tile(const std::string& a, Tile* l, Tile* r)
+    : assem(a), l(l), r(r), want_l(0), want_r(0), hits(0), need(0), argFrame(0)
+{
 }
 
-Tile::Tile(const std::string &a, const std::string &a2, Tile *l, Tile *r)
-        : assem(a), assem2(a2), l(l), r(r), want_l(0), want_r(0), hits(0), need(0), argFrame(0) {
+Tile::Tile(const std::string& a, const std::string& a2, Tile* l, Tile* r)
+    : assem(a), assem2(a2), l(l), r(r), want_l(0), want_r(0), hits(0), need(0), argFrame(0)
+{
 }
 
-Tile::~Tile() {
+Tile::~Tile()
+{
     delete l;
     delete r;
 }
 
-void Tile::label() {
-    if (!l) {
+void Tile::label()
+{
+    if (!l)
+    {
         need = 1;
-    } else if (!r) {
+    }
+    else if (!r)
+    {
         l->label();
         need = l->need;
-    } else {
+    }
+    else
+    {
         l->label();
         r->label();
         if (l->need == r->need) need = l->need + 1;
@@ -100,14 +118,18 @@ void Tile::label() {
     }
 }
 
-int Tile::eval(int want) {
+int Tile::eval(int want)
+{
     //save any hit registers
     int spill = hits;
     if (want_l) spill |= 1 << want_l;
     if (want_r) spill |= 1 << want_r;
-    if (spill) {
-        for (int n = 1; n <= NUM_REGS; ++n) {
-            if (spill & (1 << n)) {
+    if (spill)
+    {
+        for (int n = 1; n <= NUM_REGS; ++n)
+        {
+            if (spill & (1 << n))
+            {
                 if (regUsed[n]) pushReg(n);
                 else spill &= ~(1 << n);
             }
@@ -115,36 +137,48 @@ int Tile::eval(int want) {
     }
 
     //if tile needs an argFrame...
-    if (argFrame) {
+    if (argFrame)
+    {
         codeFrags.push_back("-" + itoa(argFrame));
     }
 
     int got_l = 0, got_r = 0;
     if (want_l) want = want_l;
 
-    std::string *as = &assem;
+    std::string* as = &assem;
 
-    if (!l) {
+    if (!l)
+    {
         got_l = allocReg(want);
-    } else if (!r) {
+    }
+    else if (!r)
+    {
         got_l = l->eval(want);
-    } else {
-        if (l->need >= NUM_REGS && r->need >= NUM_REGS) {
+    }
+    else
+    {
+        if (l->need >= NUM_REGS && r->need >= NUM_REGS)
+        {
             got_r = r->eval(0);
             pushReg(got_r);
             freeReg(got_r);
             got_l = l->eval(want);
             got_r = allocReg(want_r);
             popReg(got_r);
-        } else if (r->need > l->need) {
+        }
+        else if (r->need > l->need)
+        {
             got_r = r->eval(want_r);
             got_l = l->eval(want);
-        } else {
+        }
+        else
+        {
             got_l = l->eval(want);
             got_r = r->eval(want_r);
             if (assem2.size()) as = &assem2;
         }
-        if (want_l == got_r || want_r == got_l) {
+        if (want_l == got_r || want_r == got_l)
+        {
             swapRegs(got_l, got_r);
             const int t = got_l;
             got_l = got_r;
@@ -168,52 +202,60 @@ int Tile::eval(int want) {
     if (want_l != got_l) moveReg(got_l, want_l);
 
     //cleanup argFrame
-    if (argFrame) {
+    if (argFrame)
+    {
         //***** Not needed for STDCALL *****
-//		codeFrags.push_back( "+"+itoa(argFrame) );
+        //		codeFrags.push_back( "+"+itoa(argFrame) );
     }
 
     //restore spilled regs
-    if (spill) {
-        for (int n = NUM_REGS; n >= 1; --n) {
+    if (spill)
+    {
+        for (int n = NUM_REGS; n >= 1; --n)
+        {
             if (spill & (1 << n)) popReg(n);
         }
     }
     return got_l;
 }
 
-void Codegen_x86::flush() {
+void Codegen_x86::flush()
+{
     for (std::vector<std::string>::iterator it = dataFrags.begin(); it != dataFrags.end(); ++it) out << *it;
     dataFrags.clear();
 }
 
-void Codegen_x86::enter(const std::string &l, const int frameSize) {
-
+void Codegen_x86::enter(const std::string& l, const int frameSize)
+{
     inCode = true;
     ::frameSize = maxFrameSize = frameSize;
     codeFrags.clear();
     funcLabel = l;
 }
 
-void Codegen_x86::code(TNode *stmt) {
+void Codegen_x86::code(TNode* stmt)
+{
     resetRegs();
-    Tile *q = munch(stmt);
+    Tile* q = munch(stmt);
     q->label();
     q->eval(0);
     delete q;
     delete stmt;
 }
 
-static std::string fixEsp(const int esp_off) {
+static std::string fixEsp(const int esp_off)
+{
     if (esp_off < 0) return "\tsub\tesp," + itoa(-esp_off) + "\n";
     return "\tadd\tesp," + itoa(esp_off) + "\n";
 }
 
-void Codegen_x86::leave(TNode *cleanup, const int pop_sz) {
-    if (cleanup) {
+void Codegen_x86::leave(TNode* cleanup, const int pop_sz)
+{
+    if (cleanup)
+    {
         resetRegs();
         allocReg(EAX);
-        Tile *q = munch(cleanup);
+        Tile* q = munch(cleanup);
         q->label();
         q->eval(0);
         delete q;
@@ -232,15 +274,22 @@ void Codegen_x86::leave(TNode *cleanup, const int pop_sz) {
 
     int esp_off = 0;
     std::vector<std::string>::iterator it = codeFrags.begin();
-    for (it = codeFrags.begin(); it != codeFrags.end(); ++it) {
-        const std::string &t = *it;
-        if (t[0] == '+') {
+    for (it = codeFrags.begin(); it != codeFrags.end(); ++it)
+    {
+        const std::string& t = *it;
+        if (t[0] == '+')
+        {
             esp_off += atoi(t.substr(1));
-        } else if (t[0] == '-') {
+        }
+        else if (t[0] == '-')
+        {
             //***** Still needed for STDCALL *****
             esp_off -= atoi(t.substr(1));
-        } else {
-            if (esp_off) {
+        }
+        else
+        {
+            if (esp_off)
+            {
                 out << fixEsp(esp_off);
                 esp_off = 0;
             }
@@ -260,31 +309,36 @@ void Codegen_x86::leave(TNode *cleanup, const int pop_sz) {
     inCode = false;
 }
 
-void Codegen_x86::label(const std::string &l) {
+void Codegen_x86::label(const std::string& l)
+{
     const std::string t = l + '\n';
     if (inCode) codeFrags.push_back(t);
     else dataFrags.push_back(t);
 }
 
-void Codegen_x86::align_data(const int n) {
+void Codegen_x86::align_data(const int n)
+{
     char buff[32];
     itoa(n, buff, 10);
     dataFrags.push_back(std::string("\t.align\t") + buff + '\n');
 }
 
-void Codegen_x86::i_data(const int i, const std::string &l) {
+void Codegen_x86::i_data(const int i, const std::string& l)
+{
     if (l.size()) dataFrags.push_back(l);
     char buff[32];
     itoa(i, buff, 10);
     dataFrags.push_back(std::string("\t.dd\t") + buff + '\n');
 }
 
-void Codegen_x86::s_data(const std::string &s, const std::string &l) {
+void Codegen_x86::s_data(const std::string& s, const std::string& l)
+{
     if (l.size()) dataFrags.push_back(l);
     dataFrags.push_back(std::string("\t.db\t\"") + s + "\",0\n");
 }
 
-void Codegen_x86::p_data(const std::string &p, const std::string &l) {
+void Codegen_x86::p_data(const std::string& p, const std::string& l)
+{
     if (l.size()) dataFrags.push_back(l);
     dataFrags.push_back(std::string("\t.dd\t") + p + '\n');
 }

@@ -1,4 +1,3 @@
-
 #ifndef SPRITE_H
 #define SPRITE_H
 
@@ -6,24 +5,26 @@
 #include "model.h"
 #include "../gxruntime/gxmesh.h"
 
-class Sprite : public Model {
+class Sprite : public Model
+{
 public:
-    enum {
-        VIEW_MODE_FREE = 1,        //visible from any angle
-        VIEW_MODE_FIXED = 2,        //visible only from front
-        VIEW_MODE_UPRIGHT = 3,    //upright tree-style
-        VIEW_MODE_UPRIGHT2 = 4    //better upright tree-style
+    enum
+    {
+        VIEW_MODE_FREE = 1, //visible from any angle
+        VIEW_MODE_FIXED = 2, //visible only from front
+        VIEW_MODE_UPRIGHT = 3, //upright tree-style
+        VIEW_MODE_UPRIGHT2 = 4 //better upright tree-style
     };
 
     Sprite();
 
-    Sprite(const Sprite &t);
+    Sprite(const Sprite& t);
 
     ~Sprite() override;
 
-    Sprite *getSprite() override { return this; }
+    Sprite* getSprite() override { return this; }
 
-    Entity *clone() override { return d_new Sprite(*this); }
+    Entity* clone() override { return d_new Sprite(*this); }
 
     void capture() override;
 
@@ -37,7 +38,7 @@ public:
 
     void setViewmode(int mode);
 
-    bool render(const RenderContext &rc) override;
+    bool render(const RenderContext& rc) override;
 
 private:
     float xhandle, yhandle;

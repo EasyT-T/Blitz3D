@@ -1,60 +1,67 @@
-
 #include "type.h"
 #include "std.h"
 
-static struct v_type : public Type {
-    bool canCastTo(Type *t) override
+static struct v_type : public Type
+{
+    bool canCastTo(Type* t) override
     {
         return t == Type::void_type;
     }
 } v;
 
-static struct i_type : public Type {
+static struct i_type : public Type
+{
     bool intType() override
     {
         return true;
     }
 
-    bool canCastTo(Type *t) override
+    bool canCastTo(Type* t) override
     {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } i;
 
-static struct f_type : public Type {
+static struct f_type : public Type
+{
     bool floatType() override
     {
         return true;
     }
 
-    bool canCastTo(Type *t) override
+    bool canCastTo(Type* t) override
     {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } f;
 
-static struct s_type : public Type {
+static struct s_type : public Type
+{
     bool stringType() override
     {
         return true;
     }
 
-    bool canCastTo(Type *t) override
+    bool canCastTo(Type* t) override
     {
         return t == Type::int_type || t == Type::float_type || t == Type::string_type;
     }
 } s;
 
-bool StructType::canCastTo(Type *t) {
+bool StructType::canCastTo(Type* t)
+{
     return t == this || t == Type::null_type || (this == Type::null_type && t->structType());
 }
 
-bool VectorType::canCastTo(Type *t) {
+bool VectorType::canCastTo(Type* t)
+{
     if (this == t) return true;
-    if (const VectorType *v = t->vectorType()) {
+    if (const VectorType* v = t->vectorType())
+    {
         if (elementType != v->elementType) return false;
         if (sizes.size() != v->sizes.size()) return false;
-        for (int k = 0; k < sizes.size(); ++k) {
+        for (int k = 0; k < sizes.size(); ++k)
+        {
             if (sizes[k] != v->sizes[k]) return false;
         }
         return true;
@@ -64,8 +71,8 @@ bool VectorType::canCastTo(Type *t) {
 
 static StructType n("Null");
 
-Type *Type::void_type = &v;
-Type *Type::int_type = &i;
-Type *Type::float_type = &f;
-Type *Type::string_type = &s;
-Type *Type::null_type = &n;
+Type* Type::void_type = &v;
+Type* Type::int_type = &i;
+Type* Type::float_type = &f;
+Type* Type::string_type = &s;
+Type* Type::null_type = &n;

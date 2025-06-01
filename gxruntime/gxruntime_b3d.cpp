@@ -96,7 +96,8 @@ gxRuntime* gxRuntime::openRuntime(const HINSTANCE hinst, const std::string& cmd_
     const char* app_t = " ";
     int ws = WS_CAPTION, ws_ex = 0;
 
-    const HWND hwnd = CreateWindowEx(ws_ex, "Blitz Runtime Class", app_t, ws, 0, 0, 0, 0, nullptr, nullptr, nullptr, nullptr);
+    const HWND hwnd = CreateWindowEx(ws_ex, "Blitz Runtime Class", app_t, ws, 0, 0, 0, 0, nullptr, nullptr, nullptr,
+                                     nullptr);
 
     UpdateWindow(hwnd);
 
@@ -407,7 +408,7 @@ LRESULT gxRuntime::windowProc(const HWND hwnd, const UINT msg, const WPARAM wpar
         if (app_close.size())
         {
             const int n = MessageBox(hwnd, app_close.c_str(), app_title.c_str(),
-                               MB_OKCANCEL | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
+                                     MB_OKCANCEL | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
             if (n != IDOK) return 0;
         }
         asyncEnd();
@@ -723,7 +724,8 @@ bool gxRuntime::execute(const std::string& cmd_line)
 
     SetForegroundWindow(GetDesktopWindow());
 
-    return (int)ShellExecute(GetDesktopWindow(), nullptr, cmd.c_str(), params.size() ? params.c_str() : 0, nullptr,SW_SHOW) > 32;
+    return (int)ShellExecute(GetDesktopWindow(), nullptr, cmd.c_str(), params.size() ? params.c_str() : 0, nullptr,
+                             SW_SHOW) > 32;
 }
 
 ///////////////

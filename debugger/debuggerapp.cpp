@@ -1,4 +1,3 @@
-
 #include "debuggerapp.h"
 #include "debugger.h"
 #include "resource.h"
@@ -7,11 +6,12 @@
 
 DebuggerApp debuggerApp;
 
-DebuggerApp::~DebuggerApp() {
+DebuggerApp::~DebuggerApp()
+{
 }
 
-BOOL DebuggerApp::InitInstance() {
-
+BOOL DebuggerApp::InitInstance()
+{
     AfxInitRichEdit();
 
     main_frame = new MainFrame();
@@ -35,18 +35,21 @@ BOOL DebuggerApp::InitInstance() {
     return TRUE;
 }
 
-int DebuggerApp::ExitInstance() {
+int DebuggerApp::ExitInstance()
+{
     main_frame->DestroyWindow();
     return 0;
 }
 
-MainFrame *DebuggerApp::mainFrame() {
+MainFrame* DebuggerApp::mainFrame()
+{
     return debuggerApp.main_frame;
 }
 
-Debugger *_cdecl
+Debugger*_cdecl
 
-debuggerGetDebugger(void *mod, void *env) {
+debuggerGetDebugger(void* mod, void* env)
+{
     debuggerApp.mainFrame()->setRuntime(mod, env);
     return debuggerApp.mainFrame();
 }

@@ -1,4 +1,3 @@
-
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
 
@@ -6,17 +5,18 @@
 #include "helphtml.h"
 #include "tabber.h"
 
-class MainFrame : public CFrameWnd, public HelpListener, EditorListener, TabberListener {
+class MainFrame : public CFrameWnd, public HelpListener, EditorListener, TabberListener
+{
 public:
     MainFrame();
 
-    Editor *getEditor();
+    Editor* getEditor();
 
-    void setTitle(const std::string &s);
+    void setTitle(const std::string& s);
 
-DECLARE_DYNAMIC(MainFrame)
+    DECLARE_DYNAMIC(MainFrame)
 
-DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
     afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 
@@ -26,7 +26,7 @@ DECLARE_MESSAGE_MAP()
 
     afx_msg void OnDestroy();
 
-    afx_msg BOOL OnEraseBkgnd(CDC *dc);
+    afx_msg BOOL OnEraseBkgnd(CDC* dc);
 
     afx_msg void OnSize(UINT type, int w, int h);
 
@@ -100,9 +100,9 @@ DECLARE_MESSAGE_MAP()
 
     afx_msg void noExecute();
 
-    afx_msg void updateCmdUI(CCmdUI *ui);
+    afx_msg void updateCmdUI(CCmdUI* ui);
 
-    afx_msg void updateCmdUIRange(CCmdUI *ui);
+    afx_msg void updateCmdUIRange(CCmdUI* ui);
 
     afx_msg void ctrlTab();
 
@@ -110,52 +110,52 @@ DECLARE_MESSAGE_MAP()
 
     afx_msg void escape();
 
-    afx_msg void OnActivate(UINT state, CWnd *other, BOOL min);
+    afx_msg void OnActivate(UINT state, CWnd* other, BOOL min);
 
 private:
     Tabber tabber;
     CToolBar toolBar;
     CStatusBar statusBar;
 
-    std::map<CWnd *, Editor *> editors;
-    std::map<CWnd *, HelpHtml *> helps;
+    std::map<CWnd*, Editor*> editors;
+    std::map<CWnd*, HelpHtml*> helps;
 
     std::string last_quick_help;
 
-    HelpHtml *getHelp();
+    HelpHtml* getHelp();
 
-    HelpHtml *getHelp(int index);
+    HelpHtml* getHelp(int index);
 
-    HelpHtml *findHelp();
+    HelpHtml* findHelp();
 
-    Editor *getEditor(int index);
+    Editor* getEditor(int index);
 
     bool exit_flag;
 
-    void insertRecent(const std::string &f) const;
+    void insertRecent(const std::string& f) const;
 
-    void newed(const std::string &t);
+    void newed(const std::string& t);
 
-    bool open(const std::string &f);
+    bool open(const std::string& f);
 
     bool close(int n);
 
     bool save(int n);
 
-    void compile(const std::string &cmd);
+    void compile(const std::string& cmd);
 
     void build(bool exec, bool publish);
 
     //editorlistener
-    void cursorMoved(Editor *editor) override;
+    void cursorMoved(Editor* editor) override;
 
     //tabberlistener
-    void currentSet(Tabber *tabber, int index) override;
+    void currentSet(Tabber* tabber, int index) override;
 
     //htmlhelplistener
-    void helpOpen(HelpHtml *help, const std::string &file) override;
+    void helpOpen(HelpHtml* help, const std::string& file) override;
 
-    void helpTitleChange(HelpHtml *help, const std::string &title) override;
+    void helpTitleChange(HelpHtml* help, const std::string& title) override;
 };
 
 #endif

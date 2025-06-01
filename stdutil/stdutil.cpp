@@ -1,4 +1,3 @@
-
 #include "stdutil.h"
 
 #include <math.h>
@@ -125,23 +124,28 @@ void _cdecl operator delete[]( void *q,const char *file,int line ){ op_delete( q
 
 #else
 
-void trackmem(bool enable) {
+void trackmem(bool enable)
+{
 }
 
-void checkmem(std::ostream &out) {
+void checkmem(std::ostream& out)
+{
 }
 
 #endif
 
-int atoi(const std::string &s) {
+int atoi(const std::string& s)
+{
     return atoi(s.c_str());
 }
 
-double atof(const std::string &s) {
+double atof(const std::string& s)
+{
     return atof(s.c_str());
 }
 
-std::string itoa(const int n) {
+std::string itoa(const int n)
+{
     char buff[32];
     itoa(n, buff, 10);
     return std::string(buff);
@@ -185,24 +189,24 @@ static int _isnan( double n ){		// definition: exponent 2047, nonzero fraction.
 /////////////
 //By FLOYD!//
 /////////////
-std::string ftoa(const float n) {
-
+std::string ftoa(const float n)
+{
     static const int digits = 6;
 
-    int eNeg = -4, ePos = 8;    // limits for e notation.
+    int eNeg = -4, ePos = 8; // limits for e notation.
 
     char buffer[50]; // from MSDN example, 25 would probably suffice
     int dec, sign;
 
-    if (_finite(n)) {
-
-//		if ( digits < 1 ) digits = 1;	// less than one digit is nonsense
-//		if ( digits > 8 ) digits = 8;	// practical maximum for float
+    if (_finite(n))
+    {
+        //		if ( digits < 1 ) digits = 1;	// less than one digit is nonsense
+        //		if ( digits > 8 ) digits = 8;	// practical maximum for float
 
         std::string t = _ecvt(n, digits, &dec, &sign);
 
-        if (dec <= eNeg + 1 || dec > ePos) {
-
+        if (dec <= eNeg + 1 || dec > ePos)
+        {
             _gcvt(n, digits, buffer);
             t = buffer;
             return t;
@@ -211,20 +215,19 @@ std::string ftoa(const float n) {
         // Here is the tricky case. We want a nicely formatted
         // number with no e-notation or multiple trailing zeroes.
 
-        if (dec <= 0) {
-
+        if (dec <= 0)
+        {
             t = "0." + std::string(-dec, '0') + t;
-            dec = 1;    // new location for decimal point
-
-        } else if (dec < digits) {
-
+            dec = 1; // new location for decimal point
+        }
+        else if (dec < digits)
+        {
             t = t.substr(0, dec) + "." + t.substr(dec);
-
-        } else {
-
+        }
+        else
+        {
             t = t + std::string(dec - digits, '0') + ".0";
             dec += dec - digits;
-
         }
 
         // Finally, trim off excess zeroes.
@@ -234,8 +237,7 @@ std::string ftoa(const float n) {
         t = std::string(t, 0, ++p);
 
         return sign ? "-" + t : t;
-
-    }    // end of finite case
+    } // end of finite case
 
     if (_isnan(n)) return "NaN";
     if (n > 0.0) return "Infinity";
@@ -281,34 +283,39 @@ string ftoa( float n ){
 }
 */
 
-std::string tolower(const std::string &s) {
+std::string tolower(const std::string& s)
+{
     std::string t = s;
     for (int k = 0; k < t.size(); ++k) t[k] = tolower(t[k]);
     return t;
 }
 
-std::string toupper(const std::string &s) {
+std::string toupper(const std::string& s)
+{
     std::string t = s;
     for (int k = 0; k < t.size(); ++k) t[k] = toupper(t[k]);
     return t;
 }
 
-std::string fullfilename(const std::string &t) {
-    char buff[MAX_PATH + 1], *p;
+std::string fullfilename(const std::string& t)
+{
+    char buff[MAX_PATH + 1],* p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
     return std::string(buff);
 }
 
-std::string filenamepath(const std::string &t) {
-    char buff[MAX_PATH + 1], *p;
+std::string filenamepath(const std::string& t)
+{
+    char buff[MAX_PATH + 1],* p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
     if (!p) return "";
     *p = 0;
     return std::string(buff);
 }
 
-std::string filenamefile(const std::string &t) {
-    char buff[MAX_PATH + 1], *p;
+std::string filenamefile(const std::string& t)
+{
+    char buff[MAX_PATH + 1],* p;
     GetFullPathName(t.c_str(), MAX_PATH, buff, &p);
     if (!p) return "";
     return std::string(p);
@@ -316,13 +323,15 @@ std::string filenamefile(const std::string &t) {
 
 const int MIN_SIZE = 256;
 
-qstreambuf::qstreambuf() {
+qstreambuf::qstreambuf()
+{
     buf = d_new char[MIN_SIZE];
     setg(buf, buf, buf);
     setp(buf, buf, buf + MIN_SIZE);
 }
 
-qstreambuf::~qstreambuf() {
+qstreambuf::~qstreambuf()
+{
     delete buf;
 }
 
@@ -331,13 +340,15 @@ int qstreambuf::size() const
     return pptr() - gptr();
 }
 
-char *qstreambuf::data() const
+char* qstreambuf::data() const
 {
     return gptr();
 }
 
-qstreambuf::int_type qstreambuf::underflow() {
-    if (gptr() == egptr()) {
+qstreambuf::int_type qstreambuf::underflow()
+{
+    if (gptr() == egptr())
+    {
         if (gptr() == pptr()) return traits_type::eof();
         setg(gptr(), gptr(), pptr());
     }
@@ -345,14 +356,16 @@ qstreambuf::int_type qstreambuf::underflow() {
     return traits_type::to_int_type(*gptr());
 }
 
-qstreambuf::int_type qstreambuf::overflow(const qstreambuf::int_type c) {
+qstreambuf::int_type qstreambuf::overflow(const qstreambuf::int_type c)
+{
     if (c == traits_type::eof()) return c;
 
-    if (pptr() == epptr()) {
+    if (pptr() == epptr())
+    {
         const int sz = size();
         int n_sz = sz * 2;
         if (n_sz < MIN_SIZE) n_sz = MIN_SIZE;
-        char *n_buf = d_new char[n_sz];
+        char* n_buf = d_new char[n_sz];
         memcpy(n_buf, gptr(), sz);
         delete buf;
         buf = n_buf;

@@ -1,13 +1,14 @@
-
 #include "std.h"
 #include "world.h"
 
-static World *w;
+static World* w;
 
-struct Face {
+struct Face
+{
     Vector verts[4];
 
-    Face(const Vector &v0, const Vector &v1, const Vector &v2, const Vector &v3) {
+    Face(const Vector& v0, const Vector& v1, const Vector& v2, const Vector& v3)
+    {
         verts[0] = v0;
         verts[1] = v1;
         verts[2] = v2;
@@ -16,23 +17,27 @@ struct Face {
 };
 
 static int face_verts[][4] = {
-        2, 3, 1, 0,
-        3, 7, 5, 1,
-        7, 6, 4, 5,
-        6, 2, 0, 4,
-        6, 7, 3, 2,
-        0, 1, 5, 4
+    2, 3, 1, 0,
+    3, 7, 5, 1,
+    7, 6, 4, 5,
+    6, 2, 0, 4,
+    6, 7, 3, 2,
+    0, 1, 5, 4
 };
 
-struct Coll {
+struct Coll
+{
     int obj, surf, tri;
 
-    Coll(const ObjCollision &t) : obj((int) t.with), surf((int) t.collision.surface), tri(t.collision.index) {
+    Coll(const ObjCollision& t) : obj((int)t.with), surf((int)t.collision.surface), tri(t.collision.index)
+    {
     }
 };
 
-struct CollCmp {
-    bool operator()(const Coll &a, const Coll &b) const {
+struct CollCmp
+{
+    bool operator()(const Coll& a, const Coll& b) const
+    {
         if (a.obj < b.obj) return true;
         if (b.obj < a.obj) return false;
         if (a.surf < b.surf) return true;
@@ -45,15 +50,17 @@ struct CollCmp {
 typedef set<Coll, CollCmp> CollSet;
 
 //returns: 1 for visible, 0 for hidden, -1 for don't know
-static int faceVis(const Face &src, const Face &dest) {
-
+static int faceVis(const Face& src, const Face& dest)
+{
     static CollSet all;
     static CollSet colls[16];
 
     all.clear();
 
-    for (int k = 0; k < 4; ++k) {
-        for (int j = 0; j < 4; ++j) {
+    for (int k = 0; k < 4; ++k)
+    {
+        for (int j = 0; j < 4; ++j)
+        {
             const int n = k * 4 + j;
             colls[n].clear();
 
@@ -62,7 +69,8 @@ static int faceVis(const Face &src, const Face &dest) {
             const Vector adj = (dv - sv).normalized() * .01f;
             dv -= adj;
 
-            for (;;) {
+            for (;;)
+            {
                 sv += adj;
                 Line line(sv, dv - sv);
 
@@ -78,20 +86,24 @@ static int faceVis(const Face &src, const Face &dest) {
             if (!colls[n].size()) return 1;
         }
     }
-    for (CollSet::const_iterator it = all.begin(); it != all.end(); ++it) {
+    for (CollSet::const_iterator it = all.begin(); it != all.end(); ++it)
+    {
         int k = 0;
-        for (; k < 16; ++k) {
+        for (; k < 16; ++k)
+        {
             if (!colls[k].count(*it)) break;
         }
-        if (k == 16) return 0;    //definitely hidden!
+        if (k == 16) return 0; //definitely hidden!
     }
     return -1;
 }
 
-static void subdivide(list<Face> &lst) {
+static void subdivide(list<Face>& lst)
+{
     int n = lst.size();
-    while (n--) {
-        const Face &f = lst.front();
+    while (n--)
+    {
+        const Face& f = lst.front();
         Vector a((f.verts[0] + f.verts[1]) / 2);
         Vector b((f.verts[1] + f.verts[2]) / 2);
         Vector c((f.verts[2] + f.verts[3]) / 2);
@@ -105,8 +117,8 @@ static void subdivide(list<Face> &lst) {
     }
 }
 
-static int faceVis(const Face &src, const Face &dest, int recurs_limit) {
-
+static int faceVis(const Face& src, const Face& dest, int recurs_limit)
+{
     static list<Face> src_faces, dest_faces;
 
     src_faces.clear();
@@ -115,16 +127,20 @@ static int faceVis(const Face &src, const Face &dest, int recurs_limit) {
     src_faces.push_back(src);
     dest_faces.push_back(dest);
 
-    while (recurs_limit--) {
+    while (recurs_limit--)
+    {
         list<Face>::iterator src_it, dest_it;
-        for (src_it = src_faces.begin(); src_it != src_faces.end(); ++src_it) {
+        for (src_it = src_faces.begin(); src_it != src_faces.end(); ++src_it)
+        {
             int cnt = 0;
-            for (dest_it = dest_faces.begin(); dest_it != dest_faces.end(); ++dest_it) {
+            for (dest_it = dest_faces.begin(); dest_it != dest_faces.end(); ++dest_it)
+            {
                 const int n = faceVis(*src_it, *dest_it);
                 if (n == 1) return 1;
                 if (!n) ++cnt;
             }
-            if (cnt == dest_faces.size()) {
+            if (cnt == dest_faces.size())
+            {
                 //source can't see ANY dest faces
                 src_it = src_faces.erase(src_it);
                 --src_it;
@@ -138,8 +154,8 @@ static int faceVis(const Face &src, const Face &dest, int recurs_limit) {
     return -1;
 }
 
-bool World::boxVis(const Box &src, const Box &dest, const int recurs_limit) {
-
+bool World::boxVis(const Box& src, const Box& dest, const int recurs_limit)
+{
     w = this;
 
     Box big;
@@ -149,22 +165,25 @@ bool World::boxVis(const Box &src, const Box &dest, const int recurs_limit) {
 
     Plane planes[6];
 
-    for (int n = 0; n < 6; ++n) {
+    for (int n = 0; n < 6; ++n)
+    {
         planes[n] = Plane(
-                big.corner(face_verts[n][0]),
-                big.corner(face_verts[n][1]),
-                big.corner(face_verts[n][2]));
+            big.corner(face_verts[n][0]),
+            big.corner(face_verts[n][1]),
+            big.corner(face_verts[n][2]));
     }
 
-    for (int k = 0; k < 6; ++k) {
+    for (int k = 0; k < 6; ++k)
+    {
         Vector v0 = src.corner(face_verts[k][0]);
         Vector v1 = src.corner(face_verts[k][1]);
         Vector v2 = src.corner(face_verts[k][2]);
         Vector v3 = src.corner(face_verts[k][3]);
 
         int n;
-        for (n = 0; n < 6; ++n) {
-            const Plane &p = planes[n];
+        for (n = 0; n < 6; ++n)
+        {
+            const Plane& p = planes[n];
             if (fabs(p.distance(v0)) <= EPSILON &&
                 fabs(p.distance(v1)) <= EPSILON &&
                 fabs(p.distance(v2)) <= EPSILON &&
@@ -175,15 +194,17 @@ bool World::boxVis(const Box &src, const Box &dest, const int recurs_limit) {
 
         Face src_face(v0, v1, v2, v3);
 
-        for (int j = 0; j < 6; ++j) {
+        for (int j = 0; j < 6; ++j)
+        {
             Vector v0 = dest.corner(face_verts[j][0]);
             Vector v1 = dest.corner(face_verts[j][1]);
             Vector v2 = dest.corner(face_verts[j][2]);
             Vector v3 = dest.corner(face_verts[j][3]);
 
             int n;
-            for (n = 0; n < 6; ++n) {
-                const Plane &p = planes[n];
+            for (n = 0; n < 6; ++n)
+            {
+                const Plane& p = planes[n];
                 if (fabs(p.distance(v0)) <= EPSILON &&
                     fabs(p.distance(v1)) <= EPSILON &&
                     fabs(p.distance(v2)) <= EPSILON &&

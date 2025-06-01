@@ -4,6 +4,6 @@
 #include "bbsys.h"
 #include "../gxruntime/gxfilesystem.h"
 
-extern gxFileSystem *gx_filesys;
+extern gxFileSystem* gx_filesys;
 
 #endif

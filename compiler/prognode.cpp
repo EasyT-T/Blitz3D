@@ -1,11 +1,10 @@
-
 #include "prognode.h"
 
 //////////////////
 // The program! //
 //////////////////
-Environ *ProgNode::semant(Environ *e) {
-
+Environ* ProgNode::semant(Environ* e)
+{
     file_lab = genLabel();
 
     StmtSeqNode::reset(stmts->file, file_lab);
@@ -25,8 +24,8 @@ Environ *ProgNode::semant(Environ *e) {
     return sem_env;
 }
 
-void ProgNode::translate(Codegen *g, const std::vector<UserFunc> &usrfuncs) {
-
+void ProgNode::translate(Codegen* g, const std::vector<UserFunc>& usrfuncs)
+{
     int k;
 
     if (g->debug) g->s_data(stmts->file, file_lab);
@@ -49,12 +48,13 @@ void ProgNode::translate(Codegen *g, const std::vector<UserFunc> &usrfuncs) {
     g->label(sem_env->funcLabel + "_begin");
 
     //create locals
-    TNode *t = createVars(sem_env);
+    TNode* t = createVars(sem_env);
     if (t) g->code(t);
-    if (g->debug) {
+    if (g->debug)
+    {
         const std::string t = genLabel();
         g->s_data("<main program>", t);
-        g->code(call("__bbDebugEnter", local(0), iconst((int) sem_env), global(t)));
+        g->code(call("__bbDebugEnter", local(0), iconst((int)sem_env), global(t)));
     }
 
     //no user funcs used!
@@ -67,7 +67,8 @@ void ProgNode::translate(Codegen *g, const std::vector<UserFunc> &usrfuncs) {
     g->code(ret());
 
     //check labels
-    for (k = 0; k < sem_env->labels.size(); ++k) {
+    for (k = 0; k < sem_env->labels.size(); ++k)
+    {
         if (sem_env->labels[k]->def < 0)
             ex("Undefined label '" + sem_env->labels[k]->name + "'", sem_env->labels[k]->ref, stmts->file);
     }
@@ -88,13 +89,14 @@ void ProgNode::translate(Codegen *g, const std::vector<UserFunc> &usrfuncs) {
     datas->translate(g);
 
     //library functions
-    std::map<std::string, std::vector<int> > libFuncs;
+    std::map<std::string, std::vector<int>> libFuncs;
 
     //lib ptrs
     g->flush();
     g->align_data(4);
-    for (k = 0; k < usrfuncs.size(); ++k) {
-        const UserFunc &fn = usrfuncs[k];
+    for (k = 0; k < usrfuncs.size(); ++k)
+    {
+        const UserFunc& fn = usrfuncs[k];
 
         if (!usedfuncs.count(fn.ident)) continue;
 
@@ -106,15 +108,17 @@ void ProgNode::translate(Codegen *g, const std::vector<UserFunc> &usrfuncs) {
     //LIBS chunk
     g->flush();
     g->label("__LIBS");
-    for (std::map<std::string, std::vector<int>>::const_iterator lf_it = libFuncs.begin(); lf_it != libFuncs.end(); ++lf_it) {
-
+    for (std::map<std::string, std::vector<int>>::const_iterator lf_it = libFuncs.begin(); lf_it != libFuncs.end(); ++
+         lf_it)
+    {
         //lib name
         g->s_data(lf_it->first);
 
-        const std::vector<int> &fns = lf_it->second;
+        const std::vector<int>& fns = lf_it->second;
 
-        for (int j = 0; j < fns.size(); ++j) {
-            const UserFunc &fn = usrfuncs[fns[j]];
+        for (int j = 0; j < fns.size(); ++j)
+        {
+            const UserFunc& fn = usrfuncs[fns[j]];
 
             //proc name
             g->s_data(fn.proc);
