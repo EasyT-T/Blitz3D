@@ -1580,12 +1580,12 @@ static float terrainHeight(Terrain* t, const float x, const float z)
 {
     const int ix = floor(x);
     const int iz = floor(z);
-    float tx = x - ix, tz = z - iz;
+    const float tx = x - ix, tz = z - iz;
     const float h0 = t->getHeight(ix, iz);
     const float h1 = t->getHeight(ix + 1, iz);
     const float h2 = t->getHeight(ix, iz + 1);
     const float h3 = t->getHeight(ix + 1, iz + 1);
-    float ha = (h1 - h0) * tx + h0, hb = (h3 - h2) * tx + h2;
+    const float ha = (h1 - h0) * tx + h0, hb = (h3 - h2) * tx + h2;
     const float h = (hb - ha) * tz + ha;
     return h;
 }
@@ -1613,7 +1613,7 @@ Entity* bbLoadTerrain(BBStr* file, Entity* p)
     gxCanvas* c = gx_graphics->loadCanvas(*file, gxCanvas::CANVAS_HIGHCOLOR);
     if (!c)
         RTEX("Unable to load heightmap image");
-    int w = c->getWidth(), h = c->getHeight();
+    const int w = c->getWidth(), h = c->getHeight();
     if (w != h)
         RTEX("Terrain must be square");
     int shift = 0;

@@ -243,7 +243,7 @@ edgeTest(const Vector& v0, const Vector& v1, const Vector& pn, const Vector& en,
          Collision* curr_coll)
 {
     const Matrix tm = ~Matrix(en, (v1 - v0).normalized(), pn);
-    Vector sv = tm * (line.o - v0), dv = tm * (line.o + line.d - v0);
+    const Vector sv = tm * (line.o - v0), dv = tm * (line.o + line.d - v0);
     const Line l(sv, dv - sv);
     //do cylinder test...
     float a = (l.d.x * l.d.x + l.d.z * l.d.z);
@@ -294,7 +294,7 @@ bool Collision::triangleCollide(const Line& line, const float radius, const Vect
     if (t > time) return false;
 
     //edge planes
-    Plane p0(v0 + p.n, v1, v0), p1(v1 + p.n, v2, v1), p2(v2 + p.n, v0, v2);
+    const Plane p0(v0 + p.n, v1, v0), p1(v1 + p.n, v2, v1), p2(v2 + p.n, v0, v2);
 
     //intersects triangle?
     const Vector i = line * t;

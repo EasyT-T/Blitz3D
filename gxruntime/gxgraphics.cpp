@@ -253,7 +253,7 @@ int gxGraphics::getDepth() const
     return front_canvas->getDepth();
 }
 
-gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
+gxFont* gxGraphics::loadFont(const std::string& fontPath, int height, int flags)
 {
     int bold = flags & gxFont::FONT_BOLD ? FW_BOLD : FW_REGULAR;
     int italic = flags & gxFont::FONT_ITALIC ? 1 : 0;
@@ -261,16 +261,16 @@ gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
     int strikeout = 0;
 
     std::string t;
-    int n = f.find('.');
+    size_t n = fontPath.find('.');
     if (n != std::string::npos)
     {
-        t = fullfilename(f);
+        t = fullfilename(fontPath);
         if (!font_res.count(t) && AddFontResource(t.c_str())) font_res.insert(t);
-        t = filenamefile(f.substr(0, n));
+        t = filenamefile(fontPath.substr(0, n));
     }
     else
     {
-        t = f;
+        t = fontPath;
     }
 
     //save and turn off font smoothing....
@@ -278,13 +278,13 @@ gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
     SystemParametersInfo(SPI_GETFONTSMOOTHING, 0, &smoothing, 0);
     SystemParametersInfo(SPI_SETFONTSMOOTHING,FALSE, nullptr, 0);
 
-    HFONT hfont = CreateFont(
+    HFONT font = CreateFont(
         height, 0, 0, 0,
         bold, italic, underline, strikeout,
         ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,
         DEFAULT_PITCH | FF_DONTCARE, t.c_str());
 
-    if (!hfont)
+    if (!font)
     {
         //restore font smoothing
         SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
@@ -292,28 +292,28 @@ gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
     }
 
     HDC hdc = CreateCompatibleDC(nullptr);
-    HFONT pfont = (HFONT)SelectObject(hdc, hfont);
+    auto originalFont = static_cast<HFONT>(SelectObject(hdc, font));
 
-    TEXTMETRIC tm = {0};
-    if (!GetTextMetrics(hdc, &tm))
+    TEXTMETRIC metric = {};
+    if (!GetTextMetrics(hdc, &metric))
     {
-        SelectObject(hdc, pfont);
+        SelectObject(hdc, originalFont);
         DeleteDC(hdc);
-        DeleteObject(hfont);
+        DeleteObject(font);
         SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
         return nullptr;
     }
-    height = tm.tmHeight;
+    height = metric.tmHeight;
 
-    int first = tm.tmFirstChar, last = tm.tmLastChar;
-    int sz = last - first + 1;
-    int* offs = d_new int[sz];
-    int* widths = d_new int[sz];
-    int* as = d_new int[sz];
+    int first = metric.tmFirstChar, last = metric.tmLastChar;
+    int size = last - first + 1;
+    auto offsets = new int[size];
+    auto widths = new int[size];
+    auto as = new int[size];
 
     //calc size of canvas to hold font.
     int x = 0, y = 0, max_x = 0;
-    for (int k = 0; k < sz; ++k)
+    for (int k = 0; k < size; ++k)
     {
         char t = k + first;
 
@@ -339,12 +339,12 @@ gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
             x = 0;
             y += height;
         }
-        offs[k] = (x << 16) | y;
+        offsets[k] = (x << 16) | y;
         widths[k] = w;
         x += w;
         if (x > max_x) max_x = x;
     }
-    SelectObject(hdc, pfont);
+    SelectObject(hdc, originalFont);
     DeleteDC(hdc);
 
     int cw = max_x, ch = y + height;
@@ -356,45 +356,41 @@ gxFont* gxGraphics::loadFont(const std::string& f, int height, int flags)
         HDC surf_hdc;
         if (surf->GetDC(&surf_hdc) >= 0)
         {
-            HFONT pfont = (HFONT)SelectObject(surf_hdc, hfont);
+            auto originalSurfFont = static_cast<HFONT>(SelectObject(surf_hdc, font));
 
             SetBkColor(surf_hdc, 0x000000);
             SetTextColor(surf_hdc, 0xffffff);
 
-            for (int k = 0; k < sz; ++k)
+            for (int k = 0; k < size; ++k)
             {
-                int x = (offs[k] >> 16) & 0xffff, y = offs[k] & 0xffff;
+                int x = (offsets[k] >> 16) & 0xffff, y = offsets[k] & 0xffff;
                 char t = k + first;
                 RECT rect = {x, y, x + widths[k], y + height};
                 ExtTextOut(surf_hdc, x + as[k], y,ETO_CLIPPED, &rect, &t, 1, nullptr);
             }
 
-            SelectObject(surf_hdc, pfont);
+            SelectObject(surf_hdc, originalSurfFont);
             surf->ReleaseDC(surf_hdc);
-            DeleteObject(hfont);
+            DeleteObject(font);
             delete[] as;
 
             c->backup();
-            gxFont* font = d_new gxFont(this, c, tm.tmMaxCharWidth, height, first, last + 1, tm.tmDefaultChar, offs,
+            auto* f = d_new gxFont(this, c, metric.tmMaxCharWidth, height, first, last + 1, metric.tmDefaultChar, offsets,
                                         widths);
-            font_set.insert(font);
+            font_set.insert(f);
 
             //restore font smoothing
             SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);
-            return font;
+            return f;
         }
-        else
-        {
-        }
+
         freeCanvas(c);
     }
-    else
-    {
-    }
-    DeleteObject(hfont);
+
+    DeleteObject(font);
     delete[] as;
     delete[] widths;
-    delete[] offs;
+    delete[] offsets;
 
     //restore font smoothing
     SystemParametersInfo(SPI_SETFONTSMOOTHING, smoothing, nullptr, 0);

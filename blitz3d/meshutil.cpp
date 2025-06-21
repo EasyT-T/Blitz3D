@@ -43,7 +43,7 @@ MeshModel* MeshUtil::createCube(const Brush& b)
 
 MeshModel* MeshUtil::createSphere(const Brush& b, const int segs)
 {
-    int h_segs = segs * 2, v_segs = segs;
+    const int h_segs = segs * 2, v_segs = segs;
 
     MeshModel* m = d_new MeshModel();
     Surface* s = m->createSurface(b);

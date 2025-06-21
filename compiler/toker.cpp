@@ -108,7 +108,7 @@ int Toker::curr()
 
 std::string Toker::text()
 {
-    int from = tokes[curr_toke].from, to = tokes[curr_toke].to;
+    const int from = tokes[curr_toke].from, to = tokes[curr_toke].to;
     return line.substr(from, to - from);
 }
 
@@ -157,7 +157,7 @@ void Toker::nextline()
 
     while (k < line.size())
     {
-        int c = line[k], from = k;
+        const int c = line[k], from = k;
         if (c == '\n')
         {
             tokes.push_back(Toke(c, from, ++k));

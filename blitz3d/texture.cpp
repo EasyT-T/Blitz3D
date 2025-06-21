@@ -198,7 +198,7 @@ const gxScene::Matrix* Texture::getMatrix() const
     if (!rep || !rep->mat_used) return nullptr;
     if (!rep->mat_valid)
     {
-        float c = cos(rep->rot), s = sin(rep->rot);
+        const float c = cos(rep->rot), s = sin(rep->rot);
         rep->matrix.elements[0][0] = c * rep->sx;
         rep->matrix.elements[1][0] = s * rep->sx;
         rep->matrix.elements[0][1] = -s * rep->sy;

@@ -62,7 +62,7 @@ int gxFileSystem::getFileSize(const std::string& name) const
     WIN32_FIND_DATA findData;
     const HANDLE h = FindFirstFile(name.c_str(), &findData);
     if (h == INVALID_HANDLE_VALUE) return 0;
-    int n = findData.dwFileAttributes, sz = findData.nFileSizeLow;
+    const int n = findData.dwFileAttributes, sz = findData.nFileSizeLow;
     FindClose(h);
     return n & FILE_ATTRIBUTE_DIRECTORY ? 0 : sz;
 }

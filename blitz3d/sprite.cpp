@@ -155,7 +155,7 @@ bool Sprite::render(const RenderContext& rc)
     if (!rc.getWorldFrustum().cull(verts, 4)) return false;
 
     mesh->lock(false);
-    int fv = mesh_index * 4, ft = mesh_index * 2;
+    const int fv = mesh_index * 4, ft = mesh_index * 2;
     mesh->setVertex(fv + 0, &verts[0].x, null, tex_coords0);
     mesh->setVertex(fv + 1, &verts[1].x, null, tex_coords1);
     mesh->setVertex(fv + 2, &verts[2].x, null, tex_coords2);

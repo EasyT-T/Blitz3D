@@ -163,7 +163,7 @@ int bbFileSize(BBStr* f)
 
 void bbCopyFile(BBStr* f, BBStr* to)
 {
-    std::string src = *f, dest = *to;
+    const std::string src = *f, dest = *to;
     delete f;
     delete to;
     gx_filesys->copyFile(src, dest);

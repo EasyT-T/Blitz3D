@@ -59,7 +59,7 @@ std::string ftoa(const float n)
 {
     static const int digits = 6;
 
-    int eNeg = -4, ePos = 8; // limits for e notation.
+    const int eNeg = -4, ePos = 8; // limits for e notation.
 
     char buffer[50]; // from MSDN example, 25 would probably suffice
     int dec, sign;

@@ -181,7 +181,7 @@ void MainFrame::showCurStmt()
 
     SourceFile* t = sourceFile(cur_file);
 
-    int row = (cur_pos >> 16) & 0xffff, col = cur_pos & 0xffff;
+    const int row = (cur_pos >> 16) & 0xffff, col = cur_pos & 0xffff;
     t->highLight(row, col);
 
     globals_tree.refresh();

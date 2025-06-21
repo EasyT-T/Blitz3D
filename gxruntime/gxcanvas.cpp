@@ -578,7 +578,7 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
 
     bltfx.dwFillColor = color_surf;
 
-    float xr = w * .5f, yr = h * .5f, ar = (float)w / (float)h;
+    const float xr = w * .5f, yr = h * .5f, ar = (float)w / (float)h;
     float cx = x1 + xr + .5f, cy = y1 + yr - .5f, rsq = yr * yr, y;
 
     if (solid)
@@ -587,7 +587,7 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
         for (int t = dest.top; t < dest.bottom; ++y, ++t)
         {
             const float x = sqrt(rsq - y * y) * ar;
-            int xa = floor(cx - x), xb = floor(cx + x);
+            const int xa = floor(cx - x), xb = floor(cx + x);
             if (xb <= xa || xa >= viewport.right || xb <= viewport.left) continue;
             Rect dr;
             dr.top = t;
@@ -613,7 +613,7 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
     for (; t <= hh; ++y, ++t)
     {
         const float x = sqrt(rsq - y * y) * ar;
-        int xa = floor(cx - x), xb = floor(cx + x);
+        const int xa = floor(cx - x), xb = floor(cx + x);
         Rect r1(xa, t, p_xa - xa, 1);
         if (r1.right <= r1.left) r1.right = r1.left + 1;
         if (clip(&r1)) surf->Blt(&r1, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
@@ -635,7 +635,7 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
     for (; t > hh; --y, --t)
     {
         const float x = sqrt(rsq - y * y) * ar;
-        int xa = floor(cx - x), xb = floor(cx + x);
+        const int xa = floor(cx - x), xb = floor(cx + x);
         Rect r1(xa, t, p_xa - xa, 1);
         if (r1.right <= r1.left) r1.right = r1.left + 1;
         if (clip(&r1)) surf->Blt(&r1, nullptr, nullptr,DDBLT_WAIT | DDBLT_COLORFILL, &bltfx);
@@ -792,8 +792,8 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const
     ir.top = r1.top > r2.top ? r1.top : r2.top;
     ir.bottom = r1.bottom < r2.bottom ? r1.bottom : r2.bottom;
 
-    unsigned* s1 = i1->cm_mask,* s2 = i2->cm_mask;
-    int i1_pitch = i1->cm_pitch, i2_pitch = i2->cm_pitch;
+    const unsigned* s1 = i1->cm_mask,* s2 = i2->cm_mask;
+    const int i1_pitch = i1->cm_pitch, i2_pitch = i2->cm_pitch;
     s1 += (ir.top - r1.top) * i1_pitch;
     s2 += (ir.top - r2.top) * i2_pitch;
 
@@ -813,7 +813,7 @@ bool gxCanvas::collide(int x1, int y1, const gxCanvas* i2, int x2, int y2, const
     for (int y = ir.top; y < ir.bottom; ++y)
     {
         unsigned p = 0;
-        unsigned* row1 = s1,* row2 = s2;
+        const unsigned* row1 = s1,* row2 = s2;
         for (int x = 0; x < cnt; ++x)
         {
 #ifdef DEBUG_BITMASK

@@ -41,9 +41,6 @@ public:
     virtual void deleteModule(Module* mod);
 };
 
-extern "C" _declspec(dllexport)
-Linker*_cdecl
-
-linkerGetLinker();
+extern "C" _declspec(dllexport) Linker* _cdecl linkerGetLinker();
 
 #endif

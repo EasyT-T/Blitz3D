@@ -172,7 +172,7 @@ public:
 
     float distance(const Vector& q) const
     {
-        float dx = x - q.x, dy = y - q.y, dz = z - q.z;
+        const float dx = x - q.x, dy = y - q.y, dz = z - q.z;
         return sqrtf(dx * dx + dy * dy + dz * dz);
     }
 
@@ -395,25 +395,25 @@ struct Quat
 
     Vector i() const
     {
-        float xz = v.x * v.z, wy = w * v.y;
-        float xy = v.x * v.y, wz = w * v.z;
-        float yy = v.y * v.y, zz = v.z * v.z;
+        const float xz = v.x * v.z, wy = w * v.y;
+        const float xy = v.x * v.y, wz = w * v.z;
+        const float yy = v.y * v.y, zz = v.z * v.z;
         return Vector(1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy));
     }
 
     Vector j() const
     {
-        float yz = v.y * v.z, wx = w * v.x;
-        float xy = v.x * v.y, wz = w * v.z;
-        float xx = v.x * v.x, zz = v.z * v.z;
+        const float yz = v.y * v.z, wx = w * v.x;
+        const float xy = v.x * v.y, wz = w * v.z;
+        const float xx = v.x * v.x, zz = v.z * v.z;
         return Vector(2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx));
     }
 
     Vector k() const
     {
-        float xz = v.x * v.z, wy = w * v.y;
-        float yz = v.y * v.z, wx = w * v.x;
-        float xx = v.x * v.x, yy = v.y * v.y;
+        const float xz = v.x * v.z, wy = w * v.y;
+        const float yz = v.y * v.z, wx = w * v.x;
+        const float xx = v.x * v.x, yy = v.y * v.y;
         return Vector(2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy));
     }
 };
@@ -443,9 +443,9 @@ public:
 
     Matrix(const Quat& q)
     {
-        float xx = q.v.x * q.v.x, yy = q.v.y * q.v.y, zz = q.v.z * q.v.z;
-        float xy = q.v.x * q.v.y, xz = q.v.x * q.v.z, yz = q.v.y * q.v.z;
-        float wx = q.w * q.v.x, wy = q.w * q.v.y, wz = q.w * q.v.z;
+        const float xx = q.v.x * q.v.x, yy = q.v.y * q.v.y, zz = q.v.z * q.v.z;
+        const float xy = q.v.x * q.v.y, xz = q.v.x * q.v.z, yz = q.v.y * q.v.z;
+        const float wx = q.w * q.v.x, wy = q.w * q.v.y, wz = q.w * q.v.z;
         i = Vector(1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy)),
             j = Vector(2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx)),
             k = Vector(2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy));
@@ -454,8 +454,8 @@ public:
     Matrix(const float angle, const Vector& axis)
     {
         const Vector& u = axis;
-        float c = cosf(angle), s = sinf(angle);
-        float x2 = axis.x * axis.x, y2 = axis.y * axis.y, z2 = axis.z * axis.z;
+        const float c = cosf(angle), s = sinf(angle);
+        const float x2 = axis.x * axis.x, y2 = axis.y * axis.y, z2 = axis.z * axis.z;
         i = Vector(x2 + c * (1 - x2), u.x * u.y * (1 - c) - u.z * s, u.z * u.x * (1 - c) + u.y * s);
         j = Vector(u.x * u.y * (1 - c) + u.z * s, y2 + c * (1 - y2), u.y * u.z * (1 - c) - u.x * s);
         k = Vector(u.z * u.x * (1 - c) - u.y * s, u.y * u.z * (1 - c) + u.x * s, z2 + c * (1 - z2));

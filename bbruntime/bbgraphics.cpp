@@ -134,7 +134,7 @@ static int getPixel(gxCanvas* c, float x, float y)
     x -= .5f;
     y -= .5f;
     float fx = floor(x), fy = floor(y);
-    int ix = fx, iy = fy;
+    const int ix = fx, iy = fy;
     fx = x - fx;
     fy = y - fy;
 
@@ -143,7 +143,7 @@ static int getPixel(gxCanvas* c, float x, float y)
     const int br = c->getPixel(ix + 1, iy + 1);
     const int bl = c->getPixel(ix, iy + 1);
 
-    float w1 = (1 - fx) * (1 - fy), w2 = fx * (1 - fy), w3 = (1 - fx) * fy, w4 = fx * fy;
+    const float w1 = (1 - fx) * (1 - fy), w2 = fx * (1 - fy), w3 = (1 - fx) * fy, w4 = fx * fy;
 
     const float r = RED(tl) * w1 + RED(tr) * w2 + RED(bl) * w3 + RED(br) * w4;
     const float g = GRN(tl) * w1 + GRN(tr) * w2 + GRN(bl) * w3 + GRN(br) * w4;
@@ -193,7 +193,7 @@ static gxCanvas* tformCanvas(gxCanvas* c, float m[2][2], const int x_handle, con
     i[0][1] = -dt * m[0][1];
     i[1][1] = dt * m[0][0];
 
-    float ox = x_handle, oy = y_handle;
+    const float ox = x_handle, oy = y_handle;
     v0.x = -ox;
     v0.y = -oy; //tl
     v1.x = c->getWidth() - ox;
@@ -210,7 +210,7 @@ static gxCanvas* tformCanvas(gxCanvas* c, float m[2][2], const int x_handle, con
     const float miny = floor(vmin(v0.y, v1.y, v2.y, v3.y));
     const float maxx = ceil(vmax(v0.x, v1.x, v2.x, v3.x));
     const float maxy = ceil(vmax(v0.y, v1.y, v2.y, v3.y));
-    int iw = maxx - minx, ih = maxy - miny;
+    const int iw = maxx - minx, ih = maxy - miny;
 
     gxCanvas* t = gx_graphics->createCanvas(iw, ih, 0);
     t->setHandle(-minx, -miny);
@@ -1028,7 +1028,7 @@ static void tile(bbImage* i, int x, int y, const int frame, const bool solid)
 
     int hx, hy;
     c->getHandle(&hx, &hy);
-    int w = c->getWidth(), h = c->getHeight();
+    const int w = c->getWidth(), h = c->getHeight();
 
     int ox, oy, vp_x, vp_y, vp_w, vp_h;
     gx_canvas->getOrigin(&ox, &oy);

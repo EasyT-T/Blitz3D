@@ -133,7 +133,7 @@ void Editor::resized()
 {
     CRect r;
     GetClientRect(&r);
-    int x = 0, y = 0, w = r.Width(), h = r.Height();
+    const int x = 0, y = 0, w = r.Width(), h = r.Height();
     if (w)
     {
         if (tabber_width < 4) tabber_width = 4;
@@ -336,7 +336,7 @@ void Editor::setModified(const bool n)
 
 void Editor::setCursor(const int n)
 {
-    int row = (n >> 16) & 0xffff, col = n & 0xffff;
+    const int row = (n >> 16) & 0xffff, col = n & 0xffff;
     const int pos = editCtrl.LineIndex(row) + col;
     editCtrl.SetSel(pos, pos);
 }
@@ -506,7 +506,7 @@ bool Editor::findNext(const bool wrap)
 
 void Editor::hilight(int pos)
 {
-    int row = (pos >> 16) & 0xffff, col = pos & 0xffff;
+    const int row = (pos >> 16) & 0xffff, col = pos & 0xffff;
     pos = editCtrl.LineIndex(row) + col;
 
     editCtrl.HideSelection(true, false);
@@ -886,7 +886,7 @@ void Editor::formatStreamLine()
     {
         const int from = k;
         const char pf = cf;
-        int c = is_line[k], is_sz = is_line.size();
+        const int c = is_line[k], is_sz = is_line.size();
         if (!isgraph(c))
         {
             for (++k; k < is_sz && !isgraph(is_line[k]); ++k)
@@ -1029,7 +1029,7 @@ void Editor::formatLine(const int ln)
     {
         rep.resize(0);
         const int* pf = cf;
-        int from = k, c = line[k], sz = line.size();
+        const int from = k, c = line[k], sz = line.size();
         if (!isgraph(c))
         {
             for (++k; k < sz && !isgraph(line[k]); ++k)

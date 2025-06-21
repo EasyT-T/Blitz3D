@@ -94,7 +94,7 @@ gxRuntime* gxRuntime::openRuntime(const HINSTANCE hinst, const std::string& cmd_
     run_flag = true;
 
     const char* app_t = " ";
-    int ws = WS_CAPTION, ws_ex = 0;
+    const int ws = WS_CAPTION, ws_ex = 0;
 
     const HWND hwnd = CreateWindowEx(ws_ex, "Blitz Runtime Class", app_t, ws, 0, 0, 0, 0, nullptr, nullptr, nullptr,
                                      nullptr);
@@ -1008,7 +1008,7 @@ gxGraphics* gxRuntime::openGraphics(const int w, const int h, const int d, int d
             const int cy = (GetSystemMetrics(SM_CYSCREEN) - hh) / 2;
             POINT zz = {0, 0};
             ClientToScreen(hwnd, &zz);
-            int bw = zz.x - w_r.left, bh = zz.y - w_r.top;
+            const int bw = zz.x - w_r.left, bh = zz.y - w_r.top;
             int wx = cx - bw, wy = cy - bh;
             if (wy < 0) wy = 0; //not above top!
             MoveWindow(hwnd, wx, wy, ww + tw, hh + th, true);

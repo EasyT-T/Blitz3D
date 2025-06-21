@@ -989,7 +989,7 @@ void MainFrame::escape()
     }
     RECT r;
     GetClientRect(&r);
-    int w = r.right - r.left, h = r.bottom - r.top;
+    const int w = r.right - r.left, h = r.bottom - r.top;
     const int n = prefs.win_maximized ? SIZE_MAXIMIZED : SIZE_RESTORED;
     PostMessage(WM_SIZE, n, (h << 16) | w);
 }

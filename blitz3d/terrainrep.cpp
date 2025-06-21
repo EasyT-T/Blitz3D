@@ -152,7 +152,7 @@ static bool clip(const Line& l, const Box& box)
     {
         Vector t = box.corner(k);
         const Vector& n = normals[k];
-        float d0 = n.dot(v0 - t), d1 = n.dot(v1 - t);
+        const float d0 = n.dot(v0 - t), d1 = n.dot(v1 - t);
         if (d0 < 0)
         {
             if (d1 < 0) return false;
@@ -220,7 +220,7 @@ void TerrainRep::setHeight(const int x, const int z, const float h, const bool r
     if (!errs_valid) return;
     if (realtime)
     {
-        Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
+        const Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
         calcErr(2, x, z, v1, v2, v0);
         calcErr(3, x, z, v3, v0, v2);
         return;
@@ -230,7 +230,7 @@ void TerrainRep::setHeight(const int x, const int z, const float h, const bool r
 
 Vector TerrainRep::getNormal(const int x, const int z) const
 {
-    Vector
+    const Vector
         vt(x, getHeight(x, z), z),
         v0(x, getHeight(x, z - 1), z - 1),
         v1(x + 1, getHeight(x + 1, z), z),
@@ -253,7 +253,7 @@ void TerrainRep::insert(Tri* t)
         if (t->clip & 63)
         {
             ++clip_cnt;
-            Vector e0(verts[t->v0].v), e1(verts[t->v1].v), e2(verts[t->v2].v);
+            const Vector e0(verts[t->v0].v), e1(verts[t->v1].v), e2(verts[t->v2].v);
             for (int n = 0; n < 6; ++n)
             {
                 if (!(t->clip & (1 << n))) continue;
@@ -462,7 +462,7 @@ TerrainRep::Error TerrainRep::calcErr(const int id, const int x, const int z, co
 void TerrainRep::validateErrs() const
 {
     if (errs_valid) return;
-    Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
+    const Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
     calcErr(2, v1, v2, v0);
     calcErr(3, v3, v0, v2);
     errs_valid = true;
@@ -659,7 +659,7 @@ bool TerrainRep::collide(const Line& line, const float radius, Collision* curr_c
     curr = this;
     validateErrs();
 
-    Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
+    const Vert v0(0, 0), v1(cell_size, 0), v2(cell_size, cell_size), v3(0, cell_size);
 
     if (!radius)
     {

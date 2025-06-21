@@ -45,7 +45,7 @@ void gxFont::render(gxCanvas* dest, const unsigned color_argb, const int x, cons
         int c = t[k] & 0xff;
         if (c < begin_char || c >= end_char) c = def_char;
         c -= begin_char;
-        int sx = (offs[c] >> 16) & 0xffff, sy = offs[c] & 0xffff;
+        const int sx = (offs[c] >> 16) & 0xffff, sy = offs[c] & 0xffff;
         t_canvas->blit(t_x, 0, canvas, sx, sy, widths[c], height, false);
         t_x += widths[c];
     }

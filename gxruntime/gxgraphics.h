@@ -101,7 +101,7 @@ public:
     gxMovie* verifyMovie(gxMovie* movie) const;
     void closeMovie(gxMovie* movie);
 
-    gxFont* loadFont(const std::string& font, int height, int flags);
+    gxFont* loadFont(const std::string& fontPath, int height, int flags);
     gxFont* verifyFont(gxFont* font) const;
     void freeFont(gxFont* font);
 
