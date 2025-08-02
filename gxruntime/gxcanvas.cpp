@@ -578,7 +578,7 @@ void gxCanvas::oval(int x1, int y1, const int w, const int h, const bool solid) 
 
     bltfx.dwFillColor = color_surf;
 
-    const float xr = w * .5f, yr = h * .5f, ar = (float)w / (float)h;
+    const float xr = w * .5f, yr = h * .5f, ar = static_cast<float>(w) / static_cast<float>(h);
     float cx = x1 + xr + .5f, cy = y1 + yr - .5f, rsq = yr * yr, y;
 
     if (solid)
@@ -910,7 +910,7 @@ bool gxCanvas::lock() const
             return false;
         }
         locked_pitch = desc.lPitch;
-        locked_surf = (unsigned char*)desc.lpSurface;
+        locked_surf = static_cast<unsigned char*>(desc.lpSurface);
         lock_mod_cnt = mod_cnt;
     }
     return true;

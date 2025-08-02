@@ -60,8 +60,8 @@ int MainFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct)
     const std::string tb = prefs.homeDir + "/cfg/dbg_toolbar.bmp";
 
     //Toolbar
-    const HBITMAP toolbmp = (HBITMAP)LoadImage(
-        nullptr, tb.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
+    const HBITMAP toolbmp = static_cast<HBITMAP>(LoadImage(
+        nullptr, tb.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS));
 
     BITMAP bm;
     GetObject(toolbmp, sizeof(bm), &bm);
@@ -170,9 +170,9 @@ void MainFrame::OnSize(const UINT type, const int sw, const int sh)
 
 void MainFrame::setRuntime(void* mod, void* env)
 {
-    consts_tree.reset((Environ*)env);
-    globals_tree.reset((Module*)mod, (Environ*)env);
-    locals_tree.reset((Environ*)env);
+    consts_tree.reset(static_cast<Environ*>(env));
+    globals_tree.reset(static_cast<Module*>(mod), static_cast<Environ*>(env));
+    locals_tree.reset(static_cast<Environ*>(env));
 }
 
 void MainFrame::showCurStmt()

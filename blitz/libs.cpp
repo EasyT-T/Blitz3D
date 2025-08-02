@@ -56,13 +56,13 @@ static int next(std::istream& in)
 
     if (isalpha(t))
     {
-        text += (char)t;
-        while (isalnum(in.peek()) || in.peek() == '_') text += (char)in.get();
+        text += static_cast<char>(t);
+        while (isalnum(in.peek()) || in.peek() == '_') text += static_cast<char>(in.get());
         return curr = -1;
     }
     if (t == '\"')
     {
-        while (in.peek() != '\"') text = text + (char)in.get();
+        while (in.peek() != '\"') text = text + static_cast<char>(in.get());
         in.get();
         return curr = -2;
     }

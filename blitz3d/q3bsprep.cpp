@@ -220,7 +220,7 @@ static Surf* findSurf(q3_face* f)
 void Q3BSPRep::createTextures()
 {
     const int n_texs = header.dir[1].length / sizeof(q3_tex);
-    q3_tex* q3tex = (q3_tex*)header.dir[1].lump;
+    q3_tex* q3tex = static_cast<q3_tex*>(header.dir[1].lump);
     for (int k = 0; k < n_texs; ++k)
     {
         std::string t = std::string(q3tex->name);
@@ -251,7 +251,7 @@ void Q3BSPRep::createTextures()
 void Q3BSPRep::createLightMaps()
 {
     const int n_lmaps = header.dir[14].length / (128 * 128 * 3);
-    const unsigned char* rgb = (unsigned char*)header.dir[14].lump;
+    const unsigned char* rgb = static_cast<unsigned char*>(header.dir[14].lump);
     unsigned char adj[256];
     int k;
     for (k = 0; k < 256; ++k) adj[k] = pow(k / 255.0f, gamma_adj) * 255.0f;
@@ -278,7 +278,7 @@ void Q3BSPRep::createLightMaps()
 
 void Q3BSPRep::createVis()
 {
-    const int* vis = (int*)header.dir[16].lump;
+    const int* vis = static_cast<int*>(header.dir[16].lump);
     const int n_vecs = *vis++;
     vis_sz = *vis++;
     log("vis: " + itoa(n_vecs) + "," + itoa(vis_sz));
@@ -290,7 +290,7 @@ void Q3BSPRep::createCollider()
 {
     std::vector<MeshCollider::Vertex> coll_verts;
     const int n_verts = header.dir[10].length / sizeof(q3_vertex);
-    const q3_vertex* t = (q3_vertex*)header.dir[10].lump;
+    const q3_vertex* t = static_cast<q3_vertex*>(header.dir[10].lump);
     MeshCollider::Vertex cv;
     int k;
     for (k = 0; k < n_verts; ++k)
@@ -331,7 +331,7 @@ void Q3BSPRep::createSurfs()
             const int n = s->verts[j];
             if (n >= 0)
             {
-                t = (q3_vertex*)header.dir[10].lump + n;
+                t = static_cast<q3_vertex*>(header.dir[10].lump) + n;
             }
             else
             {
@@ -418,7 +418,7 @@ static void patchFace(Q3BSPFace* face, q3_face* q3face, const bool draw, const b
         verts.resize(size_x * size_y);
 
         //seed initial verts
-        const q3_vertex* t = (q3_vertex*)header.dir[10].lump + q3face->vertex;
+        const q3_vertex* t = static_cast<q3_vertex*>(header.dir[10].lump) + q3face->vertex;
         for (y = 0; y < size_y; y += step)
         {
             for (x = 0; x < size_x; x += step)
@@ -479,7 +479,7 @@ static void patchFace(Q3BSPFace* face, q3_face* q3face, const bool draw, const b
         verts.resize(size_x * size_y);
 
         //seed initial verts
-        const q3_vertex* t = (q3_vertex*)header.dir[10].lump + q3face->vertex;
+        const q3_vertex* t = static_cast<q3_vertex*>(header.dir[10].lump) + q3face->vertex;
         for (k = 0; k < size_x * size_y; ++k) verts[k] = *t++;
         //subdivide!
         for (y = 0; y < size_y; y += step)
@@ -528,7 +528,7 @@ static void meshFace(Q3BSPFace* face, q3_face* q3face, const bool draw, const bo
 {
     static std::map<int, int> vert_map;
     vert_map.clear();
-    const int* meshverts = (int*)header.dir[11].lump + q3face->meshvert;
+    const int* meshverts = static_cast<int*>(header.dir[11].lump) + q3face->meshvert;
     MeshCollider::Triangle ct;
     ct.surface = nullptr;
     ct.index = 0;
@@ -557,12 +557,12 @@ static void meshFace(Q3BSPFace* face, q3_face* q3face, const bool draw, const bo
 static Q3BSPBrush* createBrush(const int n)
 {
     Q3BSPBrush* brush = d_new Q3BSPBrush;
-    const q3_brush* q3brush = (q3_brush*)header.dir[8].lump + n;
-    const q3_brushside* q3brushside = (q3_brushside*)header.dir[9].lump + q3brush->brushside;
+    const q3_brush* q3brush = static_cast<q3_brush*>(header.dir[8].lump) + n;
+    const q3_brushside* q3brushside = static_cast<q3_brushside*>(header.dir[9].lump) + q3brush->brushside;
     Plane p;
     for (int j = 0; j < q3brush->n_brushsides; ++j)
     {
-        const q3_plane* q3plane = (q3_plane*)header.dir[2].lump + q3brushside[j].plane;
+        const q3_plane* q3plane = static_cast<q3_plane*>(header.dir[2].lump) + q3brushside[j].plane;
         p.n = tf(q3plane->normal);
         p.d = -q3plane->distance;
         brush->planes.push_back(p);
@@ -572,7 +572,7 @@ static Q3BSPBrush* createBrush(const int n)
 
 Q3BSPLeaf* Q3BSPRep::createLeaf(const int n)
 {
-    const q3_leaf* q3leaf = (q3_leaf*)header.dir[4].lump + n;
+    const q3_leaf* q3leaf = static_cast<q3_leaf*>(header.dir[4].lump) + n;
 
     Q3BSPLeaf* leaf = d_new Q3BSPLeaf;
 
@@ -582,7 +582,7 @@ Q3BSPLeaf* Q3BSPRep::createLeaf(const int n)
     const Vector maxs(q3leaf->maxs[0], q3leaf->maxs[1], q3leaf->maxs[2]);
     leaf->box = Box(tf(mins));
     leaf->box.update(tf(maxs));
-    const int* leaffaces = (int*)header.dir[5].lump + q3leaf->leafface;
+    const int* leaffaces = static_cast<int*>(header.dir[5].lump) + q3leaf->leafface;
 
     for (int k = 0; k < q3leaf->n_leaffaces; ++k)
     {
@@ -595,7 +595,7 @@ Q3BSPLeaf* Q3BSPRep::createLeaf(const int n)
             continue;
         }
 
-        q3_face* q3face = (q3_face*)header.dir[13].lump + leaffaces[k];
+        q3_face* q3face = static_cast<q3_face*>(header.dir[13].lump) + leaffaces[k];
 
         if (q3face->type == 1 || q3face->type == 3)
         {
@@ -607,7 +607,7 @@ Q3BSPLeaf* Q3BSPRep::createLeaf(const int n)
 
         if (q3face->texture >= 0)
         {
-            const q3_tex* q3tex = (q3_tex*)header.dir[1].lump + q3face->texture;
+            const q3_tex* q3tex = static_cast<q3_tex*>(header.dir[1].lump) + q3face->texture;
             if (!(q3tex->contents & 1)) continue;
             if (q3tex->flags & 0x84) draw = false;
         }
@@ -643,8 +643,8 @@ Q3BSPLeaf* Q3BSPRep::createLeaf(const int n)
 
 Q3BSPNode* Q3BSPRep::createNode(const int n)
 {
-    const q3_node* q3node = (q3_node*)header.dir[3].lump + n;
-    const q3_plane* q3plane = (q3_plane*)header.dir[2].lump + q3node->plane;
+    const q3_node* q3node = static_cast<q3_node*>(header.dir[3].lump) + n;
+    const q3_plane* q3plane = static_cast<q3_plane*>(header.dir[2].lump) + q3node->plane;
 
     Q3BSPNode* node = new Q3BSPNode;
 

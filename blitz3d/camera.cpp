@@ -74,7 +74,7 @@ const Frustum& Camera::getFrustum() const
 {
     if (!local_valid)
     {
-        const float ar = (float)vp_h / vp_w;
+        const float ar = static_cast<float>(vp_h) / vp_w;
         frustum_w = frustum_nr * 2 / zoom;
         frustum_h = frustum_nr * 2 / zoom * ar;
         new(&local_frustum) Frustum(frustum_nr, frustum_fr, frustum_w, frustum_h);

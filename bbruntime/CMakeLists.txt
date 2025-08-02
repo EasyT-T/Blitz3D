@@ -39,10 +39,9 @@ set(SRCS ${SRCS}
 set(LIBS gxruntime blitz3d)
 
 set(SRCS ${SRCS}
-        bbaudio_soloud.cpp
-        bbaudio_soloud.h
+        bbaudio_fmod.cpp
+        bbaudio_fmod.h
 )
-set(LIBS ${LIBS} soloud)
 
 add_library(bbruntime ${SRCS})
 

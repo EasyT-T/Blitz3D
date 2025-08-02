@@ -11,8 +11,8 @@ endif ()
 
 message(STATUS "### Configuring Blitz3D build for build type: ${CMAKE_BUILD_TYPE}")
 
-# Using C++ 14
-set(CMAKE_CXX_STANDARD 14)
+# Using C++ 17
+set(CMAKE_CXX_STANDARD 17)
 
 # Add our root include directory
 include_directories(${CMAKE_SOURCE_DIR})
@@ -51,4 +51,3 @@ add_subdirectory(bblaunch)
 
 add_subdirectory(freeimage)
 add_subdirectory(blitz3D)
-add_subdirectory(soloud)

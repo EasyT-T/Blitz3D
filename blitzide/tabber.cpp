@@ -62,7 +62,7 @@ BOOL Tabber::OnEraseBkgnd(CDC* dc)
     CRect c;
     GetClientRect(&c);
 
-    const HBRUSH hb = (HBRUSH)GetClassLong(m_hWnd, GCL_HBRBACKGROUND);
+    const auto hb = reinterpret_cast<HBRUSH>(GetClassLong(m_hWnd, GCLP_HBRBACKGROUND));
     CBrush br;
     br.Attach(hb);
 

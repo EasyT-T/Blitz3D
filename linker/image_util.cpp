@@ -341,7 +341,7 @@ static void saveImage(std::ostream& out)
         const Section* s = sections[k];
         if (!s->sect.data_addr) continue;
         //assumes sect data is in order!!!!!
-        while (out.tellp() < s->sect.data_addr) out.put((char)0xbb);
+        while (out.tellp() < s->sect.data_addr) out.put(static_cast<char>(0xbb));
         out.seekp(s->sect.data_addr);
         out.write(s->data, s->sect.data_size);
     }

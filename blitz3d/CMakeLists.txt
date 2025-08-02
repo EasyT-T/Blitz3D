@@ -80,6 +80,5 @@ add_library(blitz3d
 target_compile_options(blitz3d PRIVATE /Gz)
 
 set(LIBS gxruntime ${CMAKE_CURRENT_SOURCE_DIR}/minidx9/lib/d3dxof.lib)
-set(LIBS ${LIBS} soloud)
 
 target_link_libraries(blitz3d ${LIBS})

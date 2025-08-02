@@ -57,7 +57,7 @@ public:
 
     void operator delete(void* q)
     {
-        MeshQueue* t = (MeshQueue*)q;
+        MeshQueue* t = static_cast<MeshQueue*>(q);
         t->next = pool;
         pool = t;
     }

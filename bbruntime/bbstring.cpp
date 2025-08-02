@@ -108,7 +108,7 @@ BBStr* bbRSet(BBStr* s, const int n)
 BBStr* bbChr(const int n)
 {
     BBStr* t = d_new BBStr();
-    *t += (char)n;
+    *t += static_cast<char>(n);
     return t;
 }
 

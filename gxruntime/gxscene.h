@@ -89,6 +89,9 @@ public:
             gxCanvas* canvas;
             const Matrix* matrix;
             int blend, flags;
+            DWORD bumpEnvMat[2][2];
+            DWORD bumpEnvScale;
+            DWORD bumpEnvOffset;
         } tex_states[MAX_TEXTURES];
     };
 
@@ -128,6 +131,8 @@ public:
     //info
     int getTrianglesDrawn() const;
 
+    DWORD textureLodBias;
+
 private:
     gxCanvas* target;
     bool wbuffer, dither, antialias, wireframe, flipped;
@@ -149,6 +154,9 @@ private:
         int blend, flags;
         D3DMATRIX matrix;
         bool mat_valid;
+        DWORD bumpEnvMat[2][2];
+        DWORD bumpEnvScale;
+        DWORD bumpEnvOffset;
     };
 
     TexState texstate[MAX_TEXTURES];

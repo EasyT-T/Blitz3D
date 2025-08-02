@@ -12,14 +12,14 @@ static D3DMATRIX sphere_mat, nullmatrix;
 void gxScene::setRS(int n, const int t)
 {
     if (d3d_rs[n] == t) return;
-    dir3dDev->SetRenderState((D3DRENDERSTATETYPE)n, t);
+    dir3dDev->SetRenderState(static_cast<D3DRENDERSTATETYPE>(n), t);
     d3d_rs[n] = t;
 }
 
 void gxScene::setTSS(const int n, int s, const int t)
 {
     if (d3d_tss[n][s] == t) return;
-    dir3dDev->SetTextureStageState(n, (D3DTEXTURESTAGESTATETYPE)s, t);
+    dir3dDev->SetTextureStageState(n, static_cast<D3DTEXTURESTAGESTATETYPE>(s), t);
     d3d_tss[n][s] = t;
 }
 
@@ -184,7 +184,7 @@ void gxScene::setTexState(const int n, const TexState& state, const bool tex_ble
     case gxCanvas::CANVAS_TEX_SPHERE:
         setTSS(n, D3DTSS_TEXCOORDINDEX,D3DTSS_TCI_CAMERASPACENORMAL); //|tc_index );
         setTSS(n, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-        dir3dDev->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTRANSFORMSTATE_TEXTURE0 + n), &sphere_mat);
+        dir3dDev->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTRANSFORMSTATE_TEXTURE0 + n), &sphere_mat);
         break;
     case gxCanvas::CANVAS_TEX_CUBE:
         switch (state.canvas->cubeMode() & 3)
@@ -206,7 +206,7 @@ void gxScene::setTexState(const int n, const TexState& state, const bool tex_ble
         else
         {
             setTSS(n, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT3); //COUNT4|D3DTTFF_PROJECTED );
-            dir3dDev->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTRANSFORMSTATE_TEXTURE0 + n), &inv_viewmatrix);
+            dir3dDev->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTRANSFORMSTATE_TEXTURE0 + n), &inv_viewmatrix);
         }
         break;
     default:
@@ -214,7 +214,7 @@ void gxScene::setTexState(const int n, const TexState& state, const bool tex_ble
         if (state.mat_valid)
         {
             setTSS(n, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-            dir3dDev->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTRANSFORMSTATE_TEXTURE0 + n), (D3DMATRIX*)&state.matrix);
+            dir3dDev->SetTransform(static_cast<D3DTRANSFORMSTATETYPE>(D3DTRANSFORMSTATE_TEXTURE0 + n), (D3DMATRIX*)&state.matrix);
         }
         else
         {
@@ -243,6 +243,12 @@ void gxScene::setTexState(const int n, const TexState& state, const bool tex_ble
         setTSS(n, D3DTSS_COLOROP, D3DTOP_MODULATE2X);
         break;
     }
+    setTSS(n, D3DTSS_BUMPENVMAT00, state.bumpEnvMat[0][0]);
+    setTSS(n, D3DTSS_BUMPENVMAT01, state.bumpEnvMat[0][1]);
+    setTSS(n, D3DTSS_BUMPENVMAT10, state.bumpEnvMat[1][0]);
+    setTSS(n, D3DTSS_BUMPENVMAT11, state.bumpEnvMat[1][1]);
+    setTSS(n, D3DTSS_BUMPENVLSCALE, state.bumpEnvScale);
+    setTSS(n, D3DTSS_BUMPENVLOFFSET, state.bumpEnvOffset);
     setTSS(n, D3DTSS_ALPHAOP, (flags & gxCanvas::CANVAS_TEX_ALPHA) ? D3DTOP_MODULATE : D3DTOP_SELECTARG2);
 }
 
@@ -380,14 +386,14 @@ void gxScene::setFlippedTris(const bool n)
 
 void gxScene::setAmbient(const float rgb[])
 {
-    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (static_cast<int>(rgb[0] * 255.0f) << 16) | (static_cast<int>(rgb[1] * 255.0f) << 8) | static_cast<int>(rgb[2] * 255.0f);
     ambient = n;
     setAmbient();
 }
 
 void gxScene::setAmbient2(const float rgb[])
 {
-    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (static_cast<int>(rgb[0] * 255.0f) << 16) | (static_cast<int>(rgb[1] * 255.0f) << 8) | static_cast<int>(rgb[2] * 255.0f);
     ambient2 = n;
     setAmbient();
 }
@@ -444,7 +450,7 @@ void gxScene::setPerspProj(const float nr, const float fr, const float w, const 
 
 void gxScene::setFogColor(const float rgb[3])
 {
-    const int n = (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) | int(rgb[2] * 255.0f);
+    const int n = (static_cast<int>(rgb[0] * 255.0f) << 16) | (static_cast<int>(rgb[1] * 255.0f) << 8) | static_cast<int>(rgb[2] * 255.0f);
     if (n == fogcolor) return;
     fogcolor = n;
     setRS(D3DRENDERSTATE_FOGCOLOR, fogcolor);
@@ -638,6 +644,22 @@ void gxScene::setRenderState(const RenderState& rs)
             hw->flags = ts.flags;
             settex = true;
         }
+        if (ts.bumpEnvMat[0][0] != hw->bumpEnvMat[0][0]) {
+            hw->bumpEnvMat[0][0] = ts.bumpEnvMat[0][0];
+            settex = true;
+        }
+        if (ts.bumpEnvMat[1][0] != hw->bumpEnvMat[1][0]) {
+            hw->bumpEnvMat[1][0] = ts.bumpEnvMat[1][0];
+            settex = true;
+        }
+        if (ts.bumpEnvMat[0][1] != hw->bumpEnvMat[0][1]) {
+            hw->bumpEnvMat[0][1] = ts.bumpEnvMat[0][1];
+            settex = true;
+        }
+        if (ts.bumpEnvMat[1][1] != hw->bumpEnvMat[1][1]) {
+            hw->bumpEnvMat[1][1] = ts.bumpEnvMat[1][1];
+            settex = true;
+        }
         if (ts.matrix || hw->mat_valid)
         {
             if (ts.matrix)
@@ -682,6 +704,7 @@ bool gxScene::begin(const std::vector<gxLight*>& lights)
         setTSS(n, D3DTSS_COLOROP, D3DTOP_DISABLE);
         setTSS(n, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
         dir3dDev->SetTexture(n, nullptr);
+        setTSS(n, D3DTSS_MIPMAPLODBIAS, textureLodBias);
     }
 
     //set light states
@@ -708,9 +731,8 @@ void gxScene::clear(const float rgb[3], const float alpha, const float z, const 
 {
     if (!clear_argb && !clear_z) return;
     const int flags = (clear_argb ? D3DCLEAR_TARGET : 0) | (clear_z ? D3DCLEAR_ZBUFFER : 0);
-    const unsigned argb = (int(alpha * 255.0f) << 24) | (int(rgb[0] * 255.0f) << 16) | (int(rgb[1] * 255.0f) << 8) |
-        int(
-            rgb[2] * 255.0f);
+    const unsigned argb = (static_cast<int>(alpha * 255.0f) << 24) | (static_cast<int>(rgb[0] * 255.0f) << 16) | (static_cast<int>(rgb[1] * 255.0f) << 8) |
+        static_cast<int>(rgb[2] * 255.0f);
     dir3dDev->Clear(0, nullptr, flags, argb, z, 0);
 }
 
@@ -765,8 +787,8 @@ void gxScene::end() const
 {
     dir3dDev->EndScene();
     const RECT r = {
-        (LONG)viewport.dwX, (LONG)viewport.dwY, (LONG)(viewport.dwX + viewport.dwWidth),
-        (LONG)(viewport.dwY + viewport.dwHeight)
+        static_cast<LONG>(viewport.dwX), static_cast<LONG>(viewport.dwY), static_cast<LONG>(viewport.dwX + viewport.dwWidth),
+        static_cast<LONG>(viewport.dwY + viewport.dwHeight)
     };
     target->damage(r);
 }

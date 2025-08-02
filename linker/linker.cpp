@@ -77,7 +77,7 @@ void* BBModule::link(Module* libs)
     int dest;
     std::map<int, std::string>::iterator it;
 
-    char* p = (char*)VirtualAlloc(nullptr, pc, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    char* p = static_cast<char*>(VirtualAlloc(nullptr, pc, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
     memcpy(p, data, pc);
     delete[] data;
     data = p;

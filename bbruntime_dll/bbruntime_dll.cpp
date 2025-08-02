@@ -192,7 +192,7 @@ struct Sym
 static Sym getSym(void** p)
 {
     Sym sym;
-    char* t = (char*)*p;
+    char* t = static_cast<char*>(*p);
     while (const char c = *t++) sym.name += c;
     sym.value = *(int*)t + (int)module_pc;
     *p = t + 4;
@@ -245,19 +245,19 @@ static void link()
     void* p = LockResource(hglo);
     if (!p) fail();
 
-    const int sz = *(int*)p;
-    p = (int*)p + 1;
+    const int sz = *static_cast<int*>(p);
+    p = static_cast<int*>(p) + 1;
 
     //replace malloc for service pack 2 Data Execution Prevention (DEP).
     module_pc = VirtualAlloc(nullptr, sz,MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE);
 
     memcpy(module_pc, p, sz);
-    p = (char*)p + sz;
+    p = static_cast<char*>(p) + sz;
 
     int k;
 
-    int cnt = *(int*)p;
-    p = (int*)p + 1;
+    int cnt = *static_cast<int*>(p);
+    p = static_cast<int*>(p) + 1;
     for (k = 0; k < cnt; ++k)
     {
         Sym sym = getSym(&p);
@@ -265,8 +265,8 @@ static void link()
         module_syms[sym.name] = sym.value;
     }
 
-    cnt = *(int*)p;
-    p = (int*)p + 1;
+    cnt = *static_cast<int*>(p);
+    p = static_cast<int*>(p) + 1;
     for (k = 0; k < cnt; ++k)
     {
         Sym sym = getSym(&p);
@@ -275,8 +275,8 @@ static void link()
         *pp += dest - (int)pp;
     }
 
-    cnt = *(int*)p;
-    p = (int*)p + 1;
+    cnt = *static_cast<int*>(p);
+    p = static_cast<int*>(p) + 1;
     for (k = 0; k < cnt; ++k)
     {
         Sym sym = getSym(&p);
@@ -340,7 +340,7 @@ int __stdcall bbWinMain()
         }
     }
 
-    runtime->execute((void(*)())module_pc, params.c_str(), nullptr);
+    runtime->execute(static_cast<void(*)()>(module_pc), params.c_str(), nullptr);
     runtime->shutdown();
 
     _DllMainCRTStartup(inst,DLL_PROCESS_DETACH, nullptr);

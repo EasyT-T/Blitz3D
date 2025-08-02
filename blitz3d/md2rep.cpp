@@ -112,8 +112,8 @@ MD2Rep::MD2Rep(const std::string& f) :
                 t_verts.push_back(t);
                 //add UVs
                 VertexUV uv;
-                uv.u = md2_uvs[t.uv].u / (float)(header.skinWidth);
-                uv.v = md2_uvs[t.uv].v / (float)(header.skinHeight);
+                uv.u = md2_uvs[t.uv].u / static_cast<float>(header.skinWidth);
+                uv.v = md2_uvs[t.uv].v / static_cast<float>(header.skinHeight);
                 uvs.push_back(uv);
             }
             else

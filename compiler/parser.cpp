@@ -77,7 +77,7 @@ std::string Parser::parseIdent() {
 }
 
 void Parser::parseChar(const int c) {
-    if (toker->curr() != c) exp(std::string("'") + char(c) + std::string("'"));
+    if (toker->curr() != c) exp(std::string("'") + static_cast<char>(c) + std::string("'"));
     toker->next();
 }
 

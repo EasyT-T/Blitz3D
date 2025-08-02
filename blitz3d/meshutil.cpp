@@ -66,8 +66,8 @@ MeshModel* MeshUtil::createSphere(const Brush& b, const int segs)
         {
             const float yaw = (j % h_segs) * TWOPI / h_segs;
             v.coords = v.normal = rotationMatrix(pitch, yaw, 0).k;
-            v.tex_coords[0][0] = v.tex_coords[1][0] = float(j) / float(h_segs);
-            v.tex_coords[0][1] = v.tex_coords[1][1] = float(k) / float(v_segs);
+            v.tex_coords[0][0] = v.tex_coords[1][0] = static_cast<float>(j) / static_cast<float>(h_segs);
+            v.tex_coords[0][1] = v.tex_coords[1][1] = static_cast<float>(k) / static_cast<float>(v_segs);
             s->addVertex(v);
         }
     }
@@ -123,11 +123,11 @@ MeshModel* MeshUtil::createCylinder(const Brush& b, const int segs, const bool s
         v.coords = rotationMatrix(0, yaw, 0).k;
         v.coords.y = 1;
         v.normal = Vector(v.coords.x, 0, v.coords.z);
-        v.tex_coords[0][0] = v.tex_coords[1][0] = float(k) / segs;
+        v.tex_coords[0][0] = v.tex_coords[1][0] = static_cast<float>(k) / segs;
         v.tex_coords[0][1] = v.tex_coords[1][1] = 0;
         s->addVertex(v);
         v.coords.y = -1;
-        v.tex_coords[0][0] = v.tex_coords[1][0] = float(k) / segs;
+        v.tex_coords[0][0] = v.tex_coords[1][0] = static_cast<float>(k) / segs;
         v.tex_coords[0][1] = v.tex_coords[1][1] = 1;
         s->addVertex(v);
     }
@@ -195,7 +195,7 @@ MeshModel* MeshUtil::createCone(const Brush& b, const int segs, const bool solid
         v.coords = yawMatrix(yaw).k;
         v.coords.y = -1;
         v.normal = Vector(v.coords.x, 0, v.coords.z);
-        v.tex_coords[0][0] = v.tex_coords[1][0] = float(k) / segs;
+        v.tex_coords[0][0] = v.tex_coords[1][0] = static_cast<float>(k) / segs;
         v.tex_coords[0][1] = v.tex_coords[1][1] = 1;
         s->addVertex(v);
     }

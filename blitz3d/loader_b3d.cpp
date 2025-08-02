@@ -95,7 +95,7 @@ static void readColor(unsigned* t)
     float a = readFloat();
     if (a < 0) a = 0;
     else if (a > 1) a = 1;
-    *t = (int(a * 255) << 24) | (int(r * 255) << 16) | (int(g * 255) << 8) | int(b * 255);
+    *t = (static_cast<int>(a * 255) << 24) | (static_cast<int>(r * 255) << 16) | (static_cast<int>(g * 255) << 8) | static_cast<int>(b * 255);
 }
 
 static std::string readString()

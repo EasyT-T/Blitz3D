@@ -39,14 +39,20 @@ set(SRCS ${SRCS}
         gxmovie.h
         gxscene.cpp
         gxscene.h
+        gxaudio_fmod.cpp
+        gxaudio_fmod.h
 )
 
 add_library(gxruntime ${SRCS})
+
+target_include_directories(gxruntime PUBLIC "${CMAKE_SOURCE_DIR}/fmod/include")
 
 target_compile_options(gxruntime PRIVATE /Gz)
 
 set(LIBS stdutil winmm Ws2_32.lib)
 
 set(LIBS ${LIBS} freeimage amstrmid dinput8 dxguid ddraw)
+set(LIBS ${LIBS} ${CMAKE_SOURCE_DIR}/fmod/lib/fmod_vc.lib)
+
 
 target_link_libraries(gxruntime ${LIBS})

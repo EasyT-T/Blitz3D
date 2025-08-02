@@ -41,14 +41,14 @@ static int nextChunk()
     int len;
     in.sgetn((char*)&id, 2);
     in.sgetn((char*)&len, 4);
-    chunk_end = (int)in.pubseekoff(0, std::ios_base::cur) + len - 6;
+    chunk_end = static_cast<int>(in.pubseekoff(0, std::ios_base::cur)) + len - 6;
     return id;
 }
 
 static void enterChunk()
 {
     parent_end.push_back(chunk_end);
-    chunk_end = (int)in.pubseekoff(0, std::ios_base::cur);
+    chunk_end = static_cast<int>(in.pubseekoff(0, std::ios_base::cur));
 }
 
 static void leaveChunk()
@@ -60,7 +60,7 @@ static void leaveChunk()
 static std::string parseString()
 {
     std::string t;
-    while (const int c = in.sbumpc()) t += char(c);
+    while (const int c = in.sbumpc()) t += static_cast<char>(c);
     return t;
 }
 
@@ -531,7 +531,7 @@ static MeshModel* parseFile()
     in.sgetn((char*)&id, 2);
     in.sgetn((char*)&len, 4);
     if (id != CHUNK_MAIN) return nullptr;
-    chunk_end = (int)in.pubseekoff(0, std::ios_base::cur) + len - 6;
+    chunk_end = static_cast<int>(in.pubseekoff(0, std::ios_base::cur)) + len - 6;
 
     enterChunk();
     MeshModel* root = d_new MeshModel();

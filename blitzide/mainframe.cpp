@@ -135,7 +135,7 @@ int MainFrame::OnCreate(const LPCREATESTRUCT lpCreateStruct)
     {
         BITMAP bm;
         const std::string t = prefs.homeDir + "/cfg/ide_toolbar.bmp";
-        toolbmp = (HBITMAP)LoadImage(nullptr, t.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
+        toolbmp = static_cast<HBITMAP>(LoadImage(nullptr, t.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_LOADMAP3DCOLORS));
         if (!toolbmp)
         {
             AfxMessageBox("toolbar bitmap failed to load!");
@@ -691,7 +691,7 @@ void MainFrame::compile(const std::string& cmd)
     CDialog compiling;
     compiling.Create(IDD_COMPILING);
 
-    CProgressCtrl* cp = (CProgressCtrl*)compiling.GetDlgItem(IDC_COMPILEPROGRESS);
+    CProgressCtrl* cp = static_cast<CProgressCtrl*>(compiling.GetDlgItem(IDC_COMPILEPROGRESS));
     cp->SetStep(20);
 
     putenv("blitzide=1");

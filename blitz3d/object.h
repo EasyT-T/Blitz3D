@@ -6,8 +6,7 @@
 #include "animator.h"
 #include "collision.h"
 #include "entity.h"
-
-struct Sound;
+#include "gxruntime/gxaudio_fmod.h"
 
 struct ObjCollision
 {
@@ -54,7 +53,7 @@ public:
 
     void setAnimator(Animator* t);
 
-    uint32_t emitSound(Sound* sound);
+    IChannel* emitSound(ISound* sound);
 
     //overridables!
     virtual bool collide(const Line& line, float radius, ::Collision* curr_coll, const Transform& t) { return false; }
@@ -112,7 +111,7 @@ private:
     bool obscurer;
     float elapsed;
     Vector velocity;
-    std::vector<uint32_t> channels;
+    std::vector<IChannel*> channels;
     Vector capt_pos, capt_scl;
     Quat capt_rot;
     mutable Object* last_copy;

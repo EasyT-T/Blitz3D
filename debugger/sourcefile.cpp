@@ -77,7 +77,7 @@ DWORD SourceFile::streamIn(const LPBYTE buff, const LONG cnt, LONG* done)
                 c = is_stream->get();
                 if (c == '\r' || c == '\n' || c == EOF) break;
                 if (c == '\\' || c == '{' || c == '}') is_line += '\\';
-                is_line += (char)c;
+                is_line += static_cast<char>(c);
             }
             formatStreamLine();
             ++is_linenum;

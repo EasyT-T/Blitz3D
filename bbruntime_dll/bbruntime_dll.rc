@@ -27,21 +27,14 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE DISCARDABLE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#include ""../bbruntime/multiplay_setup.rc""\r\n"
-    "\r\n"
     "\0"
 END
 
@@ -53,7 +46,7 @@ END
 // Data
 //
 
-IDR_BBMODULE RCDATA DISCARDABLE 
+IDR_BBMODULE RCDATA DISCARDABLE
 BEGIN
     0x0201, 0x0403
 END
@@ -69,17 +62,4 @@ END
 IDI_ICON1               ICON    DISCARDABLE     "bbexe.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
-
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-#include "../bbruntime/multiplay_setup.rc"
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
 

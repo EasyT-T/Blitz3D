@@ -136,12 +136,12 @@ public:
         if (n > 1) return d_new T[n];
         if (!free)
         {
-            free = (T*)d_new char[sizeof(T) * N];
-            for (int k = 0; k < N - 1; ++k) *(T**)(free + k) = free + k + 1;
-            *(T**)(free + N - 1) = 0;
+            free = static_cast<T*>(d_new char[sizeof(T) * N]);
+            for (int k = 0; k < N - 1; ++k) *static_cast<T**>(free + k) = free + k + 1;
+            *static_cast<T**>(free + N - 1) = 0;
         }
         T* t = free;
-        free = *(T**)t;
+        free = *static_cast<T**>(t);
         return t;
     }
 
@@ -150,8 +150,8 @@ public:
         std::clog << "Deallocating " << n << std::endl;
         while (n-- > 0)
         {
-            *(T**)q = free;
-            *(T**)free = q;
+            *static_cast<T**>(q) = free;
+            *static_cast<T**>(free) = q;
             ++q;
         }
     }

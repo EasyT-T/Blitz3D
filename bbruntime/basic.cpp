@@ -76,7 +76,7 @@ void* BBStr::operator new(size_t size)
 {
     if (freeStrs.next == &freeStrs)
     {
-        BBStr* t = (BBStr*)bbMalloc(sizeof(BBStr) * STR_NEW_INC);
+        BBStr* t = static_cast<BBStr*>(bbMalloc(sizeof(BBStr) * STR_NEW_INC));
         for (int k = 0; k < STR_NEW_INC; ++k) insertStr(t++, &freeStrs);
     }
     BBStr* t = freeStrs.next;
@@ -88,7 +88,7 @@ void* BBStr::operator new(size_t size)
 void BBStr::operator delete(void* q)
 {
     if (!q) return;
-    BBStr* t = (BBStr*)q;
+    BBStr* t = static_cast<BBStr*>(q);
     removeStr(t);
     insertStr(t, &freeStrs);
 }
@@ -186,7 +186,7 @@ BBStr* _bbStrFromInt(const int n)
 
 float _bbStrToFloat(BBStr* s)
 {
-    const float n = (float)atof(*s);
+    const float n = static_cast<float>(atof(*s));
     delete s;
     return n;
 }
@@ -212,7 +212,7 @@ void _bbVecFree(void* vec, BBVecType* type)
 {
     if (type->elementType->type == BBTYPE_STR)
     {
-        BBStr** p = (BBStr**)vec;
+        BBStr** p = static_cast<BBStr**>(vec);
         for (int k = 0; k < type->size; ++p, ++k)
         {
             if (*p) _bbStrRelease(*p);
@@ -220,7 +220,7 @@ void _bbVecFree(void* vec, BBVecType* type)
     }
     else if (type->elementType->type == BBTYPE_OBJ)
     {
-        BBObj** p = (BBObj**)vec;
+        BBObj** p = static_cast<BBObj**>(vec);
         for (int k = 0; k < type->size; ++p, ++k)
         {
             if (*p) _bbObjRelease(*p);
@@ -240,7 +240,7 @@ void _bbUndimArray(BBArray* array)
     {
         if (array->elementType == BBTYPE_STR)
         {
-            BBStr** p = (BBStr**)t;
+            BBStr** p = static_cast<BBStr**>(t);
             const int size = array->scales[array->dims - 1];
             for (int k = 0; k < size; ++p, ++k)
             {
@@ -249,7 +249,7 @@ void _bbUndimArray(BBArray* array)
         }
         else if (array->elementType == BBTYPE_OBJ)
         {
-            BBObj** p = (BBObj**)t;
+            BBObj** p = static_cast<BBObj**>(t);
             const int size = array->scales[array->dims - 1];
             for (int k = 0; k < size; ++p, ++k)
             {
@@ -298,7 +298,7 @@ BBObj* _bbObjNew(BBObjType* type)
     if (type->free.next == &type->free)
     {
         const int obj_size = sizeof(BBObj) + type->fieldCnt * 4;
-        BBObj* o = (BBObj*)bbMalloc(obj_size * OBJ_NEW_INC);
+        BBObj* o = static_cast<BBObj*>(bbMalloc(obj_size * OBJ_NEW_INC));
         for (int k = 0; k < OBJ_NEW_INC; ++k)
         {
             insertObj(o, &type->free);
@@ -315,7 +315,7 @@ BBObj* _bbObjNew(BBObjType* type)
         switch (type->fieldTypes[k]->type)
         {
         case BBTYPE_VEC:
-            o->fields[k].VEC = _bbVecAlloc((BBVecType*)type->fieldTypes[k]);
+            o->fields[k].VEC = _bbVecAlloc(static_cast<BBVecType*>(type->fieldTypes[k]));
             break;
         default:
             o->fields[k].INT = 0;
@@ -344,7 +344,7 @@ void _bbObjDelete(BBObj* obj)
             _bbObjRelease(fields[k].OBJ);
             break;
         case BBTYPE_VEC:
-            _bbVecFree(fields[k].VEC, (BBVecType*)type->fieldTypes[k]);
+            _bbVecFree(fields[k].VEC, static_cast<BBVecType*>(type->fieldTypes[k]));
             break;
         }
     }

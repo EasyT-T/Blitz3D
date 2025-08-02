@@ -143,14 +143,14 @@ public:
         poll_time = tm;
         DIJOYSTATE state;
         if (device->GetDeviceState(sizeof(state), &state) < 0) return;
-        axis_states[0] = (state.lX - mins[0]) / (float)maxs[0] * 2 - 1;
-        axis_states[1] = (state.lY - mins[1]) / (float)maxs[1] * 2 - 1;
-        axis_states[2] = (state.lZ - mins[2]) / (float)maxs[2] * 2 - 1;
-        axis_states[3] = (state.rglSlider[0] - mins[6]) / (float)maxs[6] * 2 - 1;
-        axis_states[4] = (state.rglSlider[1] - mins[7]) / (float)maxs[7] * 2 - 1;
-        axis_states[5] = (state.lRx - mins[3]) / (float)maxs[3] * 2 - 1;
-        axis_states[6] = (state.lRy - mins[4]) / (float)maxs[4] * 2 - 1;
-        axis_states[7] = (state.lRz - mins[5]) / (float)maxs[5] * 2 - 1;
+        axis_states[0] = (state.lX - mins[0]) / static_cast<float>(maxs[0]) * 2 - 1;
+        axis_states[1] = (state.lY - mins[1]) / static_cast<float>(maxs[1]) * 2 - 1;
+        axis_states[2] = (state.lZ - mins[2]) / static_cast<float>(maxs[2]) * 2 - 1;
+        axis_states[3] = (state.rglSlider[0] - mins[6]) / static_cast<float>(maxs[6]) * 2 - 1;
+        axis_states[4] = (state.rglSlider[1] - mins[7]) / static_cast<float>(maxs[7]) * 2 - 1;
+        axis_states[5] = (state.lRx - mins[3]) / static_cast<float>(maxs[3]) * 2 - 1;
+        axis_states[6] = (state.lRy - mins[4]) / static_cast<float>(maxs[4]) * 2 - 1;
+        axis_states[7] = (state.lRz - mins[5]) / static_cast<float>(maxs[5]) * 2 - 1;
         if ((state.rgdwPOV[0] & 0xffff) == 0xffff) axis_states[8] = -1;
         else axis_states[8] = floor(state.rgdwPOV[0] / 100.0f + .5f);
 
@@ -271,7 +271,7 @@ static BOOL CALLBACK enumJoystick(const LPCDIDEVICEINSTANCE devinst, const LPVOI
 {
     if ((devinst->dwDevType & 0xff) != DI8DEVTYPE_JOYSTICK) return DIENUM_CONTINUE;
 
-    if (Joystick* joy = createJoystick((gxInput*)pvRef, devinst))
+    if (Joystick* joy = createJoystick(static_cast<gxInput*>(pvRef), devinst))
     {
         joysticks.push_back(joy);
     }

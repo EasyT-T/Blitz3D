@@ -45,7 +45,7 @@ void main()
 
     plot(pixmap, 0x818283);
     //	short *b=(short *)pixmap;
-    const int* b = (int*)pixmap;
+    const int* b = static_cast<int*>(pixmap);
     printf("b[0]=0x%x\n", b[0]);
     n = point(pixmap);
     printf("point(0,0)=0x%x\n", n);

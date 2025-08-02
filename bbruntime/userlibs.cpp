@@ -48,7 +48,7 @@ void _bbLoadLibs(char* p)
                 p += strlen(p) + 1;
                 void* ptr = *(void**)p;
                 p += 4;
-                *(void**)ptr = proc ? proc : reinterpret_cast<void*>(procNotFound);
+                *static_cast<void**>(ptr) = proc ? proc : reinterpret_cast<void*>(procNotFound);
             }
         }
         else
@@ -58,7 +58,7 @@ void _bbLoadLibs(char* p)
                 p += strlen(p) + 1;
                 void* ptr = *(void**)p;
                 p += 4;
-                *(void**)ptr = libNotFound;
+                *static_cast<void**>(ptr) = libNotFound;
             }
         }
         ++p;

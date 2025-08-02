@@ -56,7 +56,7 @@ public:
 
     void Reset(void* p)
     {
-        ptr = (char*)p;
+        ptr = static_cast<char*>(p);
         off = 0;
     }
 

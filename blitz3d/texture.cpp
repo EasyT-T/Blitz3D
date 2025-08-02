@@ -42,6 +42,9 @@ struct Texture::Rep
 
     int tex_blend, tex_flags;
     bool transparent;
+    DWORD bumpEnvMat[2][2];
+    DWORD bumpEnvScale;
+    DWORD bumpEnvOffset;
 
     float sx, sy, tx, ty, rot;
     bool mat_used, mat_valid;
@@ -163,6 +166,21 @@ void Texture::setFlags(const int flags) const
     rep->tex_flags = flags;
 }
 
+void Texture::setBumpEnvMat(const int x, const int y, float envmat) {
+    if(!rep) return;
+    rep->bumpEnvMat[x][y] = *((DWORD*)&envmat);
+}
+
+void Texture::setBumpEnvScale(float envscale) {
+    if(!rep) return;
+    rep->bumpEnvScale = *((DWORD*)&envscale);
+}
+
+void Texture::setBumpEnvOffset(float envoffset) {
+    if(!rep) return;
+    rep->bumpEnvOffset = *((DWORD*)&envoffset);
+}
+
 bool Texture::isTransparent() const
 {
     return rep ? rep->transparent : false;
@@ -191,6 +209,18 @@ int Texture::getBlend() const
 int Texture::getFlags() const
 {
     return rep ? rep->tex_flags : 0;
+}
+
+int Texture::getBumpEnvMat(const int x, const int y) const {
+    return rep ? rep->bumpEnvMat[x][y] : 0;
+}
+
+int Texture::getBumpEnvScale() const {
+    return rep ? rep->bumpEnvScale : 0;
+}
+
+int Texture::getBumpEnvOffset() const {
+    return rep ? rep->bumpEnvOffset : 0;
 }
 
 const gxScene::Matrix* Texture::getMatrix() const

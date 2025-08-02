@@ -42,12 +42,12 @@ struct PlaneModel::Rep
         int x;
         for (x = 0; x <= sub_divs; ++x)
         {
-            const float t = float(x) / float(sub_divs);
+            const float t = static_cast<float>(x) / static_cast<float>(sub_divs);
             Vector tx = (tr - tl) * t + tl;
             Vector bx = (br - bl) * t + bl;
             for (int y = 0; y <= sub_divs; ++y)
             {
-                const float t = float(y) / float(sub_divs);
+                const float t = static_cast<float>(y) / static_cast<float>(sub_divs);
                 vts[x][y] = (bx - tx) * t + tx;
             }
         }

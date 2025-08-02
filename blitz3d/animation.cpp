@@ -23,7 +23,7 @@ struct Animation::Rep
     Vector getLinearValue(const KeyList& keys, const float time) const
     {
         //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
-        KeyList::const_iterator next = keys.upper_bound((int)time);
+        KeyList::const_iterator next = keys.upper_bound(static_cast<int>(time));
 
         if (next == keys.begin()) return next->second.v;
         KeyList::const_iterator curr = next;
@@ -37,7 +37,7 @@ struct Animation::Rep
     Quat getSlerpValue(const KeyList& keys, const float time) const
     {
         //for( next=keys.begin();next!=keys.end() && time>=next->first;++next ){}
-        KeyList::const_iterator next = keys.upper_bound((int)time);
+        KeyList::const_iterator next = keys.upper_bound(static_cast<int>(time));
 
         if (next == keys.begin()) return next->second;
         KeyList::const_iterator curr = next;

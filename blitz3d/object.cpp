@@ -2,6 +2,7 @@
 #include "std.h"
 
 extern gxRuntime* gx_runtime;
+extern gxAudio* gx_audio;
 
 Object::Object() :
     order(0), animator(nullptr), last_copy(nullptr),
@@ -154,7 +155,7 @@ const Transform& Object::getRenderTform() const
 {
     if (render_tform_valid) return render_tform;
 
-    const Object* parent = (Object*)getParent();
+    const Object* parent = static_cast<Object*>(getParent());
     render_tform = parent ? parent->getRenderTform() * tween_tform : tween_tform;
     render_tform_valid = true;
 
@@ -166,42 +167,53 @@ const Transform& Object::getPrevWorldTform() const
     return prev_tform;
 }
 
-uint32_t bbPlay3dSound(Sound* sound, float x, float y, float z, float vx, float vy, float vz);
-
-int bbChannelPlaying(uint32_t channel);
-
-void bbSet3dChannel(uint32_t channel, float x, float y, float z, float vx, float vy, float vz);
-
-uint32_t Object::emitSound(Sound* sound)
+IChannel* Object::emitSound(ISound* sound)
 {
     if (!sound) return 0;
 
-    auto& pos = getWorldTform().v;
-    const auto chan = bbPlay3dSound(sound, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
+    const Vector position = getWorldTform().v;
+    const ThreeDAttributes attributes
+    {
+        {position.x, position.y, position.z},
+        {velocity.x, velocity.y, velocity.z},
+    };
+
+    sound->setMode(sound->getMode() | SOUND_3D);
+    sound->set3DAttributes(attributes);
+
+    IChannel* channel = gx_audio->playSound(sound);
 
     for (int k = 0; k < channels.size(); ++k)
     {
-        if (chan == channels[k]) return chan;
-        if (!channels[k]) return channels[k] = chan;
+        if (channel == channels[k]) return channel;
+        if (!channels[k]) return channels[k] = channel;
     }
-    channels.push_back(chan);
-    return chan;
+
+    channels.push_back(channel);
+    return channel;
 }
 
 void Object::updateSounds()
 {
     for (int k = 0; k < channels.size(); ++k)
     {
-        if (const auto chan = channels[k])
+        if (const auto channel = channels[k])
         {
-            if (bbChannelPlaying(chan))
+            if (channel->isPlaying())
             {
                 auto& pos = getWorldTform().v;
-                bbSet3dChannel(chan, pos.x, pos.y, pos.z, velocity.x, velocity.y, velocity.z);
+
+                const ThreeDAttributes attributes
+                {
+                    {pos.x, pos.y, pos.z},
+                    {velocity.x, velocity.y, velocity.z},
+                };
+
+                channel->set3DAttributes(attributes);
             }
             else
             {
-                channels[k] = 0;
+                channels[k] = nullptr;
             }
         }
     }

@@ -52,7 +52,7 @@ float bbRnd(const float from, const float to)
 int bbRand(int from, int to)
 {
     if (to < from) std::swap(from, to);
-    return int(rnd() * (to - from + 1)) + from;
+    return static_cast<int>(rnd() * (to - from + 1)) + from;
 }
 
 void bbSeedRnd(int seed)

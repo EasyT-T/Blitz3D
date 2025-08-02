@@ -94,7 +94,7 @@ struct TerrainRep::Tri
 
     void operator delete(void* q)
     {
-        Tri* t = (Tri*)q;
+        Tri* t = static_cast<Tri*>(q);
         t->e0 = tri_pool;
         tri_pool = t;
     }

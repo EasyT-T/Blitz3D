@@ -311,7 +311,7 @@ static void parseMesh(IDirectXFileData* fileData, MeshModel* mesh)
                         {
                             Surface::Vertex& v = MeshLoader::refVertex(*data++);
                             float* t = (float*)data;
-                            v.color = 0xff000000 | (int(t[0] * 255) << 16) | (int(t[1] * 255) << 8) | int(t[2] * 255);
+                            v.color = 0xff000000 | (static_cast<int>(t[0] * 255) << 16) | (static_cast<int>(t[1] * 255) << 8) | static_cast<int>(t[2] * 255);
                             //							v.color=Vector( t[0],t[1],t[2] );
                             data += 4;
                         }

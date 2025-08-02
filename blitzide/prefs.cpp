@@ -51,7 +51,7 @@ void Prefs::open()
             if (in.peek() == '\"')
             {
                 in.ignore();
-                while (in.peek() != '\"') s += (char)in.get();
+                while (in.peek() != '\"') s += static_cast<char>(in.get());
                 in.ignore();
             }
             else

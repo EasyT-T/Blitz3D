@@ -28,7 +28,7 @@ void _bbLoadLibs(char* p)
             void* ptr = *(void**)p;
             p += 4;
             if (!proc) proc = procNotFound;
-            *(void**)ptr = proc;
+            *static_cast<void**>(ptr) = proc;
         }
     }
 }

@@ -326,7 +326,7 @@ int StringConstNode::intValue()
 
 float StringConstNode::floatValue()
 {
-    return (float)atof(value);
+    return static_cast<float>(atof(value));
 }
 
 std::string StringConstNode::stringValue()
@@ -452,7 +452,7 @@ ExprNode* BinExprNode::semant(Environ* e)
             expr = d_new IntConstNode(lc->intValue() << rc->intValue());
             break;
         case SHR:
-            expr = d_new IntConstNode((unsigned)lc->intValue() >> rc->intValue());
+            expr = d_new IntConstNode(static_cast<unsigned>(lc->intValue()) >> rc->intValue());
             break;
         case SAR:
             expr = d_new IntConstNode(lc->intValue() >> rc->intValue());

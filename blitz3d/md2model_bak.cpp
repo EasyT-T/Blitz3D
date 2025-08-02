@@ -74,13 +74,13 @@ struct MD2Model::Rep
         Header header;
 
         if (!in.open(file.c_str(), ios_base::in | ios_base::binary)) return;
-        if (in.sgetn((char*)&header, sizeof(header)) != sizeof(header)) return;
+        if (in.sgetn(static_cast<char*>(&header), sizeof(header)) != sizeof(header)) return;
         if (header.magic != '2PDI' || header.version != 8) return;
 
         //read tex coords
         in.pubseekpos(header.offsetTexCoords);
         TexCoord* coords = d_new TexCoord[header.numTexCoords];
-        in.sgetn((char*)coords, header.numTexCoords * sizeof(TexCoord));
+        in.sgetn(static_cast<char*>(coords), header.numTexCoords * sizeof(TexCoord));
 
         vector<VertInfo> verts;
         map<VertInfo, int> info_map;
@@ -126,15 +126,15 @@ struct MD2Model::Rep
             Frame& frame = frames[k];
 
             //read frame header;
-            in.sgetn((char*)&frame.scale, 12);
-            in.sgetn((char*)&frame.trans, 12);
+            in.sgetn(static_cast<char*>(&frame.scale), 12);
+            in.sgetn(static_cast<char*>(&frame.trans), 12);
             in.sgetn(frame.name, 16);
 
             frame.trans = Vector(frame.trans.y, frame.trans.z, frame.trans.x);
             frame.scale = Vector(frame.scale.y, frame.scale.z, frame.scale.x);
 
             //read frame verts...
-            in.sgetn((char*)md2_verts, header.numVertices * 4);
+            in.sgetn(static_cast<char*>(md2_verts), header.numVertices * 4);
 
             frame.vertices.resize(verts.size());
             for (int j = 0; j < verts.size(); ++j)
@@ -282,7 +282,7 @@ struct MD2Model::Rep
             return;
         }
 
-        if (in.sgetn((char*)&header, sizeof(header)) != sizeof(header))
+        if (in.sgetn(static_cast<char*>(&header), sizeof(header)) != sizeof(header))
         {
             return;
         }
@@ -297,7 +297,7 @@ struct MD2Model::Rep
         //read tex coords
         in.pubseekpos(header.offsetTexCoords);
         TexCoord* coords = d_new TexCoord[header.numTexCoords];
-        in.sgetn((char*)coords, header.numTexCoords * sizeof(TexCoord));
+        in.sgetn(static_cast<char*>(coords), header.numTexCoords * sizeof(TexCoord));
 
         vector<VertInfo> verts;
         map<VertInfo, int> info_map;
@@ -343,15 +343,15 @@ struct MD2Model::Rep
             Frame& frame = frames[k];
 
             //read frame header;
-            in.sgetn((char*)&frame.scale, 12);
-            in.sgetn((char*)&frame.trans, 12);
+            in.sgetn(static_cast<char*>(&frame.scale), 12);
+            in.sgetn(static_cast<char*>(&frame.trans), 12);
             in.sgetn(frame.name, 16);
 
             frame.trans = Vector(frame.trans.y, frame.trans.z, frame.trans.x);
             frame.scale = Vector(frame.scale.y, frame.scale.z, frame.scale.x);
 
             //read frame verts...
-            in.sgetn((char*)md2_verts, header.numVertices * 4);
+            in.sgetn(static_cast<char*>(md2_verts), header.numVertices * 4);
 
             frame.vertices.resize(verts.size());
             for (int j = 0; j < verts.size(); ++j)

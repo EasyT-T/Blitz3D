@@ -32,6 +32,12 @@ public:
 
     void setFlags(int flags) const;
 
+    void setBumpEnvMat(int x, int y, float envmat);
+
+    void setBumpEnvScale(float envscale);
+
+    void setBumpEnvOffset(float envoffset);
+
     int getCanvasFlags() const;
 
     gxCanvas* getCanvas(int frame) const;
@@ -41,6 +47,12 @@ public:
     int getBlend() const;
 
     int getFlags() const;
+
+    int getBumpEnvMat(int x, int y) const;
+
+    int getBumpEnvScale() const;
+
+    int getBumpEnvOffset() const;
 
     CachedTexture* getCachedTexture() const;
 

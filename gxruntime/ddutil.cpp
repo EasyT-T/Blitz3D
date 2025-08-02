@@ -38,7 +38,7 @@ void PixelFormat::setFormat(const DDPIXELFORMAT& pf)
         VirtualFree(plot_code, 0,MEM_RELEASE);
     }
 
-    plot_code = (char*)VirtualAlloc(nullptr, 128,MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE);
+    plot_code = static_cast<char*>(VirtualAlloc(nullptr, 128,MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE));
     point_code = plot_code + 64;
 
     depth = pf.dwRGBBitCount;
@@ -59,8 +59,8 @@ void PixelFormat::setFormat(const DDPIXELFORMAT& pf)
     calcShifts(gmask, &gshr, &gshl);
     gshr += 8;
     calcShifts(bmask, &bshr, &bshl);
-    plot = (Plot)(void*)plot_code;
-    point = (Point)(void*)point_code;
+    plot = static_cast<Plot>((void*)plot_code);
+    point = static_cast<Point>((void*)point_code);
     asm_coder.CodePlot(plot_code, depth, amask, rmask, gmask, bmask);
     asm_coder.CodePoint(point_code, depth, amask, rmask, gmask, bmask);
 }
@@ -135,7 +135,7 @@ static void buildMask(ddSurf* surf)
 {
     DDSURFACEDESC2 desc = {sizeof(desc)};
     surf->Lock(nullptr, &desc,DDLOCK_WAIT, nullptr);
-    unsigned char* surf_p = (unsigned char*)desc.lpSurface;
+    unsigned char* surf_p = static_cast<unsigned char*>(desc.lpSurface);
     PixelFormat fmt(desc.ddpfPixelFormat);
 
     for (int y = 0; y < desc.dwHeight; ++y)
@@ -158,7 +158,7 @@ static void buildAlpha(ddSurf* surf, bool whiten)
 {
     DDSURFACEDESC2 desc = {sizeof(desc)};
     surf->Lock(nullptr, &desc,DDLOCK_WAIT, nullptr);
-    unsigned char* surf_p = (unsigned char*)desc.lpSurface;
+    unsigned char* surf_p = static_cast<unsigned char*>(desc.lpSurface);
     PixelFormat fmt(desc.ddpfPixelFormat);
 
     for (int y = 0; y < desc.dwHeight; ++y)
@@ -195,12 +195,12 @@ void ddUtil::buildMipMaps(ddSurf* surf)
     {
         DDSURFACEDESC2 src_desc = {sizeof(src_desc)};
         if (src->Lock(nullptr, &src_desc,DDLOCK_WAIT, nullptr) < 0) abort();
-        unsigned char* src_p = (unsigned char*)src_desc.lpSurface;
+        unsigned char* src_p = static_cast<unsigned char*>(src_desc.lpSurface);
         PixelFormat src_fmt(src_desc.ddpfPixelFormat);
 
         DDSURFACEDESC2 dest_desc = {sizeof(dest_desc)};
         if (dest->Lock(nullptr, &dest_desc,DDLOCK_WAIT, nullptr) < 0) abort();
-        unsigned char* dest_p = (unsigned char*)dest_desc.lpSurface;
+        unsigned char* dest_p = static_cast<unsigned char*>(dest_desc.lpSurface);
         PixelFormat dest_fmt(dest_desc.ddpfPixelFormat);
 
         if (src_desc.dwWidth == 1)
@@ -273,13 +273,13 @@ void ddUtil::copy(ddSurf* dest, int dx, int dy, int dw, int dh, ddSurf* src, int
     DDSURFACEDESC2 src_desc = {sizeof(src_desc)};
     src->Lock(nullptr, &src_desc,DDLOCK_WAIT, nullptr);
     PixelFormat src_fmt(src_desc.ddpfPixelFormat);
-    unsigned char* src_p = (unsigned char*)src_desc.lpSurface;
+    unsigned char* src_p = static_cast<unsigned char*>(src_desc.lpSurface);
     src_p += src_desc.lPitch * sy + src_fmt.getPitch() * sx;
 
     DDSURFACEDESC2 dest_desc = {sizeof(dest_desc)};
     dest->Lock(nullptr, &dest_desc,DDLOCK_WAIT, nullptr);
     PixelFormat dest_fmt(dest_desc.ddpfPixelFormat);
-    unsigned char* dest_p = (unsigned char*)dest_desc.lpSurface;
+    unsigned char* dest_p = static_cast<unsigned char*>(dest_desc.lpSurface);
     dest_p += dest_desc.lPitch * dy + dest_fmt.getPitch() * dx;
 
     for (int y = 0; y < dh; ++y)
@@ -570,7 +570,7 @@ ddSurf* ddUtil::loadSurface(const std::string& f, const int flags, gxGraphics* g
     }
     else
     {
-        unsigned char* p = (unsigned char*)bits;
+        unsigned char* p = static_cast<unsigned char*>(bits);
         for (int k = 0; k < height; ++k)
         {
             unsigned char* t = p + 3;

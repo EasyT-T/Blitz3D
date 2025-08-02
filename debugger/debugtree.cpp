@@ -79,22 +79,22 @@ HTREEITEM DebugTree::insertVar(void* var, Decl* d, const std::string& name, HTRE
         s += typeTag(t);
         if (t->intType())
         {
-            s += "=" + itoa(*(int*)var);
+            s += "=" + itoa(*static_cast<int*>(var));
         }
         else if (t->floatType())
         {
-            s += "=" + ftoa(*(float*)var);
+            s += "=" + ftoa(*static_cast<float*>(var));
         }
         else if (t->stringType())
         {
-            const BBStr* str = *(BBStr**)var;
+            const BBStr* str = *static_cast<BBStr**>(var);
             if (str) s += "=\"" + *str + '\"';
             else s += "=\"\"";
         }
         else if (st)
         {
-            var = *(void**)var;
-            if (var) var = *(void**)var;
+            var = *static_cast<void**>(var);
+            if (var) var = *static_cast<void**>(var);
             if (!var) s += " (Null)";
         }
     }
@@ -122,7 +122,7 @@ HTREEITEM DebugTree::insertVar(void* var, Decl* d, const std::string& name, HTRE
                 for (int k = 0; k < st->fields->size(); ++k)
                 {
                     Decl* st_d = st->fields->decls[k];
-                    void* st_var = (char*)var + st_d->offset;
+                    void* st_var = static_cast<char*>(var) + st_d->offset;
 
                     char name[256];
                     st_d->getName(name);
@@ -255,13 +255,13 @@ void LocalsTree::refreshFrame(const Frame& f)
         d->getName(name);
 
         if (!isalpha(name[0])) continue;
-        it = insertVar((char*)f.frame + d->offset, d, name, it, f.item);
+        it = insertVar(static_cast<char*>(f.frame) + d->offset, d, name, it, f.item);
     }
 }
 
 void LocalsTree::pushFrame(void* f, void* e, const char* func)
 {
-    frames.push_back(Frame(f, (Environ*)e, func));
+    frames.push_back(Frame(f, static_cast<Environ*>(e), func));
 }
 
 void LocalsTree::popFrame()

@@ -323,7 +323,7 @@ main(int argc, char* argv[])
 
         if (!veryquiet) std::cout << "Executing..." << std::endl;
 
-        runtimeLib->execute((void (*)())entry, args.c_str(), debugger);
+        runtimeLib->execute(static_cast<void (*)()>(entry), args.c_str(), debugger);
 
         if (dbgHandle) FreeLibrary(dbgHandle);
     }

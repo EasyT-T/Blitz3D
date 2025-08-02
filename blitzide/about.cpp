@@ -43,10 +43,10 @@ public:
 
     void wait(const int n)
     {
-        const int _expire = (int)timeGetTime() + n;
+        const int _expire = static_cast<int>(timeGetTime()) + n;
         for (;;)
         {
-            int tm = _expire - (int)timeGetTime();
+            int tm = _expire - static_cast<int>(timeGetTime());
             if (tm < 0) tm = 0;
             MsgWaitForMultipleObjects(0, nullptr, false, tm, QS_ALLEVENTS);
 

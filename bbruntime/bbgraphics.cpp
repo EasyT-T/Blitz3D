@@ -149,7 +149,7 @@ static int getPixel(gxCanvas* c, float x, float y)
     const float g = GRN(tl) * w1 + GRN(tr) * w2 + GRN(bl) * w3 + GRN(br) * w4;
     const float b = BLU(tl) * w1 + BLU(tr) * w2 + BLU(bl) * w3 + BLU(br) * w4;
 
-    return (int(r + .5f) << 16) | (int(g + .5f) << 8) | int(b + .5f);
+    return (static_cast<int>(r + .5f) << 16) | (static_cast<int>(g + .5f) << 8) | static_cast<int>(b + .5f);
 }
 
 struct vec2
@@ -429,8 +429,8 @@ int bbLoadBuffer(gxCanvas* c, BBStr* str)
     gxCanvas* t = gx_graphics->loadCanvas(s, 0);
     if (!t) return 0;
     float m[2][2];
-    m[0][0] = (float)c->getWidth() / (float)t->getWidth();
-    m[1][1] = (float)c->getHeight() / (float)t->getHeight();
+    m[0][0] = static_cast<float>(c->getWidth()) / static_cast<float>(t->getWidth());
+    m[1][1] = static_cast<float>(c->getHeight()) / static_cast<float>(t->getHeight());
     m[1][0] = m[0][1] = 0;
     gxCanvas* p = tformCanvas(t, m, 0, 0);
     gx_graphics->freeCanvas(t);
@@ -1212,7 +1212,7 @@ void bbResizeImage(bbImage* i, const float w, const float h)
 {
     debugImage(i);
     const gxCanvas* c = i->getFrames()[0];
-    bbTFormImage(i, w / (float)c->getWidth(), 0, 0, h / (float)c->getHeight());
+    bbTFormImage(i, w / static_cast<float>(c->getWidth()), 0, 0, h / static_cast<float>(c->getHeight()));
 }
 
 void bbRotateImage(bbImage* i, float d)
@@ -1417,7 +1417,7 @@ BBStr* bbInput(BBStr* prompt)
         default:
             if (curr_font->isPrintable(key))
             {
-                str = str.substr(0, curs) + char(key) + str.substr(curs);
+                str = str.substr(0, curs) + static_cast<char>(key) + str.substr(curs);
                 ++curs;
             }
         }

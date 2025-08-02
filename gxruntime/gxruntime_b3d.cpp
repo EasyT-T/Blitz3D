@@ -84,7 +84,7 @@ gxRuntime* gxRuntime::openRuntime(const HINSTANCE hinst, const std::string& cmd_
     wndclass.hInstance = hinst;
     wndclass.lpszClassName = "Blitz Runtime Class";
     wndclass.hCursor = (HCURSOR)LoadCursor(nullptr,IDC_ARROW);
-    wndclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wndclass.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
     RegisterClass(&wndclass);
 
     gfx_mode = 0;
@@ -498,7 +498,7 @@ LRESULT gxRuntime::windowProc(const HWND hwnd, const UINT msg, const WPARAM wpar
         }
         else
         {
-            int x = (short)(lparam & 0xffff), y = lparam >> 16;
+            int x =  static_cast<short>(lparam & 0xffff), y = lparam >> 16;
             if (gfx_mode == 1)
             {
                 RECT rect;
@@ -514,7 +514,7 @@ LRESULT gxRuntime::windowProc(const HWND hwnd, const UINT msg, const WPARAM wpar
         }
         break;
     case WM_MOUSEWHEEL:
-        input->wm_mousewheel((short)HIWORD(wparam));
+        input->wm_mousewheel(static_cast<short>(HIWORD(wparam)));
         break;
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
@@ -900,7 +900,7 @@ gxGraphics* gxRuntime::openWindowedGraphics(int w, int h, int d, bool d3d)
 
                         if (dd->CreateSurface(&desc, &fs, nullptr) >= 0)
                         {
-                            if (timerID = timeSetEvent(100, 10, timerCallback, 0,TIME_PERIODIC))
+                            if (timerID = timeSetEvent(100, 10, reinterpret_cast<LPTIMECALLBACK>(timerCallback), 0,TIME_PERIODIC))
                             {
                                 //Success!
                                 clipper = cp;
@@ -1115,7 +1115,7 @@ static HRESULT WINAPI enumMode(DDSURFACEDESC2* desc, void* context)
     {
         gxRuntime::GfxMode* m = d_new gxRuntime::GfxMode;
         m->desc = *desc;
-        gxRuntime::GfxDriver* d = (gxRuntime::GfxDriver*)context;
+        gxRuntime::GfxDriver* d = static_cast<gxRuntime::GfxDriver*>(context);
         d->modes.push_back(m);
     }
     return DDENUMRET_OK;
@@ -1133,7 +1133,7 @@ static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDe
     if (t > 1 && t > maxDevType)
     {
         maxDevType = t;
-        gxRuntime::GfxDriver* d = (gxRuntime::GfxDriver*)context;
+        gxRuntime::GfxDriver* d = static_cast<gxRuntime::GfxDriver*>(context);
         d->d3d_desc = *devDesc;
     }
     return D3DENUMRET_OK;

@@ -415,7 +415,7 @@ static int maxDevType;
 
 static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDesc, void* context)
 {
-    gxGraphics* g = (gxGraphics*)context;
+    gxGraphics* g = static_cast<gxGraphics*>(context);
     int t = 0;
     const GUID guid = devDesc->deviceGUID;
     if (guid == IID_IDirect3DRGBDevice) t = 1;
@@ -431,7 +431,7 @@ static HRESULT CALLBACK enumDevice(char* desc, char* name, D3DDEVICEDESC7* devDe
 
 static HRESULT CALLBACK enumZbuffFormat(const LPDDPIXELFORMAT format, void* context)
 {
-    gxGraphics* g = (gxGraphics*)context;
+    gxGraphics* g = static_cast<gxGraphics*>(context);
     if (format->dwZBufferBitDepth == g->primFmt.dwRGBBitCount)
     {
         g->zbuffFmt = *format;
@@ -689,7 +689,7 @@ gxMesh* gxGraphics::createMesh(const int max_verts, const int max_tris, int flag
         vbflags |= D3DVBCAPS_WRITEONLY;
     }
 
-    D3DVERTEXBUFFERDESC desc = {sizeof(desc), (DWORD)vbflags, VTXFMT, (DWORD)max_verts};
+    D3DVERTEXBUFFERDESC desc = {sizeof(desc), static_cast<DWORD>(vbflags), VTXFMT, static_cast<DWORD>(max_verts)};
 
     IDirect3DVertexBuffer7* buff;
     if (dir3d->CreateVertexBuffer(&desc, &buff, 0) < 0) return nullptr;

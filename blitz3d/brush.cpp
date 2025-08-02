@@ -48,7 +48,7 @@ struct Brush::Rep
 
     void operator delete(void* q)
     {
-        Rep* p = (Rep*)q;
+        Rep* p = static_cast<Rep*>(q);
         p->next = pool;
         pool = p;
     }
@@ -246,6 +246,12 @@ const gxScene::RenderState& Brush::getRenderState() const
         ts->matrix = rep->texs[k].getMatrix();
         ts->blend = rep->texs[k].getBlend();
         ts->flags = rep->texs[k].getFlags();
+        ts->bumpEnvMat[0][0] = rep->texs[k].getBumpEnvMat(0, 0);
+        ts->bumpEnvMat[1][0] = rep->texs[k].getBumpEnvMat(1, 0);
+        ts->bumpEnvMat[0][1] = rep->texs[k].getBumpEnvMat(0, 1);
+        ts->bumpEnvMat[1][1] = rep->texs[k].getBumpEnvMat(1, 1);
+        ts->bumpEnvScale = rep->texs[k].getBumpEnvScale();
+        ts->bumpEnvOffset = rep->texs[k].getBumpEnvOffset();
     }
     return rep->rs;
 }
